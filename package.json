@@ -1,0 +1,22 @@
+{
+  "name": "chopsuey",
+  "version": "0.0.1",
+  "description": "Buchungssystem fuer Gleis 21",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gleis21/chopsuey.git"
+  },
+  "author": "Gleis 21",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gleis21/chopsuey/issues"
+  },
+  "homepage": "https://github.com/gleis21/chopsuey#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
