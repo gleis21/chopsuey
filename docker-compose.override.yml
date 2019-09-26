@@ -1,0 +1,8 @@
+version: '2'
+services:
+    chopsuey:
+        build: .
+        expose:
+            - "3000"
+        volumes:
+            - .:/usr/src/app
