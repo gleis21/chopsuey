@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/cs-web"
+    "start": "node ./bin/cs-web",
+    "test": "echo no_tests_for_now"
   },
   "dependencies": {
     "airtable": "^0.7.1",
