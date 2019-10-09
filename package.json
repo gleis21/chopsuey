@@ -1,6 +1,6 @@
 {
   "name": "chopsuey",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "start": "node ./bin/cs-web",
@@ -11,10 +11,10 @@
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "express": "~4.16.1",
+    "hbs": "^4.0.5",
     "http-errors": "~1.6.3",
     "moment": "^2.24.0",
     "momentjs": "^2.0.0",
-    "morgan": "~1.9.1",
-    "pug": "2.0.0-beta11"
+    "morgan": "~1.9.1"
   }
 }

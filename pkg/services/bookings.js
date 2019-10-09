@@ -7,7 +7,7 @@ class BookingService {
     this.pubCalendarSrv = pubCalendarSrv;
   }
 
-  async create(bookingDto) {
+  async update(bookingDto) {
     await this.table.update({
       id: bookingDto.bookingID,
       fields: {
@@ -31,7 +31,7 @@ class BookingService {
   }
 }
 
-class InventoryService {
+class ItemsService {
   constructor(base) {
     this.table = base('Artikel');
   }
@@ -135,13 +135,13 @@ class PersonService {
     const defaultRole = 'MieterIn';
     const p = await this.getByEmail(p.email);
     if (p) {
-      await this.table.update(p.id, {
+      return await this.table.update(personDto.id, {
         Name: personDto.name,
         Rolle: [defaultRole],
         Adresse: personDto.dresse
       });
     }
-    await this.table.create({
+    return await this.table.create({
       Email: personDto.email,
       Name: personDto.name,
       Rolle: [defaultRole],
