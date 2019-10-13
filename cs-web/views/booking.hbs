@@ -2,44 +2,44 @@
   <form method="POST" action="/bookings/{{booking.id}}">
     <div class="form-group">
       <label for="title">Titel</label>
-      <input type="text" class="form-control" name="booking[title]" placeholder="Titel der Buchung"
+      <input type="text" required class="form-control" name="booking[title]" placeholder="Titel der Buchung"
         value="{{booking.title}}">
     </div>
     <div class="form-group">
       <label for="name">Vorname</label>
-      <input type="text" class="form-control" name="booking[firstname]" placeholder="Vorname">
+      <input type="text" required class="form-control" name="booking[firstname]" placeholder="Vorname">
     </div>
     <div class="form-group">
       <label for="name">Nachname</label>
-      <input type="text" class="form-control" name="booking[lastname]">
+      <input type="text" required class="form-control" name="booking[lastname]">
     </div>
     <div class="form-row">
       <div class="form-group col-md-6">
         <label for="address">Strasse</label>
-        <input class="form-control" type="text" name="booking[addrStreet]"></input>
+        <input class="form-control" required type="text" name="booking[addrStreet]"></input>
       </div>
       <div class="form-group col-md-3">
         <label for="address">Hausnummer</label>
-        <input class="form-control" type="text" name="booking[addrHno]"></input>
+        <input class="form-control" required type="text" name="booking[addrHno]"></input>
       </div>
       <div class="form-group col-md-3">
         <label for="address">Top</label>
-        <input class="form-control" type="text" name="booking[addrAno]"></input>
+        <input class="form-control" required type="text" name="booking[addrAno]"></input>
       </div>
     </div>
     <div class="form-row">
       <div class="form-group col-md-4">
         <label for="address">PLZ</label>
-        <input class="form-control" type="text" name="booking[addrPostcode]"></input>
+        <input class="form-control" required type="text" name="booking[addrPostcode]"></input>
       </div>
       <div class="form-group col-md-6">
         <label for="address">Ort</label>
-        <input class="form-control" type="text" name="booking[addrCity]"></input>
+        <input class="form-control" required type="text" name="booking[addrCity]"></input>
       </div>
     </div>
     <div class="form-group">
       <label for="email">E-Mail-Adresse</label>
-      <input type="email" class="form-control" name="booking[email]">
+      <input type="email" required class="form-control" name="booking[email]">
     </div>
     <div class="form-group">
       <label for="room">Raum</label>
@@ -60,7 +60,7 @@
     <div class="form-row">
       <div class="form-group col-md-4">
         <label for="beginn">Begin</label>
-        <input type="date" class="form-control" id="beginn" name="booking[beginnDate]" placeholder="Beginn">
+        <input type="date" required class="form-control" id="beginn" name="booking[beginnDate]" placeholder="Beginn">
       </div>
       <div class="form-group col-md-2">
         <label>&nbsp;</label>
@@ -102,7 +102,7 @@
     <div class="form-row">
       <div class="form-group col-md-4">
         <label for="end">Ende</label>
-        <input type="date" class="form-control" id="end" name="booking[endDate]" placeholder="Ende">
+        <input type="date" required class="form-control" id="end" name="booking[endDate]" placeholder="Ende">
       </div>
       <div class="form-group col-md-2">
         <label>&nbsp;</label>
@@ -116,7 +116,7 @@
           <option value="6">06</option>
           <option value="7">07</option>
           <option value="8">08</option>
-          <option value="9" selected>09</option>
+          <option value="9">09</option>
           <option value="10">10</option>
           <option value="11">11</option>
           <option value="12">12</option>
@@ -124,7 +124,7 @@
           <option value="14">14</option>
           <option value="15">15</option>
           <option value="16">16</option>
-          <option value="17">17</option>
+          <option value="17" selected>17</option>
           <option value="18">18</option>
           <option value="19">19</option>
           <option value="20">20</option>
