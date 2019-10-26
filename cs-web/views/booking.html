@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Chop Suey</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="/stylesheets/font-awesome-4.6.3/css/font-awesome.min.css"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    {{!--
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+    --}}
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"
+      integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ="
+      crossorigin="anonymous"
+    ></script>
+
+    <!--<link rel="stylesheet" href="/stylesheets/styles.css">-->
+  </head>
+
+  <body>
+    <nav class="nnavbar navbar-light bg-light">
+      <button
+        class="navbar-toggler navbar-toggler-right"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <a class="navbar-brand" href="#">
+        <img
+          src="https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-01-11/18230715235_c0a76622c4931df1fda8_88.png"
+          width="55"
+          height="35"
+          class="d-inline-block align-top"
+          alt=""
+        />
+        Gleis 21 Buchungssystem
+      </a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            {{!--
+            <a class="nav-link" href="/timerecords">Meine Happy Hours</a> --}}
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <br />
+    <div id="app">
+      <booking-form></booking-form>
+    </div>
+  </body>
+</html>
+
+<script type="text/x-template" id="booking-form">
+    <div class="container">
+    <form>
+      <div class="form-group">
+        <label for="title">Titel</label>
+        <input type="text" required class="form-control" name="booking[title]" placeholder="Titel der Buchung" v-model="booking.title">
+      </div>
+      <div class="form-group">
+        <label for="name">Vorname</label>
+        <input type="text" required class="form-control" name="booking[firstname]" placeholder="Vorname">
+      </div>
+      <div class="form-group">
+        <label for="name">Nachname</label>
+        <input type="text" required class="form-control" name="booking[lastname]">
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="address">Strasse</label>
+          <input class="form-control" required type="text" name="booking[addrStreet]"></input>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="address">Hausnummer</label>
+          <input class="form-control" required type="text" name="booking[addrHno]"></input>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="address">Top</label>
+          <input class="form-control" required type="text" name="booking[addrAno]"></input>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-4">
+          <label for="address">PLZ</label>
+          <input class="form-control" required type="text" name="booking[addrPostcode]"></input>
+        </div>
+        <div class="form-group col-md-6">
+          <label for="address">Ort</label>
+          <input class="form-control" required type="text" name="booking[addrCity]"></input>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="email">E-Mail-Adresse</label>
+        <input type="email" required class="form-control" name="booking[email]">
+      </div>
+      <div class="form-group">
+        <label for="room">Raum</label>
+        <select class="form-control c-select" id="room" v-model="booking.roomId">
+          <option v-for="r in rooms" :value="r.id">{{r.name}}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="equipment">Ausstattung</label>
+        <select multiple="true" class="form-control c-select" id="equipment" v-model="booking.equipmentIds">
+          <option v-for="e in equipment" :value="e.id">{{e.name}}</option>
+        </select>
+      </div>
+      <div v-for="timeslot in timeslots">
+      <div class="form-row">
+        <div class="form-group col-md-4">
+          <label for="beginn">Begin</label>
+          <input type="date" required v-model="timeslot.beginnDate" class="form-control" id="beginn">
+        </div>
+        <div class="form-group col-md-2">
+          <label>&nbsp;</label>
+          <select id="hour" class="form-control" v-model="timeslot.beginnH">
+            <option v-for="h in hours" :value="h">{{h}}</option>
+          </select>
+        </div>
+        <div class="form-group col-md-2">
+          <label>&nbsp;</label>
+          <select class="form-control" id="minute" v-model="timeslot.beginnM"">
+            <option v-for="m in mins" :value="m">{{m}}</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-4">
+          <label for="end">Ende</label>
+          <input type="date" required v-model="timeslot.endDate" class="form-control" id="end" name="booking[endDate]" placeholder="Ende">
+        </div>
+        <div class="form-group col-md-2">
+          <label>&nbsp;</label>
+          <select id="hour" class="form-control" v-model="timeslot.endH">
+            <option v-for="h in hours" :value="h">{{ h }}</option>
+          </select>
+        </div>
+        <div class="form-group col-md-2">
+          <label>&nbsp;</label>
+          <select class="form-control" id="minute" v-model="timeslot.endM">
+            <option v-for="m in mins" v-bind:value="m">{{ m }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-3">
+          <label for="prepH">Aufbaudauer [HH]</label>
+          <input type="number" id="prepH" class="form-control" v-model="timeslot.prepDurH">
+        </div>
+        <div class="form-group col-md-3">
+          <label for="prepM">[mm]</label>
+          <select class="form-control" id="prepM" v-model="timeslot.prepDurM">
+            <option v-for="m in mins" :value="m">{{m}}</option>
+          </select>
+        </div>
+        <div class="form-group  col-md-3">
+          <label for="teardownH">Abbaudauer [HH]</label>
+          <input type="number" id="teardownH" class="form-control" v-model="timeslot.teardownDurH">
+        </div>
+        <div class="form-group col-md-3">
+          <label for="teardownM">[mm]</label>
+          <select class="form-control" id="teardownM" v-model="timeslot.teardownDurM">
+            <option v-for="m in mins" :value="m">
+              {{m}}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+      <button type="submit" class="btn btn-primary">Absenden</button>
+    </form>
+  </div>
+</script>
+<script src="/javascripts/booking.js"></script>

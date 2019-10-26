@@ -7,30 +7,28 @@ const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-module.exports = (bookingSrv, itemsSrv, timeslotsSrv) => {
+const { body } = require('express-validator');
+/* 
+app.post(
+  '/user',
+  body('email').custom(value => {
+    return User.findUserByEmail(value).then(user => {
+      if (user) {
+        return Promise.reject('E-mail already in use');
+      }
+    });
+  }),
+  (req, res) => {
+    // Handle the request
+  }
+); */
+
+module.exports = () => {
   /* GET home page. */
   router.get(
     '/:id',
     asyncMiddleware(async (req, res, next) => {
-      const b = await bookingSrv.get(req.params.id);
-      const rooms = (await itemsSrv.getRooms()).map(r => {
-        return { id: r.id, name: r.get('Key') };
-      });
-      const equipment = (await itemsSrv.getEquipment()).map(r => {
-        return { id: r.id, name: r.get('Key') };
-      });
-      res.render('booking', {
-        booking: { id: b.id, title: b.get('Titel') },
-        rooms: rooms,
-        equipment: equipment
-      });
-    })
-  );
-
-  router.post(
-    '/:id',
-    asyncMiddleware(async (req, res, next) => {
-      console.log(JSON.stringify(req.body));
+      res.render('booking');
     })
   );
 

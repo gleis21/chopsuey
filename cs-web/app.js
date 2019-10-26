@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+var apiRouter = require('./api/api');
 var bookingsRouter = require('./routes/bookings');
 var services = require('../pkg/services');
 
@@ -11,7 +12,8 @@ var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
+app.engine('html', require('ejs').renderFile);
+app.set('view engine', 'html');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -25,7 +27,9 @@ const pubCalSrv = new services.PubCalendarService(base);
 const timeslotsSrv = new services.TimeSlotsService(base, itemsSrv, pubCalSrv);
 const bookingSrv = new services.BookingService(base, timeslotsSrv, pubCalSrv);
 
-app.use('/bookings', bookingsRouter(bookingSrv, itemsSrv, timeslotsSrv));
+app.use('/api', apiRouter(bookingSrv, itemsSrv));
+
+app.use('/bookings', bookingsRouter());
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
