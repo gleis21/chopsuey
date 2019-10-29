@@ -1,36 +1,38 @@
 const moment = require('moment');
 
 class BookingService {
-  constructor(base, timeSlotsSrv, pubCalendarSrv) {
+  constructor(base, timeSlotsSrv, pubCalendarSrv, personSrv) {
     this.table = base('Buchungen');
     this.timeSlotsSrv = timeSlotsSrv;
     this.pubCalendarSrv = pubCalendarSrv;
+    this.personSrv = personSrv;
   }
   async get(id) {
     return await this.table.find(id);
   }
 
-  async update(bookingDto) {
-    await this.table.update({
-      id: bookingDto.bookingID,
+  async update(b) {
+    console.log(JSON.stringify(b));
+    const m = await this.personSrv.createOrUpdate(b.person);
+    console.log(JSON.stringify(m));
+    const ts = await this.timeSlotsSrv.create(b.id, b.eventsTimeRanges);
+    console.log(JSON.stringify(ts));
+    const pbc = await this.pubCalendarSrv.create(b.id);
+    console.log(JSON.stringify(pbc));
+    const bk = {
+      id: b.id,
       fields: {
-        Timeslots: (await this.timeSlotsSrv.create(
-          bookingDto.bookingID,
-          bookingDto.timeSlots
-        )).map(s => this.getId()),
+        Titel: b.title,
+        Raum: b.roomIds,
+        Ausstattung: b.equipmentIds,
         Status: 'Angefragt',
-        Mieter: [
-          (await this.personSrv.createOrUpdate(bookingDto.personDto)).getId()
-        ],
-        Titel: bookingDto.titel,
-        Raum: [
-          (await this.inventorySrv.getRoomByName(bookingDto.room)).getId()
-        ],
-        PublicTimeslots: [
-          (await this.pubCalendarSrv.create(bookingDto.bookingID)).getId()
-        ]
+        Mieter: [m.getId()],
+        Timeslots: ts.map(s => s.getId()),
+        PublicTimeslots: [pbc.getId()]
       }
-    });
+    };
+    console.log(JSON.stringify(bk));
+    return await this.table.update(bk);
   }
 }
 
@@ -76,10 +78,10 @@ class PubCalendarService {
     const futureBookings = await this.table
       .select({ maxRecords: 1000, view: 'Future' })
       .firstPage();
-
     const groupedByRoom = futureBookings.reduce((acc, curr) => {
-      if (!acc[curr.id]) acc[id] = [];
-      acc[id].push(curr);
+      const roomId = curr.get('_roomId');
+      if (!acc[roomId]) acc[roomId] = [];
+      acc[roomId].push({ beginn: curr.get('Beginn'), end: curr.get('Ende') });
       return acc;
     }, {});
 
@@ -87,19 +89,22 @@ class PubCalendarService {
   }
 }
 
-class TimeSlots {
-  constructor(timeslotsDto) {
-    this.beginnEvent = momennt(timeslotsDto.beginnEvent);
-    this.beginnPrep = beginnEvent.subtract(
-      timeslotsDto.preparationDurationHours,
-      'h'
-    );
-    this.beginnTeardown = beginnEvent.add(timeslotsDto.eventDurationHours, 'h');
-    this.cleaningBeginn = beginnTeardown.add(
-      timeslotsDto.teardownDurationHours,
-      'h'
-    );
-    this.cleaningEnd = cleaningBeginn.add(1, 'h');
+class EventTimeRanges {
+  constructor(ev) {
+    this.beginnEvent = moment(ev.beginnDate)
+      .add(ev.beginnH, 'h')
+      .add(ev.beginnM, 'minutes');
+    this.prepDurSec = ev.prepDurH * 60 * 60 + ev.prepDurM * 60;
+    this.beginnPrep = this.beginnEvent.subtract(this.prepDurSec, 'seconds');
+    this.endEvent = moment(ev.endDate)
+      .add(ev.endH, 'h')
+      .add(ev.endM, 'minutes');
+    this.durSec = moment(this.endEvent).diff(this.beginnEvent, 'seconds');
+    this.beginnTeardown = moment(this.endEvent);
+    this.teardownDurSec = ev.teardownDurH * 60 * 60;
+    this.cleaningBeginn = this.beginnTeardown.add(ev.teardownDurH, 'h');
+    this.cleaningDurSec = 60 * 60;
+    this.cleaningEnd = this.cleaningBeginn.add(1, 'h');
   }
 }
 
@@ -110,96 +115,114 @@ class TimeSlotsService {
     this.pubCalendarSrv = pubCalendarSrv;
   }
 
-  async create(bookingID, roomRecordID, timeslotsDto) {
-    const tsModel = new TimeSlots(timeslotsDto);
+  async create(bookingID, eventsTimeRanges) {
+    const timeslots = eventsTimeRanges
+      .map(ev => {
+        const prep = {
+          fields: {
+            'Beginn Time': ev.beginnPrep.toISOString(),
+            Duration: ev.prepDurSec,
+            Type: 'Aufbau',
+            Buchung: [bookingID]
+          }
+        };
+        const event = {
+          fields: {
+            'Beginn Time': ev.beginnEvent.toISOString(),
+            Duration: ev.durSec,
+            Type: 'Veranstaltung',
+            Buchung: [bookingID]
+          }
+        };
 
-    const beginnPrep = tsModel.beginnPrep;
-    const beginnEvent = tsModel.beginnEvent;
-    const beginnTeardown = tsModel.beginnTeardown;
-    const cleaningBeginn = tsModel.cleaningBeginn;
-    const cleaningEnd = tsModel.cleaningBeginn.add(1, 'h');
+        const teardown = {
+          fields: {
+            'Beginn Time': ev.beginnTeardown.toISOString(),
+            Duration: ev.teardownDurSec,
+            Type: 'Abbau',
+            Buchung: [bookingID]
+          }
+        };
 
-    const isBookable = await isBookable(roomRecordID, beginnPrep, cleaningEnd);
-    if (!isBookable) {
-      return null;
-    }
+        const cleaning = {
+          fields: {
+            'Beginn Time': ev.cleaningBeginn.toISOString(),
+            Duration: ev.cleaningDurSec, // default 1 h, needs to be adjusted?
+            Type: 'Reinigung',
+            Buchung: [bookingID]
+          }
+        };
+        return [prep, event, teardown, cleaning];
+      })
+      .flat();
 
-    const prep = {
-      fields: {
-        'Beginn Time': beginnPrep.toISOString(),
-        Duration: timeslotsDto.preparationDurationHours * 60 * 60,
-        Type: 'Aufbau',
-        Buchung: [bookingID]
-      }
-    };
-    const event = {
-      fields: {
-        'Beginn Time': beginnEvent.toISOString(),
-        Duration: timeslotsDto.eventDurationHours * 60 * 60,
-        Type: 'Veranstaltung',
-        Buchung: [bookingID]
-      }
-    };
-
-    const teardown = {
-      fields: {
-        'Beginn Time': beginnTeardown.toISOString(),
-        Duration: timeslotsDto.teardownDurationHours * 60 * 60,
-        Type: 'Abbau',
-        Buchung: [bookingID]
-      }
-    };
-
-    const cleaning = {
-      fields: {
-        'Beginn Time': cleaningBeginn.toISOString(),
-        Duration: 1 * 60 * 60, // default 1 h, needs to be adjusted
-        Type: 'Reinigung',
-        Buchung: [bookingID]
-      }
-    };
-    return await this.table.create([prep, event, teardown, cleaning]); // returns records (record.getId())
+    return await this.table.create(timeslots); // returns records (record.getId())
   }
 
-  async isBookable(roomRecordID, beginn, end) {
-    const rooms = await this.itemsSrv.getRooms();
-
-    const saalID = rooms.filter(r => r.get('Key' === 'Saal 21'))[0].id;
-    const salonID = rooms.filter(r => r.get('Key' === 'Salon 21'))[0].id;
-    const stationID = rooms.filter(r => r.get('Key' === 'Station 21'))[0].id;
-    const saalSalonID = rooms.filter(r => r.get('Key' === 'Saal + Salon'))[0]
-      .id;
-    const saalSalonStationID = rooms.filter(r =>
-      r.get('Key' === 'Saal + Salon + Station')
-    )[0].id;
-
-    const room = rooms.filter(r => r.id === roomRecordID);
-    const bookingsByRoom = await this.pubCalendarSrv.getFutureBookings(
-      roomRecordID
-    );
-    let roomTimeslots = [];
-    if (room.id === saalID || room.id === salonID || room.id === stationID) {
-      roomTimeslots = bookingsByRoom[room.id];
-    } else if (room.id === saalSalonID) {
-      roomTimeslots = bookingsByRoom[saalSalonID]
-        .concat(bookingsByRoom[saalID])
-        .concat(bookingsByRoom[salonID]);
-    } else if (room.id === saalSalonStationID) {
-      roomTimeslots = bookingsByRoom[saalSalonStationID]
-        .concat(bookingsByRoom[saalID])
-        .concat(bookingsByRoom[salonID])
-        .concat(bookingsByRoom[stationID]);
+  async areBookable(roomId, events) {
+    const futureBookings = await this.pubCalendarSrv.getFutureBookings(roomId);
+    for (let index = 0; index < events.length; index++) {
+      const e = events[index];
+      if (
+        !(await this.isBookable(
+          roomId,
+          e.beginnPrep,
+          e.cleaningEnd,
+          futureBookings
+        ))
+      ) {
+        return false;
+      }
     }
+    return true;
+  }
 
-    const bookable = roomTimeslots.reduce((acc, curr) => {
-      const tsBeginn = curr.get('Beginn');
-      const tsEnd = curr.get('Ende');
+  async isBookable(roomId, beginn, end, futureBookingsByRoom) {
+    const rooms = await this.itemsSrv.getRooms();
+    const saalID = rooms.filter(r => r.get('Key') === 'Saal 21')[0].getId();
+    const salonID = rooms.filter(r => r.get('Key') === 'Salon 21')[0].getId();
+    const stationID = rooms
+      .filter(r => r.get('Key') === 'Station 21')[0]
+      .getId();
+    const saalSalonID = rooms
+      .filter(r => r.get('Key') === 'Saal + Salon')[0]
+      .getId();
+    const saalSalonStationID = rooms
+      .filter(r => r.get('Key') === 'Saal + Salon + Station')[0]
+      .getId();
+    const room = rooms.filter(r => r.getId() === roomId)[0];
+    let roomTimeslots = [];
+    if (
+      room.getId() === saalID ||
+      room.getId() === salonID ||
+      room.getId() === stationID
+    ) {
+      roomTimeslots = futureBookingsByRoom[room.getId()];
+    } else if (room.getId() === saalSalonID) {
+      roomTimeslots = futureBookingsByRoom[saalSalonID]
+        .concat(futureBookingsByRoom[saalID])
+        .concat(futureBookingsByRoom[salonID]);
+    } else if (room.id === saalSalonStationID) {
+      roomTimeslots = futureBookingsByRoom[saalSalonStationID]
+        .concat(futureBookingsByRoom[saalID])
+        .concat(futureBookingsByRoom[salonID])
+        .concat(futureBookingsByRoom[stationID]);
+    }
+    if (!roomTimeslots) {
+      return true;
+    }
+    console.log(JSON.stringify(roomTimeslots));
+    const bookable = roomTimeslots
+      .filter(r => r)
+      .reduce((acc, curr) => {
+        const tsBeginn = curr.beginn;
+        const tsEnd = curr.end;
 
-      const bookable =
-        moment(beginn).isAfter(moment(tsEnd)) ||
-        moment(end).isBefore(moment(tsBeginn));
-      return acc && bookable;
-    }, true);
+        const bookable =
+          moment(beginn).isAfter(moment(tsEnd)) ||
+          moment(end).isBefore(moment(tsBeginn));
+        return acc && bookable;
+      }, true);
 
     return bookable;
   }
@@ -210,21 +233,23 @@ class PersonService {
     this.table = base('Personen');
   }
 
-  async createOrUpdate(personDto) {
+  async createOrUpdate(p) {
     const defaultRole = 'MieterIn';
-    const p = await this.getByEmail(p.email);
-    if (p) {
-      return await this.table.update(personDto.id, {
-        Name: personDto.name,
-        Rolle: [defaultRole],
-        Adresse: personDto.dresse
-      });
+    const existing = await this.getByEmail(p.email);
+    if (existing) {
+      return existing;
     }
     return await this.table.create({
-      Email: personDto.email,
-      Name: personDto.name,
+      Email: p.email,
+      Vorname: p.firstName,
+      Nachname: p.lastName,
+      Organisation: p.org,
       Rolle: [defaultRole],
-      Adresse: personDto.address
+      Strasse: p.street,
+      HausNr: p.hno,
+      Top: p.ano,
+      PLZ: p.postcode,
+      Ort: p.city
     });
   }
 
@@ -235,5 +260,7 @@ module.exports = {
   BookingService: BookingService,
   TimeSlotsService: TimeSlotsService,
   PubCalendarService: PubCalendarService,
-  ItemsService: ItemsService
+  ItemsService: ItemsService,
+  PersonService: PersonService,
+  EventTimeRanges: EventTimeRanges
 };

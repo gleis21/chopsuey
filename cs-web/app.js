@@ -4,8 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var apiRouter = require('./api/api');
-var bookingsRouter = require('./routes/bookings');
+var apiRouter = require('./routes/api-router');
+var bookingsRouter = require('./routes/bookings-router');
 var services = require('../pkg/services');
 
 var app = express();
@@ -22,13 +22,18 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const base = require('airtable').base('appdpZhhl9ZVvABFf');
+const personSrv = new services.PersonService(base);
 const itemsSrv = new services.ItemsService(base);
 const pubCalSrv = new services.PubCalendarService(base);
 const timeslotsSrv = new services.TimeSlotsService(base, itemsSrv, pubCalSrv);
-const bookingSrv = new services.BookingService(base, timeslotsSrv, pubCalSrv);
+const bookingSrv = new services.BookingService(
+  base,
+  timeslotsSrv,
+  pubCalSrv,
+  personSrv
+);
 
-app.use('/api', apiRouter(bookingSrv, itemsSrv));
-
+app.use('/api', apiRouter(bookingSrv, itemsSrv, timeslotsSrv));
 app.use('/bookings', bookingsRouter());
 
 // catch 404 and forward to error handler
@@ -38,6 +43,8 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
+  //console.error(err.)
+  console.error(err.stack);
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

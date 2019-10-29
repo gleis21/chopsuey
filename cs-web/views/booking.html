@@ -8,10 +8,7 @@
       integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
       crossorigin="anonymous"
     />
-    <link
-      rel="stylesheet"
-      href="/stylesheets/font-awesome-4.6.3/css/font-awesome.min.css"
-    />
+    <link rel="stylesheet" href="/stylesheets/fontawesome/css/all.min.css" />
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
       integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
@@ -22,13 +19,11 @@
       integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
       crossorigin="anonymous"
     ></script>
-    {{!--
     <script
       src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
       integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
       crossorigin="anonymous"
     ></script>
-    --}}
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"
@@ -74,52 +69,56 @@
     <br />
     <div id="app">
       <booking-form></booking-form>
+      <br />
     </div>
   </body>
 </html>
 
 <script type="text/x-template" id="booking-form">
     <div class="container">
-    <form>
       <div class="form-group">
         <label for="title">Titel</label>
-        <input type="text" required class="form-control" name="booking[title]" placeholder="Titel der Buchung" v-model="booking.title">
+        <input type="text" required class="form-control" v-model="booking.title">
       </div>
       <div class="form-group">
         <label for="name">Vorname</label>
-        <input type="text" required class="form-control" name="booking[firstname]" placeholder="Vorname">
+        <input type="text" required class="form-control" v-model="booking.person.firstName">
       </div>
       <div class="form-group">
         <label for="name">Nachname</label>
-        <input type="text" required class="form-control" name="booking[lastname]">
+        <input type="text" required class="form-control" v-model="booking.person.lastName">
+      </div>
+      <div class="form-group">
+        <label for="name">Organisation/Firma</label>
+        <input type="text" class="form-control" v-model="booking.person.org">
       </div>
       <div class="form-row">
         <div class="form-group col-md-6">
           <label for="address">Strasse</label>
-          <input class="form-control" required type="text" name="booking[addrStreet]"></input>
+          <input class="form-control" required type="text" v-model="booking.person.street"></input>
         </div>
         <div class="form-group col-md-3">
           <label for="address">Hausnummer</label>
-          <input class="form-control" required type="text" name="booking[addrHno]"></input>
+          <input class="form-control" required type="text" v-model="booking.person.hno"></input>
         </div>
         <div class="form-group col-md-3">
           <label for="address">Top</label>
-          <input class="form-control" required type="text" name="booking[addrAno]"></input>
+          <input class="form-control" required type="text" v-model="booking.person.ano"></input>
         </div>
       </div>
       <div class="form-row">
         <div class="form-group col-md-4">
           <label for="address">PLZ</label>
-          <input class="form-control" required type="text" name="booking[addrPostcode]"></input>
+          <input class="form-control" required type="text" v-model="booking.person.postcode"></input>
         </div>
-        <div class="form-group col-md-6">
+        <div class="form-group col-md-8">
           <label for="address">Ort</label>
-          <input class="form-control" required type="text" name="booking[addrCity]"></input>
+          <input class="form-control" required type="text" v-model="booking.person.city"></input>
         </div>
       </div>
       <div class="form-group">
         <label for="email">E-Mail-Adresse</label>
-        <input type="email" required class="form-control" name="booking[email]">
+        <input type="email" required class="form-control" v-model="booking.person.email">
       </div>
       <div class="form-group">
         <label for="room">Raum</label>
@@ -133,21 +132,21 @@
           <option v-for="e in equipment" :value="e.id">{{e.name}}</option>
         </select>
       </div>
-      <div v-for="timeslot in timeslots">
+      <div class="jumbotron bg-light" v-for="ev in booking.eventsTimeRanges">
       <div class="form-row">
         <div class="form-group col-md-4">
           <label for="beginn">Begin</label>
-          <input type="date" required v-model="timeslot.beginnDate" class="form-control" id="beginn">
+          <input type="date" required v-model="ev.beginnDate" class="form-control" id="beginn">
         </div>
         <div class="form-group col-md-2">
           <label>&nbsp;</label>
-          <select id="hour" class="form-control" v-model="timeslot.beginnH">
+          <select id="hour" class="form-control" v-model="ev.beginnH">
             <option v-for="h in hours" :value="h">{{h}}</option>
           </select>
         </div>
         <div class="form-group col-md-2">
           <label>&nbsp;</label>
-          <select class="form-control" id="minute" v-model="timeslot.beginnM"">
+          <select class="form-control" id="minute" v-model="ev.beginnM"">
             <option v-for="m in mins" :value="m">{{m}}</option>
           </select>
         </div>
@@ -155,17 +154,17 @@
       <div class="form-row">
         <div class="form-group col-md-4">
           <label for="end">Ende</label>
-          <input type="date" required v-model="timeslot.endDate" class="form-control" id="end" name="booking[endDate]" placeholder="Ende">
+          <input type="date" required v-model="ev.endDate" class="form-control" id="end" name="booking[endDate]" placeholder="Ende">
         </div>
         <div class="form-group col-md-2">
           <label>&nbsp;</label>
-          <select id="hour" class="form-control" v-model="timeslot.endH">
+          <select id="hour" class="form-control" v-model="ev.endH">
             <option v-for="h in hours" :value="h">{{ h }}</option>
           </select>
         </div>
         <div class="form-group col-md-2">
           <label>&nbsp;</label>
-          <select class="form-control" id="minute" v-model="timeslot.endM">
+          <select class="form-control" id="minute" v-model="ev.endM">
             <option v-for="m in mins" v-bind:value="m">{{ m }}</option>
           </select>
         </div>
@@ -173,21 +172,21 @@
       <div class="form-row">
         <div class="form-group col-md-3">
           <label for="prepH">Aufbaudauer [HH]</label>
-          <input type="number" id="prepH" class="form-control" v-model="timeslot.prepDurH">
+          <input type="number" id="prepH" class="form-control" v-model="ev.prepDurH">
         </div>
         <div class="form-group col-md-3">
           <label for="prepM">[mm]</label>
-          <select class="form-control" id="prepM" v-model="timeslot.prepDurM">
+          <select class="form-control" id="prepM" v-model="ev.prepDurM">
             <option v-for="m in mins" :value="m">{{m}}</option>
           </select>
         </div>
         <div class="form-group  col-md-3">
           <label for="teardownH">Abbaudauer [HH]</label>
-          <input type="number" id="teardownH" class="form-control" v-model="timeslot.teardownDurH">
+          <input type="number" id="teardownH" class="form-control" v-model="ev.teardownDurH">
         </div>
         <div class="form-group col-md-3">
           <label for="teardownM">[mm]</label>
-          <select class="form-control" id="teardownM" v-model="timeslot.teardownDurM">
+          <select class="form-control" id="teardownM" v-model="ev.teardownDurM">
             <option v-for="m in mins" :value="m">
               {{m}}
             </option>
@@ -195,8 +194,16 @@
         </div>
       </div>
     </div>
-      <button type="submit" class="btn btn-primary">Absenden</button>
-    </form>
+    <div class="row">
+    <div class="col-md-12">
+    <button type="button" class="btn btn-success float-right" v-on:click="addTimeRange"><i class="fas fa-plus"></i>&nbsp;Zeiten hinzufügen</button>
+    </div>
+  </div>
+    <div class="row">
+      <div class="col-md-12">
+    <button type="button" class="btn btn-primary" v-on:click="submit">Absenden</button>
+      </div>
+  </div>
   </div>
 </script>
 <script src="/javascripts/booking.js"></script>
