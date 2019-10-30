@@ -40,9 +40,7 @@ module.exports = (bookingSrv, itemsSrv, timeSlotsSrv) => {
           booking.eventsTimeRanges
         )
       ) {
-        console.log('validated');
         const r = await bookingSrv.update(booking);
-        console.log(JSON.stringify(r));
         res.status(200).json({
           res: r,
           err: null

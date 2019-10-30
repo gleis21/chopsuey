@@ -12,27 +12,19 @@ class BookingService {
   }
 
   async update(b) {
-    console.log(JSON.stringify(b));
     const m = await this.personSrv.createOrUpdate(b.person);
-    console.log(JSON.stringify(m));
     const ts = await this.timeSlotsSrv.create(b.id, b.eventsTimeRanges);
-    console.log(JSON.stringify(ts));
     const pbc = await this.pubCalendarSrv.create(b.id);
-    console.log(JSON.stringify(pbc));
     const bk = {
-      id: b.id,
-      fields: {
-        Titel: b.title,
-        Raum: b.roomIds,
-        Ausstattung: b.equipmentIds,
-        Status: 'Angefragt',
-        Mieter: [m.getId()],
-        Timeslots: ts.map(s => s.getId()),
-        PublicTimeslots: [pbc.getId()]
-      }
+      Titel: b.title,
+      Raum: b.roomIds,
+      Ausstattung: b.equipmentIds,
+      Status: 'Angefragt',
+      Mieter: [m.getId()],
+      Timeslots: ts.map(s => s.getId()),
+      PublicTimeslots: pbc.map(pb => pb.getId())
     };
-    console.log(JSON.stringify(bk));
-    return await this.table.update(bk);
+    return await this.table.update(b.id, bk);
   }
 }
 
@@ -67,11 +59,14 @@ class PubCalendarService {
   }
 
   async create(bookingID) {
-    return await this.table.create({
-      fields: {
-        Buchung: [bookingID]
+    const r = await this.table.create([
+      {
+        fields: {
+          Buchung: [bookingID]
+        }
       }
-    });
+    ]);
+    return r;
   }
 
   async getFutureBookings() {
@@ -120,7 +115,7 @@ class TimeSlotsService {
       .map(ev => {
         const prep = {
           fields: {
-            'Beginn Time': ev.beginnPrep.toISOString(),
+            BeginnTime: ev.beginnPrep.toISOString(),
             Duration: ev.prepDurSec,
             Type: 'Aufbau',
             Buchung: [bookingID]
@@ -128,7 +123,7 @@ class TimeSlotsService {
         };
         const event = {
           fields: {
-            'Beginn Time': ev.beginnEvent.toISOString(),
+            BeginnTime: ev.beginnEvent.toISOString(),
             Duration: ev.durSec,
             Type: 'Veranstaltung',
             Buchung: [bookingID]
@@ -137,7 +132,7 @@ class TimeSlotsService {
 
         const teardown = {
           fields: {
-            'Beginn Time': ev.beginnTeardown.toISOString(),
+            BeginnTime: ev.beginnTeardown.toISOString(),
             Duration: ev.teardownDurSec,
             Type: 'Abbau',
             Buchung: [bookingID]
@@ -146,7 +141,7 @@ class TimeSlotsService {
 
         const cleaning = {
           fields: {
-            'Beginn Time': ev.cleaningBeginn.toISOString(),
+            BeginnTime: ev.cleaningBeginn.toISOString(),
             Duration: ev.cleaningDurSec, // default 1 h, needs to be adjusted?
             Type: 'Reinigung',
             Buchung: [bookingID]
@@ -155,7 +150,6 @@ class TimeSlotsService {
         return [prep, event, teardown, cleaning];
       })
       .flat();
-
     return await this.table.create(timeslots); // returns records (record.getId())
   }
 
@@ -211,7 +205,6 @@ class TimeSlotsService {
     if (!roomTimeslots) {
       return true;
     }
-    console.log(JSON.stringify(roomTimeslots));
     const bookable = roomTimeslots
       .filter(r => r)
       .reduce((acc, curr) => {
@@ -235,7 +228,9 @@ class PersonService {
 
   async createOrUpdate(p) {
     const defaultRole = 'MieterIn';
+
     const existing = await this.getByEmail(p.email);
+
     if (existing) {
       return existing;
     }
@@ -253,7 +248,17 @@ class PersonService {
     });
   }
 
-  async getByEmail(email) {}
+  async getByEmail(email) {
+    const r = await this.table
+      .select({
+        view: 'Alle Personen',
+        filterByFormula: '{Email}=' + "'" + email + "'"
+      })
+      .firstPage();
+    if (r.length > 0) {
+      return r[0];
+    } else return null;
+  }
 }
 
 module.exports = {
