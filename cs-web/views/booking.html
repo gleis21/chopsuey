@@ -75,135 +75,151 @@
 </html>
 
 <script type="text/x-template" id="booking-form">
-    <div class="container">
-      <div class="form-group">
-        <label for="title">Titel</label>
-        <input type="text" required class="form-control" v-model="booking.title">
-      </div>
-      <div class="form-group">
-        <label for="name">Vorname</label>
-        <input type="text" required class="form-control" v-model="booking.person.firstName">
-      </div>
-      <div class="form-group">
-        <label for="name">Nachname</label>
-        <input type="text" required class="form-control" v-model="booking.person.lastName">
-      </div>
-      <div class="form-group">
-        <label for="name">Organisation/Firma</label>
-        <input type="text" class="form-control" v-model="booking.person.org">
-      </div>
-      <div class="form-row">
-        <div class="form-group col-md-6">
-          <label for="address">Strasse</label>
-          <input class="form-control" required type="text" v-model="booking.person.street"></input>
-        </div>
-        <div class="form-group col-md-3">
-          <label for="address">Hausnummer</label>
-          <input class="form-control" required type="text" v-model="booking.person.hno"></input>
-        </div>
-        <div class="form-group col-md-3">
-          <label for="address">Top</label>
-          <input class="form-control" required type="text" v-model="booking.person.ano"></input>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group col-md-4">
-          <label for="address">PLZ</label>
-          <input class="form-control" required type="text" v-model="booking.person.postcode"></input>
-        </div>
-        <div class="form-group col-md-8">
-          <label for="address">Ort</label>
-          <input class="form-control" required type="text" v-model="booking.person.city"></input>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="email">E-Mail-Adresse</label>
-        <input type="email" required class="form-control" v-model="booking.person.email">
-      </div>
-      <div class="form-group">
-        <label for="room">Raum</label>
-        <select class="form-control c-select" id="room" v-model="booking.roomId">
-          <option v-for="r in rooms" :value="r.id">{{r.name}}</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="equipment">Ausstattung</label>
-        <select multiple="true" class="form-control c-select" id="equipment" v-model="booking.equipmentIds">
-          <option v-for="e in equipment" :value="e.id">{{e.name}}</option>
-        </select>
-      </div>
-      <div class="jumbotron bg-light" v-for="ev in booking.eventsTimeRanges">
-      <div class="form-row">
-        <div class="form-group col-md-4">
-          <label for="beginn">Begin</label>
-          <input type="date" required v-model="ev.beginnDate" class="form-control" id="beginn">
-        </div>
-        <div class="form-group col-md-2">
-          <label>&nbsp;</label>
-          <select id="hour" class="form-control" v-model="ev.beginnH">
-            <option v-for="h in hours" :value="h">{{h}}</option>
-          </select>
-        </div>
-        <div class="form-group col-md-2">
-          <label>&nbsp;</label>
-          <select class="form-control" id="minute" v-model="ev.beginnM"">
-            <option v-for="m in mins" :value="m">{{m}}</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group col-md-4">
-          <label for="end">Ende</label>
-          <input type="date" required v-model="ev.endDate" class="form-control" id="end" name="booking[endDate]" placeholder="Ende">
-        </div>
-        <div class="form-group col-md-2">
-          <label>&nbsp;</label>
-          <select id="hour" class="form-control" v-model="ev.endH">
-            <option v-for="h in hours" :value="h">{{ h }}</option>
-          </select>
-        </div>
-        <div class="form-group col-md-2">
-          <label>&nbsp;</label>
-          <select class="form-control" id="minute" v-model="ev.endM">
-            <option v-for="m in mins" v-bind:value="m">{{ m }}</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group col-md-3">
-          <label for="prepH">Aufbaudauer [HH]</label>
-          <input type="number" id="prepH" class="form-control" v-model="ev.prepDurH">
-        </div>
-        <div class="form-group col-md-3">
-          <label for="prepM">[mm]</label>
-          <select class="form-control" id="prepM" v-model="ev.prepDurM">
-            <option v-for="m in mins" :value="m">{{m}}</option>
-          </select>
-        </div>
-        <div class="form-group  col-md-3">
-          <label for="teardownH">Abbaudauer [HH]</label>
-          <input type="number" id="teardownH" class="form-control" v-model="ev.teardownDurH">
-        </div>
-        <div class="form-group col-md-3">
-          <label for="teardownM">[mm]</label>
-          <select class="form-control" id="teardownM" v-model="ev.teardownDurM">
-            <option v-for="m in mins" :value="m">
-              {{m}}
-            </option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-    <div class="col-md-12">
-    <button type="button" class="btn btn-success float-right" v-on:click="addTimeRange"><i class="fas fa-plus"></i>&nbsp;Zeiten hinzufügen</button>
-    </div>
+
+      <div class="container">
+  <div class="progress" v-if="!initialized">
+    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar"  aria-valuemin="0" aria-valuemax="100" :style="{ width: initializerWidth + '%' }"></div>
   </div>
-    <div class="row">
+  <div v-if="initialized">
+        <div class="form-group">
+          <label for="title">Titel</label>
+          <input type="text" required class="form-control" v-model="booking.title">
+        </div>
+        <div class="form-group">
+          <label for="name">Vorname</label>
+          <input type="text" required class="form-control" v-model="booking.person.firstName">
+        </div>
+        <div class="form-group">
+          <label for="name">Nachname</label>
+          <input type="text" required class="form-control" v-model="booking.person.lastName">
+        </div>
+        <div class="form-group">
+          <label for="name">Organisation/Firma</label>
+          <input type="text" class="form-control" v-model="booking.person.org">
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="address">Strasse</label>
+            <input class="form-control" required type="text" v-model="booking.person.street"></input>
+          </div>
+          <div class="form-group col-md-3">
+            <label for="address">Hausnummer</label>
+            <input class="form-control" required type="text" v-model="booking.person.hno"></input>
+          </div>
+          <div class="form-group col-md-3">
+            <label for="address">Top</label>
+            <input class="form-control" required type="text" v-model="booking.person.ano"></input>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-4">
+            <label for="address">PLZ</label>
+            <input class="form-control" required type="text" v-model="booking.person.postcode"></input>
+          </div>
+          <div class="form-group col-md-8">
+            <label for="address">Ort</label>
+            <input class="form-control" required type="text" v-model="booking.person.city"></input>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="email">E-Mail-Adresse</label>
+          <input type="email" required class="form-control" v-model="booking.person.email">
+        </div>
+        <div class="form-group">
+          <label for="room">Raum</label>
+          <select class="form-control c-select" id="room" v-model="booking.roomId">
+            <option v-for="r in rooms" :value="r.id">{{r.name}}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="equipment">Ausstattung</label>
+          <select multiple="true" class="form-control c-select" id="equipment" v-model="booking.equipmentIds">
+            <option v-for="e in equipment" :value="e.id">{{e.name}}</option>
+          </select>
+        </div>
+        <div class="jumbotron bg-light" v-for="ev in booking.eventsTimeRanges">
+        <div class="form-row">
+          <div class="form-group col-md-4">
+            <label for="beginn">Begin</label>
+            <input type="date" required v-model="ev.beginnDate" class="form-control" id="beginn">
+          </div>
+          <div class="form-group col-md-2">
+            <label>&nbsp;</label>
+            <select id="hour" class="form-control" v-model="ev.beginnH">
+              <option v-for="h in hours" :value="h">{{h}}</option>
+            </select>
+          </div>
+          <div class="form-group col-md-2">
+            <label>&nbsp;</label>
+            <select class="form-control" id="minute" v-model="ev.beginnM"">
+              <option v-for="m in mins" :value="m">{{m}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-4">
+            <label for="end">Ende</label>
+            <input type="date" required v-model="ev.endDate" class="form-control" id="end" name="booking[endDate]" placeholder="Ende">
+          </div>
+          <div class="form-group col-md-2">
+            <label>&nbsp;</label>
+            <select id="hour" class="form-control" v-model="ev.endH">
+              <option v-for="h in hours" :value="h">{{ h }}</option>
+            </select>
+          </div>
+          <div class="form-group col-md-2">
+            <label>&nbsp;</label>
+            <select class="form-control" id="minute" v-model="ev.endM">
+              <option v-for="m in mins" v-bind:value="m">{{ m }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-3">
+            <label for="prepH">Aufbaudauer [HH]</label>
+            <input type="number" id="prepH" class="form-control" v-model="ev.prepDurH">
+          </div>
+          <div class="form-group col-md-3">
+            <label for="prepM">[mm]</label>
+            <select class="form-control" id="prepM" v-model="ev.prepDurM">
+              <option v-for="m in mins" :value="m">{{m}}</option>
+            </select>
+          </div>
+          <div class="form-group  col-md-3">
+            <label for="teardownH">Abbaudauer [HH]</label>
+            <input type="number" id="teardownH" class="form-control" v-model="ev.teardownDurH">
+          </div>
+          <div class="form-group col-md-3">
+            <label for="teardownM">[mm]</label>
+            <select class="form-control" id="teardownM" v-model="ev.teardownDurM">
+              <option v-for="m in mins" :value="m">
+                {{m}}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="row">
       <div class="col-md-12">
-    <button type="button" class="btn btn-primary" v-on:click="submit">Absenden</button>
+      <button type="button" class="btn btn-success float-right" v-on:click="addTimeRange"><i class="fas fa-plus"></i>&nbsp;Zeiten hinzufügen</button>
       </div>
-  </div>
-  </div>
+    </div>
+      <div class="row">
+        <div class="col-md-12">
+        <div class="alert alert-success" role="alert" v-if="submitResult && submitResult.success">
+          {{submitResult.msg}}
+        </div>
+        <div class="alert alert-danger" role="alert" v-if="submitResult && !submitResult.success">
+          {{submitResult.msg}}
+        </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+      <button type="button" class="btn btn-primary" v-on:click="submit" style="width: 100px"><i class="fas fa-spinner fa-spin" v-if="loading"></i>{{loading ? '' : 'Absenden'}}</button>
+        </div>
+    </div>
+    </div>
+    </div>
 </script>
 <script src="/javascripts/booking.js"></script>

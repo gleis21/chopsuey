@@ -76,7 +76,11 @@ class PubCalendarService {
     const groupedByRoom = futureBookings.reduce((acc, curr) => {
       const roomId = curr.get('_roomId');
       if (!acc[roomId]) acc[roomId] = [];
-      acc[roomId].push({ beginn: curr.get('Beginn'), end: curr.get('Ende') });
+      // beginn and end are arrays, no idea why...
+      acc[roomId].push({
+        beginn: moment(curr.get('Beginn')[0]),
+        end: moment(curr.get('Ende')[0])
+      });
       return acc;
     }, {});
 
@@ -90,16 +94,23 @@ class EventTimeRanges {
       .add(ev.beginnH, 'h')
       .add(ev.beginnM, 'minutes');
     this.prepDurSec = ev.prepDurH * 60 * 60 + ev.prepDurM * 60;
-    this.beginnPrep = this.beginnEvent.subtract(this.prepDurSec, 'seconds');
+    this.beginnPrep = moment(this.beginnEvent).subtract(
+      this.prepDurSec,
+      'seconds'
+    );
     this.endEvent = moment(ev.endDate)
       .add(ev.endH, 'h')
       .add(ev.endM, 'minutes');
     this.durSec = moment(this.endEvent).diff(this.beginnEvent, 'seconds');
     this.beginnTeardown = moment(this.endEvent);
     this.teardownDurSec = ev.teardownDurH * 60 * 60;
-    this.cleaningBeginn = this.beginnTeardown.add(ev.teardownDurH, 'h');
+    +ev.teardownDurM * 60;
+    this.cleaningBeginn = moment(this.beginnTeardown).add(
+      this.teardownDurSec,
+      'seconds'
+    );
     this.cleaningDurSec = 60 * 60;
-    this.cleaningEnd = this.cleaningBeginn.add(1, 'h');
+    this.cleaningEnd = moment(this.cleaningBeginn).add(1, 'h');
   }
 }
 
@@ -206,7 +217,7 @@ class TimeSlotsService {
       return true;
     }
     const bookable = roomTimeslots
-      .filter(r => r)
+      .filter(r => !!r)
       .reduce((acc, curr) => {
         const tsBeginn = curr.beginn;
         const tsEnd = curr.end;

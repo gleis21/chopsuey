@@ -2,6 +2,10 @@ Vue.component('booking-form', {
   template: '#booking-form',
   data: function() {
     return {
+      initialized: false,
+      initializerWidth: 20,
+      submitResult: null,
+      loading: false,
       booking: {
         person: {},
         equipmentIds: [],
@@ -58,6 +62,9 @@ Vue.component('booking-form', {
     };
   },
   async mounted() {
+    setTimeout(() => {
+      if (this.initializerWidth < 100) this.initializerWidth += 20;
+    }, 200);
     const pathSegments = window.location.pathname.split('/');
     const id = pathSegments[pathSegments.length - 1];
     const booking = await (await fetch('/api/bookings/' + id)).json();
@@ -67,6 +74,9 @@ Vue.component('booking-form', {
     this.equipment = equipment.res;
     this.booking = { ...this.booking, ...booking.res };
     this.booking.roomId = this.rooms[0].id;
+
+    this.initializerWidth = 100;
+    setTimeout(() => (this.initialized = true), 300);
   },
   methods: {
     addTimeRange: function() {
@@ -78,12 +88,31 @@ Vue.component('booking-form', {
         { ...lastRange }
       ];
     },
-    submit: function() {
-      fetch('/api/bookings/' + this.booking.id, {
+    submit: async function() {
+      this.loading = true;
+      const res = await fetch('/api/bookings/' + this.booking.id, {
         headers: { 'Content-Type': 'application/json' },
         method: 'PUT',
         body: JSON.stringify(this.booking)
       });
+      this.loading = false;
+      if (res.ok) {
+        this.submitResult = {
+          success: true,
+          msg: 'Ihre Anfrage wurde erfolgreich gespeichert.'
+        };
+      } else if (res.status === 409) {
+        //conflict
+        this.submitResult = {
+          success: false,
+          msg: 'Der gewünschte Zeitraum ist nicht frei.'
+        };
+      } else {
+        this.submitResult = {
+          success: false,
+          msg: 'Ups... something went wrong.'
+        };
+      }
     }
   }
 });
