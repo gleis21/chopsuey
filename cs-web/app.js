@@ -24,14 +24,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 const base = require('airtable').base('appdpZhhl9ZVvABFf');
 const personSrv = new services.PersonService(base);
 const itemsSrv = new services.ItemsService(base);
-const pubCalSrv = new services.PubCalendarService(base);
-const timeslotsSrv = new services.TimeSlotsService(base, itemsSrv, pubCalSrv);
-const bookingSrv = new services.BookingService(
-  base,
-  timeslotsSrv,
-  pubCalSrv,
-  personSrv
-);
+const timeslotsSrv = new services.TimeSlotsService(base, itemsSrv);
+const bookingSrv = new services.BookingService(base, timeslotsSrv, personSrv);
 
 app.use('/api', apiRouter(bookingSrv, itemsSrv, timeslotsSrv));
 app.use('/bookings', bookingsRouter());

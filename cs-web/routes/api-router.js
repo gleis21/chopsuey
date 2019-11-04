@@ -29,25 +29,15 @@ module.exports = (bookingSrv, itemsSrv, timeSlotsSrv) => {
         roomIds: [b.roomId],
         equipmentIds: b.equipmentIds,
         person: b.person,
-        eventsTimeRanges: b.eventsTimeRanges.map(
-          e => new services.EventTimeRanges(e)
+        timeSlotsGroups: b.timeSlotsGroups.map(
+          e => new services.TimeSlotsGroup(e)
         )
       };
-      // validate
-      if (
-        await timeSlotsSrv.areBookable(
-          booking.roomIds[0],
-          booking.eventsTimeRanges
-        )
-      ) {
-        const r = await bookingSrv.update(booking);
-        res.status(200).json({
-          res: r,
-          err: null
-        });
-      } else {
-        res.status(409).json({ res: null, err: 'Zeitraum nich buchbar.' });
-      }
+      const r = await bookingSrv.update(booking);
+      res.status(200).json({
+        res: r,
+        err: null
+      });
     })
   );
 

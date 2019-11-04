@@ -10,7 +10,7 @@ Vue.component('booking-form', {
         person: {},
         equipmentIds: [],
         roomId: '',
-        eventsTimeRanges: [
+        timeSlotsGroups: [
           {
             id: 1,
             beginnDate: moment()
@@ -63,8 +63,8 @@ Vue.component('booking-form', {
   },
   async mounted() {
     setTimeout(() => {
-      if (this.initializerWidth < 100) this.initializerWidth += 20;
-    }, 200);
+      if (this.initializerWidth < 100) this.initializerWidth = 60;
+    }, 100);
     const pathSegments = window.location.pathname.split('/');
     const id = pathSegments[pathSegments.length - 1];
     const booking = await (await fetch('/api/bookings/' + id)).json();
@@ -80,11 +80,11 @@ Vue.component('booking-form', {
   },
   methods: {
     addTimeRange: function() {
-      const lastRange = this.booking.eventsTimeRanges[
-        this.booking.eventsTimeRanges.length - 1
+      const lastRange = this.booking.timeSlotsGroups[
+        this.booking.timeSlotsGroups.length - 1
       ];
-      this.booking.eventsTimeRanges = [
-        ...this.booking.eventsTimeRanges,
+      this.booking.timeSlotsGroups = [
+        ...this.booking.timeSlotsGroups,
         { ...lastRange }
       ];
     },
@@ -100,12 +100,6 @@ Vue.component('booking-form', {
         this.submitResult = {
           success: true,
           msg: 'Ihre Anfrage wurde erfolgreich gespeichert.'
-        };
-      } else if (res.status === 409) {
-        //conflict
-        this.submitResult = {
-          success: false,
-          msg: 'Der gewünschte Zeitraum ist nicht frei.'
         };
       } else {
         this.submitResult = {
