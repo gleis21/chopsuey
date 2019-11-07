@@ -200,11 +200,11 @@ class TimeSlotsService {
         .concat(futureBookingsByRoom[salonID])
         .concat(futureBookingsByRoom[stationID]);
     }
-    if (roomTimeslots.filter(r => !!r).length == 0) {
+    if (roomTimeslots.filter(r => r).length == 0) {
       return true;
     }
     const bookable = roomTimeslots
-      .filter(r => !!r)
+      .filter(r => r)
       .reduce((acc, curr) => {
         const tsBeginn = curr.beginn;
         const tsEnd = curr.end;

@@ -10,6 +10,7 @@ Vue.component('booking-form', {
         person: {},
         equipmentIds: [],
         roomId: '',
+        notes: '',
         timeSlotsGroups: [
           {
             id: 1,
@@ -62,9 +63,7 @@ Vue.component('booking-form', {
     };
   },
   async mounted() {
-    setTimeout(() => {
-      if (this.initializerWidth < 100) this.initializerWidth = 60;
-    }, 100);
+    this.initializerWidth = 60;
     const pathSegments = window.location.pathname.split('/');
     const id = pathSegments[pathSegments.length - 1];
     const booking = await (await fetch('/api/bookings/' + id)).json();
@@ -76,7 +75,7 @@ Vue.component('booking-form', {
     this.booking.roomId = this.rooms[0].id;
 
     this.initializerWidth = 100;
-    setTimeout(() => (this.initialized = true), 300);
+    setTimeout(() => (this.initialized = true), 150);
   },
   methods: {
     addTimeRange: function() {

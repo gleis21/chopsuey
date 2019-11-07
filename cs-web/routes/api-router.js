@@ -12,10 +12,15 @@ module.exports = (bookingSrv, itemsSrv, timeSlotsSrv) => {
     '/bookings/:id',
     asyncMiddleware(async (req, res, next) => {
       const b = await bookingSrv.get(req.params.id);
-      res.status(200).json({
-        res: { id: b.id, title: b.get('Titel') },
-        err: null
-      });
+      const status = b.get('Status');
+      if (!status || status === 'Angefragt') {
+        res.status(200).json({
+          res: { id: b.id, title: b.get('Titel') },
+          err: null
+        });
+      } else {
+        res.status(403).json({ res: null, err: 403 });
+      }
     })
   );
 
