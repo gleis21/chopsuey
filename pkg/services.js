@@ -12,18 +12,14 @@ class BookingService {
 
   async update(b) {
     const m = await this.personSrv.createOrUpdate(b.person);
-    const ts = await this.timeSlotsSrv.create(
-      b.id,
-      b.roomIds[0],
-      b.timeSlotsGroups
-    );
+    const ts = await this.timeSlotsSrv.create(b.id, b.timeSlotsGroups);
 
     const bk = {
       Titel: b.title,
-      Raum: b.roomIds,
       Ausstattung: b.equipmentIds,
       Status: 'Angefragt',
       Mieter: [m.getId()],
+      Notes: b.notes,
       Timeslots: ts.map(s => s.getId())
     };
     return await this.table.update(b.id, bk);
@@ -57,6 +53,7 @@ class ItemsService {
 
 class TimeSlotsGroup {
   constructor(ev) {
+    this.roomId = ev.roomId;
     this.beginnEvent = moment(ev.beginnDate)
       .add(ev.beginnH, 'h')
       .add(ev.beginnM, 'minutes');
@@ -84,6 +81,7 @@ class TimeSlotsGroup {
   getTimeSlots() {
     return [
       {
+        roomId: this.roomId,
         beginn: this.beginnPrep,
         end: this.endPrep,
         duration: this.prepDurSec,
@@ -91,6 +89,7 @@ class TimeSlotsGroup {
         status: ''
       },
       {
+        roomId: this.roomId,
         beginn: this.beginnEvent,
         end: this.endEvent,
         duration: this.durSec,
@@ -98,6 +97,7 @@ class TimeSlotsGroup {
         status: ''
       },
       {
+        roomId: this.roomId,
         beginn: this.beginnTeardown,
         end: this.endTeardown,
         duration: this.teardownDurSec,
@@ -105,6 +105,7 @@ class TimeSlotsGroup {
         status: ''
       },
       {
+        roomId: this.roomId,
         beginn: this.beginnCleanning,
         end: this.endCleanning,
         duration: this.cleaningDurSec,
@@ -127,8 +128,9 @@ class TimeSlotsService {
       .select({ maxRecords: 1000, view: 'Zukunft' })
       .firstPage();
     const groupedByRoom = ts.reduce((acc, curr) => {
-      const roomId = curr.get('_roomId');
-      if (roomId) {
+      const roomIds = curr.get('Raum');
+      if (roomIds && roomIds.length === 1) {
+        const roomId = roomIds[0];
         if (!acc[roomId]) acc[roomId] = [];
         acc[roomId].push({
           beginn: moment(curr.get('Beginn')),
@@ -141,36 +143,43 @@ class TimeSlotsService {
     return groupedByRoom;
   }
 
-  async create(bookingID, roomId, timeSlotsGroups) {
-    const futureBookings = await this.getTimeSlotsAfterToday(roomId);
-    const timeslots = (await Promise.all(
-      timeSlotsGroups.map(async ev => {
-        return await Promise.all(
-          ev.getTimeSlots().map(async s => {
-            const bookable = await this.isBookable(
-              roomId,
-              s.beginn,
-              s.end,
-              futureBookings
-            );
-            return {
-              fields: {
-                Beginn: s.beginn.toISOString(),
-                Duration: s.duration,
-                Type: s.type,
-                Buchung: [bookingID],
-                Status: bookable ? 'OK' : 'Conflict'
-              }
-            };
-          })
-        );
-      })
-    )).flat();
+  async create(bookingID, timeSlotsGroups) {
+    const futureBookings = await this.getTimeSlotsAfterToday();
+    const timeslots = (
+      await Promise.all(
+        timeSlotsGroups.map(async ev => {
+          return await Promise.all(
+            ev.getTimeSlots().map(async s => {
+              const bookable = await this.isBookable(
+                s.roomId,
+                s.beginn,
+                s.end,
+                futureBookings
+              );
+              return {
+                fields: {
+                  Beginn: s.beginn.toISOString(),
+                  Duration: s.duration,
+                  Type: s.type,
+                  Buchung: [bookingID],
+                  Raum: [s.roomId],
+                  Status: bookable ? 'OK' : 'Conflict'
+                }
+              };
+            })
+          );
+        })
+      )
+    ).flat();
     return await this.table.create(timeslots); // returns records (record.getId())
   }
 
   async isBookable(roomId, beginn, end, futureBookingsByRoom) {
+    if (Object.keys(futureBookingsByRoom).length === 0) {
+      return true;
+    }
     const rooms = await this.itemsSrv.getRooms();
+    const gastroID = rooms.filter(r => r.get('Key') === 'Gastro')[0].getId();
     const saalID = rooms.filter(r => r.get('Key') === 'Saal 21')[0].getId();
     const salonID = rooms.filter(r => r.get('Key') === 'Salon 21')[0].getId();
     const stationID = rooms
@@ -187,7 +196,8 @@ class TimeSlotsService {
     if (
       room.getId() === saalID ||
       room.getId() === salonID ||
-      room.getId() === stationID
+      room.getId() === stationID ||
+      room.getId() === gastroID
     ) {
       roomTimeslots = futureBookingsByRoom[room.getId()];
     } else if (room.getId() === saalSalonID) {

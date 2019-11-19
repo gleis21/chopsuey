@@ -9,11 +9,11 @@ Vue.component('booking-form', {
       booking: {
         person: {},
         equipmentIds: [],
-        roomId: '',
         notes: '',
         timeSlotsGroups: [
           {
             id: 1,
+            roomId: '',
             beginnDate: moment()
               .add(2, 'd')
               .format('YYYY-MM-DD'),

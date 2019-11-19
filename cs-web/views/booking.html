@@ -82,6 +82,17 @@
           <label for="name">Organisation/Firma</label>
           <input type="text" class="form-control" v-model="booking.person.org">
         </div>
+        <div class="form-group">
+          <label for="name">UID-Nummer</label>
+          <input type="text" class="form-control" v-model="booking.person.uid">
+        </div>
+        <div class="form-group">
+          <label for="umsatzsteuerbefreit">Die/Der MiterIn ist umsatzseuerbefreit</label>
+          <select class="form-control c-select" id="umsatzsteuerbefreit" v-model="booking.person.umsatzseuerberfreit">
+            <option :value="true">Ja</option>
+            <option :value="false">Nein</option>
+          </select>
+        </div>
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="address">Strasse</label>
@@ -110,12 +121,7 @@
           <label for="email">E-Mail-Adresse</label>
           <input type="email" required class="form-control" v-model="booking.person.email">
         </div>
-        <div class="form-group">
-          <label for="room">Raum</label>
-          <select class="form-control c-select" id="room" v-model="booking.roomId">
-            <option v-for="r in rooms" :value="r.id">{{r.name}}</option>
-          </select>
-        </div>
+
         <div class="form-group">
           <label for="equipment">Ausstattung</label>
           <select multiple="true" class="form-control c-select" id="equipment" v-model="booking.equipmentIds">
@@ -127,6 +133,14 @@
           <textarea class="form-control" id="notes" rows="5" v-model="booking.notes"></textarea>
         </div>
         <div class="jumbotron bg-light" v-for="ev in booking.timeSlotsGroups">
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="room">Raum</label>
+              <select class="form-control c-select" id="room" v-model="ev.roomId">
+                <option v-for="r in rooms" :value="r.id">{{r.name}}</option>
+              </select>
+            </div>
+          </div>
         <div class="form-row">
           <div class="form-group col-md-4">
             <label for="beginn">Begin</label>
