@@ -1,10 +1,11 @@
 const moment = require('moment');
 
 class BookingService {
-  constructor(base, timeSlotsSrv, personSrv) {
+  constructor(base, timeSlotsSrv, personSrv, itemsSrv) {
     this.table = base('Buchungen');
     this.timeSlotsSrv = timeSlotsSrv;
     this.personSrv = personSrv;
+    this.itemsSrv = itemsSrv;
   }
   async get(id) {
     return await this.table.find(id);
@@ -13,10 +14,12 @@ class BookingService {
   async update(b) {
     const m = await this.personSrv.createOrUpdate(b.person);
     const ts = await this.timeSlotsSrv.create(b.id, b.timeSlotsGroups);
+    const equipments = await this.itemsSrv.createEquipment(b.equipments);
 
     const bk = {
       Titel: b.title,
-      Ausstattung: b.equipmentIds,
+      Ausstattung: equipments.map(e => e.getId()),
+      TeilnehmerInnenanzahl: b.participantsCount,
       Status: 'Angefragt',
       Mieter: [m.getId()],
       Notes: b.notes,
@@ -29,6 +32,7 @@ class BookingService {
 class ItemsService {
   constructor(base) {
     this.table = base('Artikel');
+    this.bookedEquipmentTable = base('BuchungAusstattung');
     this.rooms = [];
     this.equipment = [];
   }
@@ -48,6 +52,29 @@ class ItemsService {
         .firstPage();
     }
     return this.equipment;
+  }
+
+  async getBookedEquipment(bookingKey) {
+    return await this.bookedEquipmentTable
+      .select({
+        maxRecords: 50,
+        view: 'Grid View',
+        filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
+      })
+      .firstPage();
+  }
+
+  async createEquipment(bookedEquipments) {
+    this.bookedEquipmentTable.create(
+      bookedEquipments.map(be => {
+        return {
+          fields: {
+            Ausstattung: [be.id],
+            Anzahl: be.count
+          }
+        };
+      })
+    );
   }
 }
 
@@ -121,6 +148,16 @@ class TimeSlotsService {
     this.table = base('Timeslots');
     this.itemsSrv = itemsSrv;
     this.pubCalendarSrv = pubCalendarSrv;
+  }
+
+  async getBookingTimeSlots(bookingKey) {
+    return await this.table
+      .select({
+        maxRecords: 500,
+        view: 'Grid View',
+        filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
+      })
+      .firstPage();
   }
 
   async getTimeSlotsAfterToday() {
@@ -239,7 +276,20 @@ class PersonService {
     const existing = await this.getByEmail(p.email);
 
     if (existing) {
-      return existing;
+      return await this.table.update(existing.getId(), {
+        Email: p.email,
+        Vorname: p.firstName,
+        Nachname: p.lastName,
+        Organisation: p.org,
+        Rolle: [defaultRole],
+        Strasse: p.street,
+        HausNr: p.hno,
+        Top: p.ano,
+        PLZ: p.postcode,
+        Ort: p.city,
+        UID: p.uid,
+        Umsatzsteuerbefreit: p.umsatzseuerberfreit
+      });
     }
     return await this.table.create({
       Email: p.email,
@@ -251,8 +301,14 @@ class PersonService {
       HausNr: p.hno,
       Top: p.ano,
       PLZ: p.postcode,
-      Ort: p.city
+      Ort: p.city,
+      UID: p.uid,
+      Umsatzsteuerbefreit: p.umsatzseuerberfreit
     });
+  }
+
+  async getById(id) {
+    return await this.table.find(id);
   }
 
   async getByEmail(email) {

@@ -8,6 +8,7 @@ Vue.component('booking-form', {
       loading: false,
       booking: {
         person: {},
+        participantsCount: 1,
         equipmentIds: [],
         notes: '',
         timeSlotsGroups: [
@@ -70,7 +71,9 @@ Vue.component('booking-form', {
     const room = await (await fetch('/api/rooms')).json();
     const equipment = await (await fetch('/api/equipment')).json();
     this.rooms = room.res;
-    this.equipment = equipment.res;
+    this.booking.equipment = equipment.res.map(e => {
+      return { id: e.id, name: e.name, count: 0 };
+    });
     this.booking = { ...this.booking, ...booking.res };
     this.booking.roomId = this.rooms[0].id;
 

@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var apiRouter = require('./routes/api-router');
-var bookingsRouter = require('./routes/bookings-router');
+var bookingsRouter = require('./routes/router');
 var services = require('../pkg/services');
 
 var app = express();
@@ -25,10 +25,18 @@ const base = require('airtable').base('appdpZhhl9ZVvABFf');
 const personSrv = new services.PersonService(base);
 const itemsSrv = new services.ItemsService(base);
 const timeslotsSrv = new services.TimeSlotsService(base, itemsSrv);
-const bookingSrv = new services.BookingService(base, timeslotsSrv, personSrv);
+const bookingSrv = new services.BookingService(
+  base,
+  timeslotsSrv,
+  personSrv,
+  itemsSrv
+);
 
 app.use('/api', apiRouter(bookingSrv, itemsSrv, timeslotsSrv));
-app.use('/bookings', bookingsRouter());
+app.use(
+  '/bookings',
+  bookingsRouter(bookingSrv, itemsSrv, timeslotsSrv, personSrv)
+);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
