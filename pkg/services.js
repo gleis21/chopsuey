@@ -58,10 +58,17 @@ class ItemsService {
     return await this.bookedEquipmentTable
       .select({
         maxRecords: 50,
-        view: 'Grid View',
+        view: 'Grid view',
         filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
       })
       .firstPage();
+    //var x = await this.bookedEquipmentTable
+    //  .select({
+    //    maxRecords: 50,
+    //    view: 'Grid View' //,
+    //    //filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
+    //  })
+    //  .firstPage();
   }
 
   async createEquipment(bookedEquipments) {
@@ -151,13 +158,14 @@ class TimeSlotsService {
   }
 
   async getBookingTimeSlots(bookingKey) {
-    return await this.table
+    var x = await this.table
       .select({
         maxRecords: 500,
-        view: 'Grid View',
+        view: 'Alles',
         filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
       })
       .firstPage();
+    return x;
   }
 
   async getTimeSlotsAfterToday() {
