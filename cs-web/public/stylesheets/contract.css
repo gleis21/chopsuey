@@ -1,6 +1,7 @@
 .pg-header,
 .pg-header-space {
   height: 100px;
+  text-align: center;
 }
 
 .pg-footer,
@@ -12,16 +13,17 @@
   position: fixed;
   bottom: 0;
   width: 100%;
-  border-top: 1px solid black; /* for demo */
-  background: yellow; /* for demo */
+  font-size: x-small;
 }
 
 .pg-header {
   position: fixed;
   top: 0mm;
   width: 100%;
-  border-bottom: 1px solid black; /* for demo */
-  background: yellow; /* for demo */
+}
+table.footer {
+  width: 100%;
+  padding-left: 20px;
 }
 
 .pg {

@@ -1,11 +1,17 @@
 const express = require('express');
-const { check, validationResult } = require('express-validator');
+const moment = require('moment');
 
 const router = express.Router();
 
 const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
+function groupBy(xs, key) {
+  return xs.reduce(function(rv, x) {
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+  }, {});
+}
 
 module.exports = (bookingSrv, itemsSrv, timeSlotsSrv, personSrv) => {
   /* GET home page. */
@@ -36,16 +42,23 @@ module.exports = (bookingSrv, itemsSrv, timeSlotsSrv, personSrv) => {
           address:
             p.get('Strasse') + ' ' + p.get('HausNr') + '/' + p.get('Top'),
           postCode: p.get('PLZ'),
-          city: p.get('Ort')
+          city: p.get('Ort'),
+          uid: p.get('UID'),
+          umsatzsteuerbefreit: p.get('Umsatzsteuerbefreit')
         },
-        timeSlots: ts.map(t => {
-          return {
-            room: t.get('RaumName')[0],
-            type: t.get('Type'),
-            beginn: t.get('Beginn'),
-            end: t.get('Ende')
-          };
-        }),
+        timeSlots: groupBy(
+          ts
+            .map(t => {
+              return {
+                room: t.get('RaumName')[0],
+                type: t.get('Type'),
+                beginn: moment(t.get('Beginn')),
+                end: moment(t.get('Ende'))
+              };
+            })
+            .sort((a, b) => (a.beginn.isAfter(b.end) ? 1 : -1)),
+          'room'
+        ),
         equipment: eq.map(e => {
           return {
             name: e.get('AusstattungKey')[0],
@@ -57,8 +70,7 @@ module.exports = (bookingSrv, itemsSrv, timeSlotsSrv, personSrv) => {
 
       console.log(JSON.stringify(contract));
 
-      const m = { foo: 'bar' };
-      res.render('contract', m);
+      res.render('contract', contract);
     })
   );
 
