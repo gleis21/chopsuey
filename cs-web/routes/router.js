@@ -46,19 +46,25 @@ module.exports = (bookingSrv, itemsSrv, timeSlotsSrv, personSrv) => {
           uid: p.get('UID'),
           umsatzsteuerbefreit: p.get('Umsatzsteuerbefreit')
         },
-        timeSlots: groupBy(
-          ts
-            .map(t => {
-              return {
-                room: t.get('RaumName')[0],
-                type: t.get('Type'),
-                beginn: moment(t.get('Beginn')),
-                end: moment(t.get('Ende'))
-              };
-            })
-            .sort((a, b) => (a.beginn.isAfter(b.end) ? 1 : -1)),
-          'room'
-        ),
+        timeSlots: ts
+          .map(t => {
+            return {
+              room: t.get('RaumName')[0],
+              type: t.get('Type'),
+              beginn: moment(t.get('Beginn')),
+              end: moment(t.get('Ende'))
+            };
+          })
+          .filter(t => t.type !== 'Reinigung')
+          .sort((a, b) => (a.beginn.isAfter(b.beginn) ? 1 : -1))
+          .map(t => {
+            return {
+              room: t.room,
+              type: t.type,
+              beginn: t.beginn.format('DD.MM.YYYY hh:mm'),
+              end: t.end.format('DD.MM.YYYY hh:mm')
+            };
+          }),
         equipment: eq.map(e => {
           return {
             name: e.get('AusstattungKey')[0],

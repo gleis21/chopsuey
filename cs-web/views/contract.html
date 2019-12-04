@@ -50,7 +50,7 @@
       <tbody>
         <tr>
           <td style="padding-left: 100px;">
-            <table style="width: 100%;">
+            <table>
               <tr>
                 <td><b>Veranstaltungstitel/Art der Veranstaltung</b></td>
               </tr>
@@ -72,7 +72,7 @@
               </tr>
             </table>
 
-            <table style="width: 100%;">
+            <table>
               <tr>
                 <td>
                   <b>Ansprechperson:</b>
@@ -134,6 +134,28 @@
                 <td>
                   <% if(person.umsatzsteuerbefreit){ %> Ja <% } else{ %> Nein
                   <%} %>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <br />
+                  <b>Benutzungszeiträume:</b>
+                  <table class="border" style="border-collapse: collapse;">
+                    <tr>
+                      <th class="cell-padding border" scope="col">Raum</th>
+                      <th class="cell-padding border" scope="col"></th>
+                      <th class="cell-padding border" scope="col">Von</th>
+                      <th class="cell-padding border" scope="col">Bis</th>
+                    </tr>
+                    <% timeSlots.forEach( t => { %>
+                    <tr>
+                      <td class="cell-padding border"><%= t.room %></td>
+                      <td class="cell-padding border"><%= t.type %></td>
+                      <td class="cell-padding border"><%= t.beginn %></td>
+                      <td class="cell-padding border"><%= t.end %></td>
+                    </tr>
+                    <% }) %>
+                  </table>
                 </td>
               </tr>
             </table>

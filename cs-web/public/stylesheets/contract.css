@@ -30,6 +30,15 @@ table.footer {
   page-break-after: always;
 }
 
+.border {
+  border: 1px solid black;
+}
+td.cell-padding,
+th.cell-padding {
+  padding: 15px;
+  text-align: left;
+}
+
 @page {
   size: auto; /* auto is the initial value */
   margin: 0; /* this affects the margin in the printer settings */
