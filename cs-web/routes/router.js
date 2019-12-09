@@ -28,9 +28,9 @@ module.exports = (bookingSrv, itemsSrv, timeSlotsSrv, personSrv) => {
       const b = await bookingSrv.get(req.params.id);
       const p = await personSrv.getById(b.get('Mieter'));
       const ts = await timeSlotsSrv.getBookingTimeSlots(b.get('Key'));
-      const eq = await itemsSrv.getBookedEquipment(b.get('Key'));
-      console.log(JSON.stringify(eq));
-      console.log('nach eq');
+      const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(
+        b.get('Key')
+      );
       const contract = {
         title: b.get('Titel'),
         participantsCount: b.get('TeilnehmerInnenanzahl'),
@@ -65,9 +65,9 @@ module.exports = (bookingSrv, itemsSrv, timeSlotsSrv, personSrv) => {
               end: t.end.format('DD.MM.YYYY hh:mm')
             };
           }),
-        equipment: eq.map(e => {
+        invoiceItems: eq.map(e => {
           return {
-            name: e.get('AusstattungKey')[0],
+            name: e.get('PriceName'),
             count: e.get('Anzahl')
           };
         }),

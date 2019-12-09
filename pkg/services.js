@@ -1,11 +1,64 @@
 const moment = require('moment');
 
+class InvoiceService {
+  constructor(base, itemsSrv) {
+    this.rechnungenTable = base('Rechnungen');
+    this.rechnungspostenTable = base('Rechnungsposten');
+    this.preiseTable = base('Preise');
+    this.itemsSrv = itemsSrv;
+  }
+
+  async creatInvoice(invoiceItems) {
+    return await this.rechnungenTable.create({
+      Rechnungsposten: invoiceItems.map(it => it.getId()),
+      Status: 'Neu'
+    });
+  }
+
+  async getInvoceItemsByBooking(bookingKey) {
+    return await this.rechnungspostenTable
+      .select({
+        maxRecords: 500,
+        view: 'Grid View',
+        filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
+      })
+      .firstPage();
+  }
+
+  async getEquipmentPrices() {
+    return await this.preiseTable
+      .select({ maxRecords: 50, view: 'AusstattungPreise' })
+      .firstPage();
+  }
+
+  async createInvoiceItems(items) {
+    const eqPrices = await getEquipmentPrices();
+    // items have an id and count
+    const items = items
+      .map(it => {
+        return {
+          priceId: eqPrices.filter(ep => ep.getId() === it.id)[0].getId(),
+          count: it.count
+        };
+      })
+      .map(p => {
+        return {
+          fields: {
+            Anzahl: p.count,
+            Artikel: [p.priceId]
+          }
+        };
+      });
+    return await this.rechnungspostenTable.create(items);
+  }
+}
+
 class BookingService {
-  constructor(base, timeSlotsSrv, personSrv, itemsSrv) {
+  constructor(base, timeSlotsSrv, personSrv, invoiceSrv) {
     this.table = base('Buchungen');
     this.timeSlotsSrv = timeSlotsSrv;
     this.personSrv = personSrv;
-    this.itemsSrv = itemsSrv;
+    this.invoiceSrv = invoiceSrv;
   }
   async get(id) {
     return await this.table.find(id);
@@ -14,7 +67,10 @@ class BookingService {
   async update(b) {
     const m = await this.personSrv.createOrUpdate(b.person);
     const ts = await this.timeSlotsSrv.create(b.id, b.timeSlotsGroups);
-    const equipments = await this.itemsSrv.createEquipment(b.equipments);
+    const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(
+      b.equipments
+    );
+    const invoice = await this.invoiceSrv.createInvoice(equipmentInvoiceItems);
 
     const bk = {
       Titel: b.title,
@@ -23,7 +79,8 @@ class BookingService {
       Status: 'Angefragt',
       Mieter: [m.getId()],
       Notes: b.notes,
-      Timeslots: ts.map(s => s.getId())
+      Timeslots: ts.map(s => s.getId()),
+      Rechnungen: [invoice.getId()]
     };
     return await this.table.update(b.id, bk);
   }
@@ -32,7 +89,6 @@ class BookingService {
 class ItemsService {
   constructor(base) {
     this.table = base('Artikel');
-    this.bookedEquipmentTable = base('BuchungAusstattung');
     this.rooms = [];
     this.equipment = [];
   }
@@ -52,36 +108,6 @@ class ItemsService {
         .firstPage();
     }
     return this.equipment;
-  }
-
-  async getBookedEquipment(bookingKey) {
-    return await this.bookedEquipmentTable
-      .select({
-        maxRecords: 50,
-        view: 'Grid view',
-        filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
-      })
-      .firstPage();
-    //var x = await this.bookedEquipmentTable
-    //  .select({
-    //    maxRecords: 50,
-    //    view: 'Grid View' //,
-    //    //filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
-    //  })
-    //  .firstPage();
-  }
-
-  async createEquipment(bookedEquipments) {
-    this.bookedEquipmentTable.create(
-      bookedEquipments.map(be => {
-        return {
-          fields: {
-            Ausstattung: [be.id],
-            Anzahl: be.count
-          }
-        };
-      })
-    );
   }
 }
 
@@ -337,5 +363,6 @@ module.exports = {
   TimeSlotsService: TimeSlotsService,
   ItemsService: ItemsService,
   PersonService: PersonService,
-  TimeSlotsGroup: TimeSlotsGroup
+  TimeSlotsGroup: TimeSlotsGroup,
+  InvoiceService: InvoiceService
 };

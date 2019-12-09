@@ -25,11 +25,12 @@ const base = require('airtable').base('appdpZhhl9ZVvABFf');
 const personSrv = new services.PersonService(base);
 const itemsSrv = new services.ItemsService(base);
 const timeslotsSrv = new services.TimeSlotsService(base, itemsSrv);
+const invoiceSrv = new services.InvoiceService(base, itemsSrv);
 const bookingSrv = new services.BookingService(
   base,
   timeslotsSrv,
   personSrv,
-  itemsSrv
+  invoiceSrv
 );
 
 app.use('/api', apiRouter(bookingSrv, itemsSrv, timeslotsSrv));
