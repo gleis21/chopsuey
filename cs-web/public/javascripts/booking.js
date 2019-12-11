@@ -9,7 +9,7 @@ Vue.component('booking-form', {
       booking: {
         person: {},
         participantsCount: 1,
-        equipmentIds: [],
+        equipment: [],
         notes: '',
         timeSlotsGroups: [
           {

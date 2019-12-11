@@ -32,7 +32,7 @@ module.exports = (bookingSrv, itemsSrv, timeSlotsSrv) => {
         id: b.id,
         title: b.title,
         roomIds: [b.roomId],
-        equipmentIds: b.equipmentIds,
+        equipment: b.equipment,
         person: b.person,
         timeSlotsGroups: b.timeSlotsGroups.map(
           e => new services.TimeSlotsGroup(e)

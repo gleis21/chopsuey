@@ -8,10 +8,11 @@ class InvoiceService {
     this.itemsSrv = itemsSrv;
   }
 
-  async creatInvoice(invoiceItems) {
+  async createInvoice(invoiceItems) {
     return await this.rechnungenTable.create({
       Rechnungsposten: invoiceItems.map(it => it.getId()),
-      Status: 'Neu'
+      Status: 'Neu',
+      Rechnungsdatum: moment().toISOString()
     });
   }
 
@@ -27,29 +28,31 @@ class InvoiceService {
 
   async getEquipmentPrices() {
     return await this.preiseTable
-      .select({ maxRecords: 50, view: 'AusstattungPreise' })
+      .select({ maxRecords: 100, view: 'AusstattungPreise' })
       .firstPage();
   }
 
   async createInvoiceItems(items) {
-    const eqPrices = await getEquipmentPrices();
+    const eqPrices = await this.getEquipmentPrices();
     // items have an id and count
-    const items = items
+    const invoiceItems = items
       .map(it => {
         return {
-          priceId: eqPrices.filter(ep => ep.getId() === it.id)[0].getId(),
+          priceId: eqPrices
+            .filter(ep => ep.get('Artikel')[0] === it.id)[0]
+            .getId(),
           count: it.count
         };
       })
       .map(p => {
         return {
           fields: {
-            Anzahl: p.count,
+            Anzahl: parseInt(p.count, 10),
             Artikel: [p.priceId]
           }
         };
       });
-    return await this.rechnungspostenTable.create(items);
+    return await this.rechnungspostenTable.create(invoiceItems);
   }
 }
 
@@ -66,15 +69,17 @@ class BookingService {
 
   async update(b) {
     const m = await this.personSrv.createOrUpdate(b.person);
+    console.log('1');
     const ts = await this.timeSlotsSrv.create(b.id, b.timeSlotsGroups);
+    console.log('2');
     const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(
-      b.equipments
+      b.equipment
     );
+    console.log('3');
     const invoice = await this.invoiceSrv.createInvoice(equipmentInvoiceItems);
-
+    console.log('after inv');
     const bk = {
       Titel: b.title,
-      Ausstattung: equipments.map(e => e.getId()),
       TeilnehmerInnenanzahl: b.participantsCount,
       Status: 'Angefragt',
       Mieter: [m.getId()],
@@ -86,7 +91,7 @@ class BookingService {
   }
 }
 
-class ItemsService {
+class BookableItemsService {
   constructor(base) {
     this.table = base('Artikel');
     this.rooms = [];
@@ -361,7 +366,7 @@ class PersonService {
 module.exports = {
   BookingService: BookingService,
   TimeSlotsService: TimeSlotsService,
-  ItemsService: ItemsService,
+  BookableItemsService: BookableItemsService,
   PersonService: PersonService,
   TimeSlotsGroup: TimeSlotsGroup,
   InvoiceService: InvoiceService
