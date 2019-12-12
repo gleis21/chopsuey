@@ -13,7 +13,7 @@ function groupBy(xs, key) {
   }, {});
 }
 
-module.exports = (bookingSrv, itemsSrv, timeSlotsSrv, personSrv) => {
+module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
   /* GET home page. */
   router.get(
     '/:id',
@@ -31,6 +31,7 @@ module.exports = (bookingSrv, itemsSrv, timeSlotsSrv, personSrv) => {
       const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(
         b.get('Key')
       );
+
       const contract = {
         title: b.get('Titel'),
         participantsCount: b.get('TeilnehmerInnenanzahl'),
@@ -65,10 +66,12 @@ module.exports = (bookingSrv, itemsSrv, timeSlotsSrv, personSrv) => {
               end: t.end.format('DD.MM.YYYY hh:mm')
             };
           }),
-        invoiceItems: eq.map(e => {
+        invoiceItems: invoiceItems.map(e => {
           return {
-            name: e.get('PriceName'),
-            count: e.get('Anzahl')
+            name: e.get('ArtikelName'),
+            showCount: e.get('ArtikelTyp')[0] === 'Ausstattung',
+            count: e.get('Anzahl'),
+            price: e.get('SummeNetto')
           };
         }),
         notes: b.get('Notes')

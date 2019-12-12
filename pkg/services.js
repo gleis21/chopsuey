@@ -17,10 +17,11 @@ class InvoiceService {
   }
 
   async getInvoceItemsByBooking(bookingKey) {
+    console.log(bookingKey);
     return await this.rechnungspostenTable
       .select({
         maxRecords: 500,
-        view: 'Grid View',
+        view: 'Grid view',
         filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
       })
       .firstPage();

@@ -56,7 +56,7 @@ th.cell-padding {
     margin: 0;
   }
 
-  div.section {
+  .section {
     page-break-inside: avoid;
   }
 }

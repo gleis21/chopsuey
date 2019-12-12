@@ -136,7 +136,7 @@
                   <%} %>
                 </td>
               </tr>
-              <tr>
+              <tr class="section">
                 <td colspan="2">
                   <br />
                   <b>Benutzungszeiträume:</b>
@@ -153,6 +153,29 @@
                       <td class="cell-padding border"><%= t.type %></td>
                       <td class="cell-padding border"><%= t.beginn %></td>
                       <td class="cell-padding border"><%= t.end %></td>
+                    </tr>
+                    <% }) %>
+                  </table>
+                </td>
+              </tr>
+
+              <tr class="section">
+                <td colspan="2">
+                  <br />
+                  <b>Konditionen:</b>
+                  <table class="border" style="border-collapse: collapse;">
+                    <tr>
+                      <th class="cell-padding border" scope="col"></th>
+                      <th class="cell-padding border" scope="col">Anzahl</th>
+                      <th class="cell-padding border" scope="col">Preis</th>
+                    </tr>
+                    <% invoiceItems.forEach( it => { %>
+                    <tr>
+                      <td class="cell-padding border"><%= it.name %></td>
+                      <td class="cell-padding border">
+                        <% if(it.showCount){ %> <%= it.count %> <% } %>
+                      </td>
+                      <td class="cell-padding border"><%= it.price %></td>
                     </tr>
                     <% }) %>
                   </table>

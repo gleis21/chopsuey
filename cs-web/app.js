@@ -36,7 +36,7 @@ const bookingSrv = new services.BookingService(
 app.use('/api', apiRouter(bookingSrv, itemsSrv, timeslotsSrv));
 app.use(
   '/bookings',
-  bookingsRouter(bookingSrv, itemsSrv, timeslotsSrv, personSrv)
+  bookingsRouter(bookingSrv, invoiceSrv, timeslotsSrv, personSrv)
 );
 
 // catch 404 and forward to error handler
