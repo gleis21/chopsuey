@@ -1,199 +1,246 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Chop Suey</title>
-    <link rel="stylesheet" href="/stylesheets/simple-grid.min.css" />
-    <link rel="stylesheet" href="/stylesheets/contract.css" />
 
-    <link rel="stylesheet" href="/stylesheets/fontawesome/css/all.min.css" />
-  </head>
+<head>
+  <title>Chop Suey</title>
+  <link rel="stylesheet" href="/stylesheets/simple-grid.min.css" />
+  <link rel="stylesheet" href="/stylesheets/contract.css" />
 
-  <body>
-    <div class="pg-header">
-      <table style="width:100%">
-        <tr>
-          <td>
-            <img
-              src="https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-01-11/18230715235_c0a76622c4931df1fda8_88.png"
-            />
-          </td>
-          <td><h4>Miteinnander Weichen stellen!</h4></td>
-        </tr>
-      </table>
-    </div>
+  <link rel="stylesheet" href="/stylesheets/fontawesome/css/all.min.css" />
+</head>
 
-    <div class="pg-footer">
-      <table class="footer">
-        <tr>
-          <td><b>WOHNPROJEKT GLEIS 21</b></td>
-          <td><b>WEB: </b>www.gleis21.wien</td>
-          <td><b>UID: </b>ATU70349508</td>
-        </tr>
-        <tr>
-          <td>1100 Wien, Bloch-Bauer-Promenade 22</td>
-          <td><b>MAIL: </b>hello@gleis21.wien</td>
-          <td><b>ZVR-ZAHL: </b>585895816</td>
-        </tr>
-      </table>
-    </div>
-
-    <table style="width: 100%;">
-      <thead>
-        <tr>
-          <td>
-            <!--place holder for the fixed-position header-->
-            <div class="pg-header-space"></div>
-          </td>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td style="padding-left: 100px;">
-            <table>
-              <tr>
-                <td><b>Veranstaltungstitel/Art der Veranstaltung</b></td>
-              </tr>
-              <tr>
-                <td>
-                  <%= title %>
-                </td>
-              </tr>
-              <tr>
-                <td><b>TeilnehmerInnenzahl: </b> <%= participantsCount %></td>
-              </tr>
-              <tr>
-                <td><b>Veranstalter (=MieterIn): </b></td>
-              </tr>
-              <tr>
-                <td>
-                  <%= person.org %>
-                </td>
-              </tr>
-            </table>
-
-            <table>
-              <tr>
-                <td>
-                  <b>Ansprechperson:</b>
-                </td>
-                <td></td>
-              </tr>
-              <tr>
-                <td>
-                  Name:
-                </td>
-                <td><%= person.name %></td>
-              </tr>
-              <tr>
-                <td>
-                  Telefon:
-                </td>
-                <td><%= person.telefon %></td>
-              </tr>
-              <tr>
-                <td>
-                  E-Mail-Adresse:
-                </td>
-                <td><%= person.email %></td>
-              </tr>
-              <tr>
-                <td>
-                  <b>Rechnungsadresse:</b>
-                </td>
-                <td></td>
-              </tr>
-              <tr>
-                <td>
-                  Name/Institution:
-                </td>
-                <td><%= person.org %></td>
-              </tr>
-              <tr>
-                <td>
-                  Straße/Nummer:
-                </td>
-                <td><%= person.address %></td>
-              </tr>
-              <tr>
-                <td>
-                  PLZ, Ort:
-                </td>
-                <td><%= person.postCode %>, <%= person.city %></td>
-              </tr>
-              <tr>
-                <td>
-                  UID-Nummer:
-                </td>
-                <td><%= person.uid %></td>
-              </tr>
-              <tr>
-                <td>
-                  Der/Die MieterIn ist umsatzsteuerbefreit:
-                </td>
-                <td>
-                  <% if(person.umsatzsteuerbefreit){ %> Ja <% } else{ %> Nein
-                  <%} %>
-                </td>
-              </tr>
-              <tr class="section">
-                <td colspan="2">
-                  <br />
-                  <b>Benutzungszeiträume:</b>
-                  <table class="border" style="border-collapse: collapse;">
-                    <tr>
-                      <th class="cell-padding border" scope="col">Raum</th>
-                      <th class="cell-padding border" scope="col"></th>
-                      <th class="cell-padding border" scope="col">Von</th>
-                      <th class="cell-padding border" scope="col">Bis</th>
-                    </tr>
-                    <% timeSlots.forEach( t => { %>
-                    <tr>
-                      <td class="cell-padding border"><%= t.room %></td>
-                      <td class="cell-padding border"><%= t.type %></td>
-                      <td class="cell-padding border"><%= t.beginn %></td>
-                      <td class="cell-padding border"><%= t.end %></td>
-                    </tr>
-                    <% }) %>
-                  </table>
-                </td>
-              </tr>
-
-              <tr class="section">
-                <td colspan="2">
-                  <br />
-                  <b>Konditionen:</b>
-                  <table class="border" style="border-collapse: collapse;">
-                    <tr>
-                      <th class="cell-padding border" scope="col"></th>
-                      <th class="cell-padding border" scope="col">Anzahl</th>
-                      <th class="cell-padding border" scope="col">Preis</th>
-                    </tr>
-                    <% invoiceItems.forEach( it => { %>
-                    <tr>
-                      <td class="cell-padding border"><%= it.name %></td>
-                      <td class="cell-padding border">
-                        <% if(it.showCount){ %> <%= it.count %> <% } %>
-                      </td>
-                      <td class="cell-padding border"><%= it.price %></td>
-                    </tr>
-                    <% }) %>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </tbody>
-
-      <tfoot>
-        <tr>
-          <td>
-            <!--place holder for the fixed-position footer-->
-            <div class="pg-footer-space"></div>
-          </td>
-        </tr>
-      </tfoot>
+<body>
+  <div class="pg-header">
+    <table style="width:100%">
+      <tr>
+        <td>
+          <img
+            src="https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-01-11/18230715235_c0a76622c4931df1fda8_88.png" />
+        </td>
+        <td>
+          <h4>Miteinander Weichen stellen!</h4>
+        </td>
+      </tr>
     </table>
-  </body>
+  </div>
+
+  <div class="pg-footer">
+    <table class="footer">
+      <tr>
+        <td><b>WOHNPROJEKT GLEIS 21</b></td>
+        <td><b>WEB: </b>www.gleis21.wien</td>
+        <td><b>UID: </b>ATU70349508</td>
+      </tr>
+      <tr>
+        <td>1100 Wien, Bloch-Bauer-Promenade 22</td>
+        <td><b>MAIL: </b>hello@gleis21.wien</td>
+        <td><b>ZVR-ZAHL: </b>585895816</td>
+      </tr>
+    </table>
+  </div>
+
+  <table style="width: 100%;">
+    <thead>
+      <tr>
+        <td>
+          <!--place holder for the fixed-position header-->
+          <div class="pg-header-space"></div>
+        </td>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr>
+        <td style="padding-left: 80px; padding-right: 80px;">
+          <table>
+            <tr>
+              <td><b>Veranstaltungstitel/Art der Veranstaltung</b></td>
+            </tr>
+            <tr>
+              <td>
+                <%= title %>
+              </td>
+            </tr>
+            <tr>
+              <td><b>TeilnehmerInnenzahl: </b> <%= participantsCount %></td>
+            </tr>
+            <tr>
+              <td><b>VeranstalterIn (=MieterIn): </b></td>
+            </tr>
+            <tr>
+              <td>
+                <%= person.org %>
+              </td>
+            </tr>
+          </table>
+
+          <table>
+            <tr>
+              <td>
+                <b>Ansprechperson:</b>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Name: <%= person.name %>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Telefon: <%= person.telefon %>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                E-Mail-Adresse: <%= person.email %>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <b>Rechnungsadresse:</b>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Name/Institution: <%= person.org %>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Straße/Nummer: <%= person.address %>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                PLZ, Ort: <%= person.postCode %>, <%= person.city %>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                UID-Nummer: <%= person.uid %>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Der/Die MieterIn ist umsatzsteuerbefreit: <% if(person.umsatzsteuerbefreit){ %> Ja <% } else{ %>
+                Nein<%} %>
+              </td>
+            </tr>
+            <tr class="section">
+              <td colspan="2">
+                <br />
+                <b>Benutzungszeiträume:</b>
+                <table class="border" style="border-collapse: collapse; width: 100%;">
+                  <tr>
+                    <th class="cell-padding border" scope="col">Raum</th>
+                    <th class="cell-padding border" scope="col"></th>
+                    <th class="cell-padding border" scope="col">von</th>
+                    <th class="cell-padding border" scope="col">bis</th>
+                  </tr>
+                  <% timeSlots.forEach( t => { %>
+                  <tr>
+                    <td class="cell-padding border"><%= t.room %></td>
+                    <td class="cell-padding border"><%= t.type %></td>
+                    <td class="cell-padding border"><%= t.beginn %></td>
+                    <td class="cell-padding border"><%= t.end %></td>
+                  </tr>
+                  <% }) %>
+                </table>
+              </td>
+            </tr>
+
+            <tr class="section">
+              <td colspan="2">
+                <br />
+                <b>Konditionen:</b>
+                <table class="border" style="border-collapse: collapse; width: 100%;">
+                  <tr>
+                    <th class="cell-padding border" scope="col"></th>
+                    <th class="cell-padding border" scope="col">Anzahl</th>
+                    <th class="cell-padding border" scope="col">Preis</th>
+                  </tr>
+                  <% invoiceItems.forEach( it => { %>
+                  <tr>
+                    <td class="cell-padding border"><%= it.name %></td>
+                    <td class="cell-padding border">
+                      <% if(it.showCount){ %> <%= it.count %> <% } %>
+                    </td>
+                    <td class="cell-padding border"><%= it.price %> &euro;</td>
+                  </tr>
+                  <% }) %>
+                </table>
+              </td>
+            </tr>
+            <tr class="section">
+              <td colspan="2">
+                <br>
+                <br>
+                <b>Sofern nicht anders vereinbart sind im Gundpreis enthalten:</b> W-LAN, Beamer, 1 Flipchart, 1
+                Pinnwand, Sound System
+              </td>
+            </tr>
+            <tr class="section">
+              <td colspan="2">
+                <br>
+                <b>Anmerkung zur Buchung und Aufbausetting</b> (bzw. Skizze im Anhang):
+                <br>
+                <p>
+                  <%= notes %>
+                </p>
+              </td>
+            </tr>
+            <tr class="section">
+              <td colspan="2">
+                <br>
+                <b>Verpflegung:</b>
+                <br>
+                Wir empfehlen Gaumenfreundinnen Bio-Catering: https://www.gaumenfreundinnen.com Weitere Empfehlungen auf
+                Anfrage.
+              </td>
+            </tr>
+            <tr class="section">
+              <td colspan="2">
+                <br>
+                <br>
+                <input type="checkbox" /> Ich akzeptiere die Allgemeinen Geschäftsbedingungen des Vereins Wohnprojekt
+                Gleis 21 im Anhang (bitte ankreuzen).
+                <br>
+                <input type="checkbox" /> Ich stimme der elektronischen Speicherung und Verarbeitung meiner Daten für
+                diese und ggf. künftige Vermietung zu.
+              </td>
+            </tr>
+            <tr class="section">
+              <td>
+                <br>
+                <br>
+                <br>
+                <br>
+                Datum, Unterschrift<br>
+                VeranstalterIn (= MieterIn)
+              </td>
+              <td>
+                <br>
+                <br>
+                <br>
+                <br>
+                Datum, Unterschrift<br>
+                Verein Wohnprojekt Gleis 21
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+
+    <tfoot>
+      <tr>
+        <td>
+          <!--place holder for the fixed-position footer-->
+          <div class="pg-footer-space"></div>
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+</body>
+
 </html>
