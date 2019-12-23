@@ -1,62 +1,46 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Chop Suey</title>
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-      crossorigin="anonymous"
-    />
-    <link rel="stylesheet" href="/stylesheets/fontawesome/css/all.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"
-      integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ="
-      crossorigin="anonymous"
-    ></script>
 
-    <!--<link rel="stylesheet" href="/stylesheets/styles.css">-->
-  </head>
+<head>
+  <title>Chop Suey</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/stylesheets/fontawesome/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"
+    integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous"></script>
 
-  <body>
-    <nav class="nnavbar navbar-light bg-light">
-      <button
-        class="navbar-toggler navbar-toggler-right"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <a class="navbar-brand" href="#">
-        <img
-          src="https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-01-11/18230715235_c0a76622c4931df1fda8_88.png"
-          width="55"
-          height="35"
-          class="d-inline-block align-top"
-          alt=""
-        />
-        Gleis 21 Buchungssystem
-      </a>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            {{!--
+  <!--<link rel="stylesheet" href="/stylesheets/styles.css">-->
+</head>
+
+<body>
+  <nav class="nnavbar navbar-light bg-light">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="#">
+      <img
+        src="https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-01-11/18230715235_c0a76622c4931df1fda8_88.png"
+        width="55" height="35" class="d-inline-block align-top" alt="" />
+      Gleis 21 Buchungssystem
+    </a>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          {{!--
             <a class="nav-link" href="/timerecords">Meine Happy Hours</a> --}}
-          </li>
-        </ul>
-      </div>
-    </nav>
-    <br />
-    <div id="app">
-      <booking-form></booking-form>
-      <br />
+        </li>
+      </ul>
     </div>
-  </body>
+  </nav>
+  <br />
+  <div id="app">
+    <booking-form></booking-form>
+    <br />
+  </div>
+</body>
+
 </html>
 
 <script type="text/x-template" id="booking-form">
@@ -225,7 +209,7 @@
       </div>
       <div class="row">
         <div class="col-md-12">
-      <button type="button" class="btn btn-primary" v-on:click="submit" style="width: 100px"><i class="fas fa-spinner fa-spin" v-if="loading"></i>{{loading ? '' : 'Absenden'}}</button>
+      <button type="button" class="btn btn-primary" :disabled="!submitResult || !submitResult.success" v-on:click="submit" style="width: 100px"><i class="fas fa-spinner fa-spin" v-if="loading"></i>{{loading ? '' : 'Absenden'}}</button>
         </div>
     </div>
     </div>

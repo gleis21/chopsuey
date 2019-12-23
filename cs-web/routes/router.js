@@ -2,6 +2,8 @@ const express = require('express');
 const moment = require('moment');
 
 const router = express.Router();
+const puppeteer = require('puppeteer');
+const fs = require('fs');
 
 const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -21,13 +23,38 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
       res.render('booking');
     })
   );
+  router.get(
+    '/:id/contract/print',
+    asyncMiddleware(async (req, res, next) => {
+      const browser = await puppeteer.launch();
+      const page = await browser.newPage();
+      await page.goto(
+        'http://localhost:3000/bookings/' + req.params.id + '/contract',
+        {
+          waitUntil: 'networkidle2'
+        }
+      );
+      const fileName = 'gleis21_' + new Date().valueOf().toString() + '.pdf';
+      const filePath = '/tmp/chopsuey/' + fileName;
+      await page.pdf({ path: filePath, format: 'A4' });
+
+      await browser.close();
+
+      const rs = fs.createReadStream(filePath, { autoClose: true });
+      var stat = fs.statSync(filePath);
+      res.setHeader('Content-Length', stat.size);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename=' + fileName);
+      rs.pipe(res);
+    })
+  );
 
   router.get(
     '/:id/contract',
     asyncMiddleware(async (req, res, next) => {
       const b = await bookingSrv.get(req.params.id);
       if (b.get('Status') !== 'Vorreserviert') {
-        res.status(403);
+        res.status(403).json({});
       } else {
         const p = await personSrv.getById(b.get('Mieter'));
         const ts = await timeSlotsSrv.getBookingTimeSlots(b.get('Key'));

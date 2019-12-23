@@ -17,7 +17,6 @@ class InvoiceService {
   }
 
   async getInvoceItemsByBooking(bookingKey) {
-    console.log(bookingKey);
     return await this.rechnungspostenTable
       .select({
         maxRecords: 500,
@@ -70,15 +69,11 @@ class BookingService {
 
   async update(b) {
     const m = await this.personSrv.createOrUpdate(b.person);
-    console.log('1');
     const ts = await this.timeSlotsSrv.create(b.id, b.timeSlotsGroups);
-    console.log('2');
     const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(
       b.equipment
     );
-    console.log('3');
     const invoice = await this.invoiceSrv.createInvoice(equipmentInvoiceItems);
-    console.log('after inv');
     const bk = {
       Titel: b.title,
       TeilnehmerInnenanzahl: b.participantsCount,

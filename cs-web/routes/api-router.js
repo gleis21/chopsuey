@@ -6,7 +6,7 @@ const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-module.exports = (bookingSrv, itemsSrv, timeSlotsSrv) => {
+module.exports = (bookingSrv, itemsSrv) => {
   /* GET home page. */
   router.get(
     '/bookings/:id',
