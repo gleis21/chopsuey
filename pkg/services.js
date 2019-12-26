@@ -16,6 +16,16 @@ class InvoiceService {
     });
   }
 
+  async getInvoceByBooking(bookingKey) {
+    return await this.rechnungenTable
+      .select({
+        maxRecords: 1,
+        view: 'Grid view',
+        filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
+      })
+      .firstPage();
+  }
+
   async getInvoceItemsByBooking(bookingKey) {
     return await this.rechnungspostenTable
       .select({

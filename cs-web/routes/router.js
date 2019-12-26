@@ -50,6 +50,25 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
   );
 
   router.get(
+    '/:id/invoice',
+    asyncMiddleware(async (req, res, next) => {
+      const b = await bookingSrv.get(req.params.id);
+      const invoice = await invoiceSrv.getInvoceByBooking(b.get('Key'));
+      const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(
+        b.get('Key')
+      );
+      const p = await personSrv.getById(b.get('Mieter'));
+      const inv = {
+        invoiceNo: invoice.get('Key'),
+        address: p.get('Strasse') + ' ' + p.get('HausNr') + '/' + p.get('Top'),
+        postCode: p.get('PLZ'),
+        city: p.get('Ort'),
+        uid: p.get('UID')
+      };
+    })
+  );
+
+  router.get(
     '/:id/contract',
     asyncMiddleware(async (req, res, next) => {
       const b = await bookingSrv.get(req.params.id);
