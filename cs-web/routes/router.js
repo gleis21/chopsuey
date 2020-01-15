@@ -18,11 +18,19 @@ function groupBy(xs, key) {
 module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
   /* GET home page. */
   router.get(
-    '/:id',
+    '/new',
     asyncMiddleware(async (req, res, next) => {
-      res.render('booking');
+      res.render('booking_create');
     })
   );
+
+  router.get(
+    '/:id',
+    asyncMiddleware(async (req, res, next) => {
+      res.render('booking_update');
+    })
+  );
+
   router.get(
     '/:id/contract/print',
     asyncMiddleware(async (req, res, next) => {

@@ -3,12 +3,13 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node ./bin/cs-web",
+    "start": "CS_BOOKING_EDIT_URL=http://localhost:3000/bookings node ./bin/cs-web",
     "test": "echo no_tests_for_now"
   },
   "dependencies": {
     "airtable": "^0.7.2",
     "cookie-parser": "~1.4.4",
+    "crypto-random-string": "^3.1.0",
     "debug": "~2.6.9",
     "ejs": "^2.7.1",
     "express": "~4.16.1",

@@ -77,6 +77,10 @@ class BookingService {
     return await this.table.find(id);
   }
 
+  async create(b) {
+    return await this.table.create({ Titel: b.title, PIN: b.pin });
+  }
+
   async update(b) {
     const m = await this.personSrv.createOrUpdate(b.person);
     const ts = await this.timeSlotsSrv.create(b.id, b.timeSlotsGroups);

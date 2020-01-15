@@ -1,6 +1,7 @@
 const express = require('express');
 var services = require('../../pkg/services');
 const router = express.Router();
+const cryptoRandomString = require('crypto-random-string');
 
 const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -14,6 +15,7 @@ module.exports = (bookingSrv, itemsSrv) => {
       const b = await bookingSrv.get(req.params.id);
       const status = b.get('Status');
       if (!status || status === 'Angefragt') {
+        console.log(JSON.stringify(b));
         res.status(200).json({
           res: { id: b.id, title: b.get('Titel') },
           err: null
@@ -21,6 +23,26 @@ module.exports = (bookingSrv, itemsSrv) => {
       } else {
         res.status(403).json({ res: null, err: 403 });
       }
+    })
+  );
+
+  router.post(
+    '/bookings',
+    asyncMiddleware(async (req, res, next) => {
+      const b = req.body;
+      const pin = cryptoRandomString({ length: 16 });
+      const booking = {
+        title: b.title,
+        pin: pin
+      };
+      const r = await bookingSrv.create(booking);
+      const id = r.getId();
+      console.log(process.env.CS_BOOKING_EDIT_URL);
+      const editUrl = process.env.CS_BOOKING_EDIT_URL + '/' + id; //http://localhost:3000/bookings/recryijdOWALXyG1Q
+      res.status(200).json({
+        res: { editUrl: editUrl, pin: pin },
+        err: null
+      });
     })
   );
 
