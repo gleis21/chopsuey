@@ -3,11 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "CS_BOOKING_EDIT_URL=http://localhost:3000/bookings node ./bin/cs-web",
+    "start": "CS_USER=a CS_PASSWORD=a CS_BOOKING_EDIT_URL=http://localhost:3000/bookings node ./bin/cs-web",
     "test": "echo no_tests_for_now"
   },
   "dependencies": {
     "airtable": "^0.7.2",
+    "basic-auth": "^2.0.1",
     "cookie-parser": "~1.4.4",
     "crypto-random-string": "^3.1.0",
     "debug": "~2.6.9",
@@ -18,6 +19,7 @@
     "moment": "^2.24.0",
     "momentjs": "^2.0.0",
     "morgan": "~1.9.1",
-    "puppeteer": "^2.0.0"
+    "puppeteer": "^2.0.0",
+    "tsscmp": "^1.0.6"
   }
 }

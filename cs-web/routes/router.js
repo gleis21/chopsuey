@@ -1,9 +1,13 @@
 const express = require('express');
 const moment = require('moment');
-
+var auth = require('basic-auth');
+var compare = require('tsscmp');
 const router = express.Router();
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+
+const user = process.env.CS_USER;
+const password = process.env.CS_PASSWORD;
 
 const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -13,6 +17,27 @@ function groupBy(xs, key) {
     (rv[x[key]] = rv[x[key]] || []).push(x);
     return rv;
   }, {});
+}
+
+function basicAuth(req, res, next) {
+  var credentials = auth(req);
+
+  if (!credentials || !check(credentials.name, credentials.pass)) {
+    res.statusCode = 401;
+    res.setHeader('WWW-Authenticate', 'Basic realm="example"');
+    res.end('Access denied');
+  } else {
+    next();
+  }
+}
+function check(name, pass) {
+  var valid = true;
+
+  // Simple method to prevent short-circut and use timing-safe compare
+  valid = compare(name, user) && valid;
+  valid = compare(pass, password) && valid;
+
+  return valid;
 }
 
 module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
@@ -33,15 +58,18 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
 
   router.get(
     '/:id/contract/print',
+    basicAuth,
     asyncMiddleware(async (req, res, next) => {
       const browser = await puppeteer.launch();
       const page = await browser.newPage();
-      await page.goto(
-        'http://localhost:3000/bookings/' + req.params.id + '/contract',
-        {
-          waitUntil: 'networkidle2'
-        }
-      );
+      const contractUrl = `http://${user}:${password}@localhost:3000/bookings/${req.params.id}/contract`;
+      await page.goto(contractUrl, {
+        waitUntil: 'networkidle2'
+      });
+      // /tmp/chopsuey dir must exist!!
+      if (!fs.existsSync('/tmp/chopsuey')) {
+        fs.mkdirSync('/tmp/chopsuey');
+      }
       const fileName = 'gleis21_' + new Date().valueOf().toString() + '.pdf';
       const filePath = '/tmp/chopsuey/' + fileName;
       await page.pdf({ path: filePath, format: 'A4' });
@@ -59,6 +87,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
 
   router.get(
     '/:id/invoice',
+    basicAuth,
     asyncMiddleware(async (req, res, next) => {
       const b = await bookingSrv.get(req.params.id);
       const invoice = await invoiceSrv.getInvoceByBooking(b.get('Key'));
@@ -78,6 +107,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
 
   router.get(
     '/:id/contract',
+    basicAuth,
     asyncMiddleware(async (req, res, next) => {
       const b = await bookingSrv.get(req.params.id);
       if (b.get('Status') !== 'Vorreserviert') {

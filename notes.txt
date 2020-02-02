@@ -1,0 +1,9 @@
+feedback1
+1. Numerierung der Rechnungen - es darf keine Löcher geben
+2. E-Mail an hello@gleis21.wien wenn es eine neue Buchung gibt - mailgun
+feedback2
+1. Kategorisierung der Timeslots
+2. Hilfetexte
+3. Rabatbausteine und Preiskategorien
+4. Sortiern nach Ende der Veranstaltung
+5. Aussplitten der Rechnungen

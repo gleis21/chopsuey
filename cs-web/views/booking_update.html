@@ -122,76 +122,62 @@
           <label for="notes">Anmerkung</label>
           <textarea class="form-control" id="notes" rows="5" v-model="booking.notes"></textarea>
         </div>
-        <div class="jumbotron bg-light" v-for="ev in booking.timeSlotsGroups">
+
+        <div class="jumbotron bg-light" v-for="ts in booking.timeSlots">
           <div class="form-row">
             <div class="form-group col-md-4">
               <label for="room">Raum</label>
-              <select class="form-control c-select" id="room" v-model="ev.roomId">
+              <select class="form-control c-select" id="room" v-model="ts.roomId">
                 <option v-for="r in rooms" :value="r.id">{{r.name}}</option>
               </select>
             </div>
+            <div class="form-group col-md-4">
+              <label for="room">Typ</label>
+              <select class="form-control c-select" id="type" v-model="ts.type">
+                <option v-for="t in timeSlotTypes" :value="t">{{t}}</option>
+              </select>
+            </div>
           </div>
-        <div class="form-row">
-          <div class="form-group col-md-4">
-            <label for="beginn">Begin</label>
-            <input type="date" required v-model="ev.beginnDate" class="form-control" id="beginn">
+
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="beginn">Begin</label>
+              <input type="date" required v-model="ts.beginnDate" class="form-control" id="beginn">
+            </div>
+            <div class="form-group col-md-2">
+              <label>&nbsp;</label>
+              <select id="hour" class="form-control" v-model="ts.beginnH">
+                <option v-for="h in hours" :value="h">{{h}}</option>
+              </select>
+            </div>
+            <div class="form-group col-md-2">
+              <label>&nbsp;</label>
+              <select class="form-control" id="minute" v-model="ts.beginnM"">
+                <option v-for="m in mins" :value="m">{{m}}</option>
+              </select>
+            </div>
           </div>
-          <div class="form-group col-md-2">
-            <label>&nbsp;</label>
-            <select id="hour" class="form-control" v-model="ev.beginnH">
-              <option v-for="h in hours" :value="h">{{h}}</option>
-            </select>
-          </div>
-          <div class="form-group col-md-2">
-            <label>&nbsp;</label>
-            <select class="form-control" id="minute" v-model="ev.beginnM"">
-              <option v-for="m in mins" :value="m">{{m}}</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group col-md-4">
-            <label for="end">Ende</label>
-            <input type="date" required v-model="ev.endDate" class="form-control" id="end" name="booking[endDate]" placeholder="Ende">
-          </div>
-          <div class="form-group col-md-2">
-            <label>&nbsp;</label>
-            <select id="hour" class="form-control" v-model="ev.endH">
-              <option v-for="h in hours" :value="h">{{ h }}</option>
-            </select>
-          </div>
-          <div class="form-group col-md-2">
-            <label>&nbsp;</label>
-            <select class="form-control" id="minute" v-model="ev.endM">
-              <option v-for="m in mins" v-bind:value="m">{{ m }}</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group col-md-3">
-            <label for="prepH">Aufbaudauer [HH]</label>
-            <input type="number" id="prepH" class="form-control" v-model="ev.prepDurH">
-          </div>
-          <div class="form-group col-md-3">
-            <label for="prepM">[mm]</label>
-            <select class="form-control" id="prepM" v-model="ev.prepDurM">
-              <option v-for="m in mins" :value="m">{{m}}</option>
-            </select>
-          </div>
-          <div class="form-group  col-md-3">
-            <label for="teardownH">Abbaudauer [HH]</label>
-            <input type="number" id="teardownH" class="form-control" v-model="ev.teardownDurH">
-          </div>
-          <div class="form-group col-md-3">
-            <label for="teardownM">[mm]</label>
-            <select class="form-control" id="teardownM" v-model="ev.teardownDurM">
-              <option v-for="m in mins" :value="m">
-                {{m}}
-              </option>
-            </select>
+
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="end">Ende</label>
+              <input type="date" required v-model="ts.endDate" class="form-control" id="end" name="booking[endDate]" placeholder="Ende">
+            </div>
+            <div class="form-group col-md-2">
+              <label>&nbsp;</label>
+              <select id="hour" class="form-control" v-model="ts.endH">
+                <option v-for="h in hours" :value="h">{{ h }}</option>
+              </select>
+            </div>
+            <div class="form-group col-md-2">
+              <label>&nbsp;</label>
+              <select class="form-control" id="minute" v-model="ts.endM">
+                <option v-for="m in mins" v-bind:value="m">{{ m }}</option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
+      
       <div class="row">
       <div class="col-md-12">
       <button type="button" class="btn btn-success float-right" v-on:click="addTimeRange"><i class="fas fa-plus"></i>&nbsp;Zeiten hinzufügen</button>

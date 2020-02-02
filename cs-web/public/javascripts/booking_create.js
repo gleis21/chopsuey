@@ -24,12 +24,12 @@ Vue.component('booking-form', {
 
         this.submitResult = {
           success: true,
-          msg: 'LINK: ' + result.editUrl + ' PIN: ' + result.pin
+          msg: 'LINK: ' + result.editUrl
         };
       } else {
         this.submitResult = {
           success: false,
-          msg: 'Ups... something went wrong.'
+          msg: 'Ups... das hätte nie passieeren sollen.'
         };
       }
     }

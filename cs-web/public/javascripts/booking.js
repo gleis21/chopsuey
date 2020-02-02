@@ -11,10 +11,11 @@ Vue.component('booking-form', {
         participantsCount: 1,
         equipment: [],
         notes: '',
-        timeSlotsGroups: [
+        timeSlots: [
           {
             id: 1,
             roomId: '',
+            type: 'Veranstaltung',
             beginnDate: moment()
               .add(2, 'd')
               .format('YYYY-MM-DD'),
@@ -24,14 +25,11 @@ Vue.component('booking-form', {
               .add(2, 'd')
               .format('YYYY-MM-DD'),
             endH: 17,
-            endM: 0,
-            prepDurH: 1,
-            prepDurM: 0,
-            teardownDurH: 1,
-            teardownDurM: 0
+            endM: 0
           }
         ]
       },
+      timeSlotTypes: [],
       rooms: [],
       equipment: [],
       hours: [
@@ -71,6 +69,7 @@ Vue.component('booking-form', {
     const room = await (await fetch('/api/rooms')).json();
     const equipment = await (await fetch('/api/equipment')).json();
     this.rooms = room.res;
+    this.timeSlotTypes = ['Aufbau', 'Veranstaltung', 'Abbau'];
     this.booking.equipment = equipment.res.map(e => {
       return { id: e.id, name: e.name, count: 0 };
     });
@@ -82,13 +81,10 @@ Vue.component('booking-form', {
   },
   methods: {
     addTimeRange: function() {
-      const lastRange = this.booking.timeSlotsGroups[
-        this.booking.timeSlotsGroups.length - 1
+      const lastRange = this.booking.timeSlots[
+        this.booking.timeSlots.length - 1
       ];
-      this.booking.timeSlotsGroups = [
-        ...this.booking.timeSlotsGroups,
-        { ...lastRange }
-      ];
+      this.booking.timeSlots = [...this.booking.timeSlots, { ...lastRange }];
     },
     submit: async function() {
       this.loading = true;

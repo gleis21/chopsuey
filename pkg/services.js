@@ -83,7 +83,7 @@ class BookingService {
 
   async update(b) {
     const m = await this.personSrv.createOrUpdate(b.person);
-    const ts = await this.timeSlotsSrv.create(b.id, b.timeSlotsGroups);
+    const ts = await this.timeSlotsSrv.create(b.id, b.timeSlots);
     const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(
       b.equipment
     );
@@ -126,71 +126,6 @@ class BookableItemsService {
   }
 }
 
-class TimeSlotsGroup {
-  constructor(ev) {
-    this.roomId = ev.roomId;
-    this.beginnEvent = moment(ev.beginnDate)
-      .add(ev.beginnH, 'h')
-      .add(ev.beginnM, 'minutes');
-    this.prepDurSec = ev.prepDurH * 60 * 60 + ev.prepDurM * 60;
-    this.beginnPrep = moment(this.beginnEvent).subtract(
-      this.prepDurSec,
-      'seconds'
-    );
-    this.endPrep = moment(this.beginnEvent);
-    this.endEvent = moment(ev.endDate)
-      .add(ev.endH, 'h')
-      .add(ev.endM, 'minutes');
-    this.durSec = moment(this.endEvent).diff(this.beginnEvent, 'seconds');
-    this.beginnTeardown = moment(this.endEvent);
-    this.teardownDurSec = ev.teardownDurH * 60 * 60 + ev.teardownDurM * 60;
-    this.endTeardown = moment(this.beginnTeardown).add(
-      this.teardownDurSec,
-      'seconds'
-    );
-    this.beginnCleanning = moment(this.endTeardown);
-    this.cleaningDurSec = 60 * 60;
-    this.endCleanning = moment(this.beginnCleanning).add(1, 'h');
-    this.status = 'OK';
-  }
-  getTimeSlots() {
-    return [
-      {
-        roomId: this.roomId,
-        beginn: this.beginnPrep,
-        end: this.endPrep,
-        duration: this.prepDurSec,
-        type: 'Aufbau',
-        status: ''
-      },
-      {
-        roomId: this.roomId,
-        beginn: this.beginnEvent,
-        end: this.endEvent,
-        duration: this.durSec,
-        type: 'Veranstaltung',
-        status: ''
-      },
-      {
-        roomId: this.roomId,
-        beginn: this.beginnTeardown,
-        end: this.endTeardown,
-        duration: this.teardownDurSec,
-        type: 'Abbau',
-        status: ''
-      },
-      {
-        roomId: this.roomId,
-        beginn: this.beginnCleanning,
-        end: this.endCleanning,
-        duration: this.cleaningDurSec,
-        type: 'Reinigung',
-        status: ''
-      }
-    ];
-  }
-}
-
 class TimeSlotsService {
   constructor(base, itemsSrv, pubCalendarSrv) {
     this.table = base('Timeslots');
@@ -229,35 +164,29 @@ class TimeSlotsService {
     return groupedByRoom;
   }
 
-  async create(bookingID, timeSlotsGroups) {
-    const futureBookings = await this.getTimeSlotsAfterToday();
-    const timeslots = (
-      await Promise.all(
-        timeSlotsGroups.map(async ev => {
-          return await Promise.all(
-            ev.getTimeSlots().map(async s => {
-              const bookable = await this.isBookable(
-                s.roomId,
-                s.beginn,
-                s.end,
-                futureBookings
-              );
-              return {
-                fields: {
-                  Beginn: s.beginn.toISOString(),
-                  Duration: s.duration,
-                  Type: s.type,
-                  Buchung: [bookingID],
-                  Raum: [s.roomId],
-                  Status: bookable ? 'OK' : 'Conflict'
-                }
-              };
-            })
-          );
-        })
-      )
-    ).flat();
-    return await this.table.create(timeslots); // returns records (record.getId())
+  async create(bookingID, timeSlots) {
+    const slots = timeSlots.map(ts => {
+      const beginn = moment(ts.beginnDate)
+        .add(ts.beginnH, 'h')
+        .add(ts.beginnM, 'minutes');
+
+      const end = moment(ts.endDate)
+        .add(ts.endH, 'h')
+        .add(ts.endM, 'minutes');
+      this.durSec = moment(end).diff(beginn, 'seconds');
+      const bookable = true;
+      return {
+        fields: {
+          Beginn: beginn.toISOString(),
+          Duration: durSec,
+          Type: ts.type,
+          Buchung: [bookingID],
+          Raum: [ts.roomId],
+          Status: bookable ? 'OK' : 'Conflict'
+        }
+      };
+    });
+    return await this.table.create(slots); // returns records (record.getId())
   }
 
   async isBookable(roomId, beginn, end, futureBookingsByRoom) {
