@@ -173,7 +173,7 @@ class TimeSlotsService {
       const end = moment(ts.endDate)
         .add(ts.endH, 'h')
         .add(ts.endM, 'minutes');
-      this.durSec = moment(end).diff(beginn, 'seconds');
+      const durSec = moment(end).diff(beginn, 'seconds');
       const bookable = true;
       return {
         fields: {
@@ -307,6 +307,5 @@ module.exports = {
   TimeSlotsService: TimeSlotsService,
   BookableItemsService: BookableItemsService,
   PersonService: PersonService,
-  TimeSlotsGroup: TimeSlotsGroup,
   InvoiceService: InvoiceService
 };

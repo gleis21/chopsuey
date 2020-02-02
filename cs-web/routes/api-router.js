@@ -52,9 +52,7 @@ module.exports = (bookingSrv, itemsSrv) => {
         roomIds: [b.roomId],
         equipment: b.equipment,
         person: b.person,
-        timeSlotsGroups: b.timeSlotsGroups.map(
-          e => new services.TimeSlotsGroup(e)
-        )
+        timeSlots: b.timeSlots
       };
       const r = await bookingSrv.update(booking);
       res.status(200).json({

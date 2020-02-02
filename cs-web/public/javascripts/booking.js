@@ -80,11 +80,14 @@ Vue.component('booking-form', {
     setTimeout(() => (this.initialized = true), 150);
   },
   methods: {
-    addTimeRange: function() {
+    addTimeSlot: function() {
       const lastRange = this.booking.timeSlots[
         this.booking.timeSlots.length - 1
       ];
       this.booking.timeSlots = [...this.booking.timeSlots, { ...lastRange }];
+    },
+    deleteTimeSlot: function(index) {
+      this.booking.timeSlots.splice(index, 1);
     },
     submit: async function() {
       this.loading = true;
