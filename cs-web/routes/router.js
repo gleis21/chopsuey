@@ -6,8 +6,8 @@ const router = express.Router();
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
-const user = process.env.CS_USER;
-const password = process.env.CS_PASSWORD;
+const gleisUser = process.env.CS_USER;
+const gleisPassword = process.env.CS_PASSWORD;
 
 const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -19,23 +19,25 @@ function groupBy(xs, key) {
   }, {});
 }
 
-function basicAuth(req, res, next) {
-  var credentials = auth(req);
+function basicAuth(validUser, validPass) {
+  return (req, res, next) => {
+    var credentials = auth(req);
 
-  if (!credentials || !check(credentials.name, credentials.pass)) {
-    res.statusCode = 401;
-    res.setHeader('WWW-Authenticate', 'Basic realm="example"');
-    res.end('Access denied');
-  } else {
-    next();
+    if (!credentials || !check(credentials.name, credentials.pass, validUser, validPass)) {
+      res.statusCode = 401;
+      res.setHeader('WWW-Authenticate', 'Basic realm="example"');
+      res.end('Access denied');
+    } else {
+      next();
+    }
   }
 }
-function check(name, pass) {
+
+function check(providedUserame, providedPass, validUsername, validPass) {
   var valid = true;
 
-  // Simple method to prevent short-circut and use timing-safe compare
-  valid = compare(name, user) && valid;
-  valid = compare(pass, password) && valid;
+  valid = compare(providedUserame, validUsername) && valid;
+  valid = compare(providedPass, validPass) && valid;
 
   return valid;
 }
@@ -44,6 +46,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
   /* GET home page. */
   router.get(
     '/new',
+    basicAuth(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
       res.render('booking_create');
     })
@@ -52,13 +55,25 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
   router.get(
     '/:id',
     asyncMiddleware(async (req, res, next) => {
+      var id = req.params.id;
+      const b = await bookingSrv.get(req.params.id);
+      var userName = b.get('MieterEmail')[0];
+      var pin = b.get('PIN');
+      res.locals.un = userName;
+      res.locals.pin = pin
+      next()
+    }),
+    (req, res, next) => {
+      return basicAuth(res.locals.un, res.locals.pin)(req, res, next);
+    },
+    asyncMiddleware(async (req, res, next) => {
       res.render('booking_update');
     })
   );
 
   router.get(
     '/:id/contract/print',
-    basicAuth,
+    basicAuth(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
       const browser = await puppeteer.launch();
       const page = await browser.newPage();
@@ -87,7 +102,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
 
   router.get(
     '/:id/invoice',
-    basicAuth,
+    basicAuth(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
       const b = await bookingSrv.get(req.params.id);
       const invoice = await invoiceSrv.getInvoceByBooking(b.get('Key'));
@@ -107,7 +122,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
 
   router.get(
     '/:id/contract',
-    basicAuth,
+    basicAuth(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
       const b = await bookingSrv.get(req.params.id);
       if (b.get('Status') !== 'Vorreserviert') {
@@ -166,13 +181,6 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
 
         res.render('contract', contract);
       }
-    })
-  );
-
-  router.get(
-    '/:id/invoice',
-    asyncMiddleware(async (req, res, next) => {
-      res.render('invoice');
     })
   );
 
