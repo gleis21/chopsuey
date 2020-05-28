@@ -29,14 +29,17 @@ module.exports = (bookingSrv, itemsSrv) => {
     '/bookings',
     asyncMiddleware(async (req, res, next) => {
       const b = req.body;
+      const pin = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       const booking = {
-        title: b.title
+        title: b.title,
+        customerEmail: b.customerEmail,
+        pin: pin
       };
       const r = await bookingSrv.create(booking);
       const id = r.getId();
       const editUrl = process.env.CS_BOOKING_EDIT_URL + '/' + id;
       res.status(200).json({
-        res: { editUrl: editUrl },
+        res: { editUrl: editUrl, pin: pin },
         err: null
       });
     })

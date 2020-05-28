@@ -132,12 +132,6 @@
                 <option v-for="r in rooms" :value="r.id">{{r.name}}</option>
               </select>
             </div>
-            <div class="form-group col-md-4">
-              <label for="room">Typ</label>
-              <select class="form-control c-select" id="type" v-model="ts.type">
-                <option v-for="t in timeSlotTypes" :value="t">{{t}}</option>
-              </select>
-            </div>
           </div>
 
           <div class="form-row">

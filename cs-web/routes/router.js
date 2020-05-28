@@ -59,12 +59,12 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
       const b = await bookingSrv.get(req.params.id);
       var userName = b.get('MieterEmail')[0];
       var pin = b.get('PIN');
-      res.locals.un = userName;
+      res.locals.customerUserName = userName;
       res.locals.pin = pin
       next()
     }),
     (req, res, next) => {
-      return basicAuth(res.locals.un, res.locals.pin)(req, res, next);
+      return basicAuth(res.locals.customerUserName, res.locals.pin)(req, res, next);
     },
     asyncMiddleware(async (req, res, next) => {
       res.render('booking_update');
@@ -100,25 +100,25 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     })
   );
 
-  router.get(
-    '/:id/invoice',
-    basicAuth(gleisUser, gleisPassword),
-    asyncMiddleware(async (req, res, next) => {
-      const b = await bookingSrv.get(req.params.id);
-      const invoice = await invoiceSrv.getInvoceByBooking(b.get('Key'));
-      const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(
-        b.get('Key')
-      );
-      const p = await personSrv.getById(b.get('Mieter'));
-      const inv = {
-        invoiceNo: invoice.get('Key'),
-        address: p.get('Strasse') + ' ' + p.get('HausNr') + '/' + p.get('Top'),
-        postCode: p.get('PLZ'),
-        city: p.get('Ort'),
-        uid: p.get('UID')
-      };
-    })
-  );
+  // router.get(
+  //   '/:id/invoice',
+  //   basicAuth(gleisUser, gleisPassword),
+  //   asyncMiddleware(async (req, res, next) => {
+  //     const b = await bookingSrv.get(req.params.id);
+  //     const invoice = await invoiceSrv.getInvoceByBooking(b.get('Key'));
+  //     const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(
+  //       b.get('Key')
+  //     );
+  //     const p = await personSrv.getById(b.get('Mieter'));
+  //     const inv = {
+  //       invoiceNo: invoice.get('Key'),
+  //       address: p.get('Strasse') + ' ' + p.get('HausNr') + '/' + p.get('Top'),
+  //       postCode: p.get('PLZ'),
+  //       city: p.get('Ort'),
+  //       uid: p.get('UID')
+  //     };
+  //   })
+  // );
 
   router.get(
     '/:id/contract',

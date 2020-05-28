@@ -78,6 +78,12 @@ class BookingService {
   }
 
   async create(b) {
+    const customer = await this.personSrv.getByEmail(b.customerEmail);
+    if (customer) {
+      console.log(b.customerEmail);
+      console.log(JSON.stringify(customer));
+      return await this.table.create({ Titel: b.title, Mieter: [customer.getId()], PIN: b.pin });
+    }
     return await this.table.create({ Titel: b.title, PIN: b.pin });
   }
 
@@ -127,10 +133,9 @@ class BookableItemsService {
 }
 
 class TimeSlotsService {
-  constructor(base, itemsSrv, pubCalendarSrv) {
+  constructor(base, itemsSrv) {
     this.table = base('Timeslots');
     this.itemsSrv = itemsSrv;
-    this.pubCalendarSrv = pubCalendarSrv;
   }
 
   async getBookingTimeSlots(bookingKey) {
@@ -179,7 +184,7 @@ class TimeSlotsService {
         fields: {
           Beginn: beginn.toISOString(),
           Duration: durSec,
-          Type: ts.type,
+          Type: 'Veranstaltung',
           Buchung: [bookingID],
           Raum: [ts.roomId],
           Status: bookable ? 'OK' : 'Conflict'

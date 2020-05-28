@@ -29,7 +29,6 @@ Vue.component('booking-form', {
           }
         ]
       },
-      timeSlotTypes: [],
       rooms: [],
       equipment: [],
       hours: [
@@ -69,7 +68,6 @@ Vue.component('booking-form', {
     const room = await (await fetch('/api/rooms')).json();
     const equipment = await (await fetch('/api/equipment')).json();
     this.rooms = room.res;
-    this.timeSlotTypes = ['Aufbau', 'Veranstaltung', 'Abbau'];
     this.booking.equipment = equipment.res.map(e => {
       return { id: e.id, name: e.name, count: 0 };
     });

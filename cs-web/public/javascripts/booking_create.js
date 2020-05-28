@@ -5,7 +5,8 @@ Vue.component('booking-form', {
       submitResult: null,
       loading: false,
       booking: {
-        title: ''
+        title: '',
+        customerEmail: ''
       }
     };
   },
@@ -24,7 +25,7 @@ Vue.component('booking-form', {
 
         this.submitResult = {
           success: true,
-          msg: 'LINK: ' + result.editUrl
+          msg: 'LINK: ' + result.editUrl + ' | ' + 'PIN: ' + result.pin
         };
       } else {
         this.submitResult = {
