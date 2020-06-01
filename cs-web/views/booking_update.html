@@ -76,7 +76,7 @@
         </div>
         <div class="form-group">
           <label for="umsatzsteuerbefreit">Die/Der MiterIn ist umsatzseuerbefreit</label>
-          <select class="form-control c-select" id="umsatzsteuerbefreit" v-model="booking.person.umsatzseuerberfreit">
+          <select class="form-control c-select" id="umsatzsteuerbefreit" v-model="booking.person.umsatzsteuerbefreit">
             <option :value="true">Ja</option>
             <option :value="false">Nein</option>
           </select>
@@ -156,7 +156,7 @@
           <div class="form-row">
             <div class="form-group col-md-4">
               <label for="end">Ende</label>
-              <input type="date" required v-model="ts.endDate" class="form-control" id="end" name="booking[endDate]" placeholder="Ende">
+              <input type="date" required v-model="ts.endDate" class="form-control" id="end">
             </div>
             <div class="form-group col-md-2">
               <label>&nbsp;</label>

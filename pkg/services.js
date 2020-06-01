@@ -29,7 +29,6 @@ class InvoiceService {
   async getInvoceItemsByBooking(bookingKey) {
     return await this.rechnungspostenTable
       .select({
-        maxRecords: 500,
         view: 'Grid view',
         filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
       })
@@ -38,7 +37,7 @@ class InvoiceService {
 
   async getEquipmentPrices() {
     return await this.preiseTable
-      .select({ maxRecords: 100, view: 'AusstattungPreise' })
+      .select({ view: 'AusstattungPreise' })
       .firstPage();
   }
 
@@ -80,15 +79,13 @@ class BookingService {
   async create(b) {
     const customer = await this.personSrv.getByEmail(b.customerEmail);
     if (customer) {
-      console.log(b.customerEmail);
-      console.log(JSON.stringify(customer));
       return await this.table.create({ Titel: b.title, Mieter: [customer.getId()], PIN: b.pin });
     }
     return await this.table.create({ Titel: b.title, PIN: b.pin });
   }
 
   async update(b) {
-    const m = await this.personSrv.createOrUpdate(b.person);
+    const person = await this.personSrv.createOrUpdate(b.person);
     const ts = await this.timeSlotsSrv.create(b.id, b.timeSlots);
     const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(
       b.equipment
@@ -98,7 +95,7 @@ class BookingService {
       Titel: b.title,
       TeilnehmerInnenanzahl: b.participantsCount,
       Status: 'Angefragt',
-      Mieter: [m.getId()],
+      Mieter: [person.getId()],
       Notes: b.notes,
       Timeslots: ts.map(s => s.getId()),
       Rechnungen: [invoice.getId()]
@@ -116,7 +113,7 @@ class BookableItemsService {
   async getRooms() {
     if (this.rooms.length === 0) {
       this.rooms = await this.table
-        .select({ maxRecords: 10, view: 'Raeume' })
+        .select({ view: 'Raeume' })
         .firstPage();
     }
     return this.rooms;
@@ -125,7 +122,7 @@ class BookableItemsService {
   async getEquipment() {
     if (this.equipment.length === 0) {
       this.equipment = await this.table
-        .select({ maxRecords: 20, view: 'Ausstattung' })
+        .select({ view: 'Ausstattung' })
         .firstPage();
     }
     return this.equipment;
@@ -141,7 +138,6 @@ class TimeSlotsService {
   async getBookingTimeSlots(bookingKey) {
     var x = await this.table
       .select({
-        maxRecords: 500,
         view: 'Alles',
         filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
       })
@@ -170,7 +166,78 @@ class TimeSlotsService {
   }
 
   async create(bookingID, timeSlots) {
-    const slots = timeSlots.map(ts => {
+    const getTimeSlotsAfterToday = async () => {
+      const ts = await this.table
+      .select({ maxRecords: 1000, view: 'Zukunft' })
+      .firstPage();
+    const groupedByRoom = ts.reduce((acc, curr) => {
+      const roomIds = curr.get('Raum');
+      if (roomIds && roomIds.length === 1) {
+        const roomId = roomIds[0];
+        if (!acc[roomId]) acc[roomId] = [];
+        acc[roomId].push({
+          beginn: moment(curr.get('Beginn')),
+          end: moment(curr.get('Ende'))
+        });
+      }
+      return acc;
+    }, {});
+
+    return groupedByRoom;
+    };
+    const isBookable = async (roomId, beginn, end, futureBookingsByRoom) => {
+      if (Object.keys(futureBookingsByRoom).length === 0) {
+        return true;
+      }
+      const rooms = await this.itemsSrv.getRooms();
+      const gastroID = rooms.filter(r => r.get('Key') === 'Gastro')[0].getId();
+      const saalID = rooms.filter(r => r.get('Key') === 'Saal 21')[0].getId();
+      const salonID = rooms.filter(r => r.get('Key') === 'Salon 21')[0].getId();
+      const stationID = rooms
+        .filter(r => r.get('Key') === 'Station 21')[0]
+        .getId();
+      const saalSalonID = rooms
+        .filter(r => r.get('Key') === 'Saal + Salon')[0]
+        .getId();
+      const saalSalonStationID = rooms
+        .filter(r => r.get('Key') === 'Saal + Salon + Station')[0]
+        .getId();
+      const room = rooms.filter(r => r.getId() === roomId)[0];
+      let roomTimeslots = [];
+      if (
+        room.getId() === saalID ||
+        room.getId() === salonID ||
+        room.getId() === stationID ||
+        room.getId() === gastroID
+      ) {
+        roomTimeslots = futureBookingsByRoom[room.getId()];
+      } else if (room.getId() === saalSalonID) {
+        roomTimeslots = futureBookingsByRoom[saalSalonID]
+          .concat(futureBookingsByRoom[saalID])
+          .concat(futureBookingsByRoom[salonID]);
+      } else if (room.id === saalSalonStationID) {
+        roomTimeslots = futureBookingsByRoom[saalSalonStationID]
+          .concat(futureBookingsByRoom[saalID])
+          .concat(futureBookingsByRoom[salonID])
+          .concat(futureBookingsByRoom[stationID]);
+      }
+      if (roomTimeslots.filter(r => r).length == 0) {
+        return true;
+      }
+      const bookable = roomTimeslots
+        .filter(r => r)
+        .reduce((acc, curr) => {
+          const tsBeginn = curr.beginn;
+          const tsEnd = curr.end;
+          const bookable =
+            moment(beginn).isAfter(moment(tsEnd)) ||
+            moment(end).isBefore(moment(tsBeginn));
+          return acc && bookable;
+        }, true);
+  
+      return bookable;
+    };
+    const slots = await Promise.all(timeSlots.map(async ts => {
       const beginn = moment(ts.beginnDate)
         .add(ts.beginnH, 'h')
         .add(ts.beginnM, 'minutes');
@@ -179,7 +246,8 @@ class TimeSlotsService {
         .add(ts.endH, 'h')
         .add(ts.endM, 'minutes');
       const durSec = moment(end).diff(beginn, 'seconds');
-      const bookable = true;
+      const futureBookingsByRoom = await getTimeSlotsAfterToday()
+      const bookable = await isBookable(ts.roomId, beginn, end, futureBookingsByRoom);
       return {
         fields: {
           Beginn: beginn.toISOString(),
@@ -190,7 +258,7 @@ class TimeSlotsService {
           Status: bookable ? 'OK' : 'Conflict'
         }
       };
-    });
+    }));
     return await this.table.create(slots); // returns records (record.getId())
   }
 
@@ -257,9 +325,8 @@ class PersonService {
     const defaultRole = 'MieterIn';
 
     const existing = await this.getByEmail(p.email);
-
     if (existing) {
-      return await this.table.update(existing.getId(), {
+      const updated =  await this.table.update(existing.getId(), {
         Email: p.email,
         Vorname: p.firstName,
         Nachname: p.lastName,
@@ -271,8 +338,10 @@ class PersonService {
         PLZ: p.postcode,
         Ort: p.city,
         UID: p.uid,
-        Umsatzsteuerbefreit: p.umsatzseuerberfreit
+        Umsatzsteuerbefreit: p.umsatzsteuerbefreit
       });
+      
+      return updated;
     }
     return await this.table.create({
       Email: p.email,
@@ -286,7 +355,7 @@ class PersonService {
       PLZ: p.postcode,
       Ort: p.city,
       UID: p.uid,
-      Umsatzsteuerbefreit: p.umsatzseuerberfreit
+      Umsatzsteuerbefreit: p.umsatzsteuerbefreit
     });
   }
 

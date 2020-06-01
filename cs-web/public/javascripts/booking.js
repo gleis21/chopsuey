@@ -71,8 +71,8 @@ Vue.component('booking-form', {
     this.booking.equipment = equipment.res.map(e => {
       return { id: e.id, name: e.name, count: 0 };
     });
+    this.booking.timeSlots[0].roomId = this.rooms[0].id
     this.booking = { ...this.booking, ...booking.res };
-    this.booking.roomId = this.rooms[0].id;
 
     this.initializerWidth = 100;
     setTimeout(() => (this.initialized = true), 150);
@@ -89,6 +89,7 @@ Vue.component('booking-form', {
     },
     submit: async function() {
       this.loading = true;
+      this.booking.equipment = this.booking.equipment.filter(eq => eq.count > 0);
       const res = await fetch('/api/bookings/' + this.booking.id, {
         headers: { 'Content-Type': 'application/json' },
         method: 'PUT',

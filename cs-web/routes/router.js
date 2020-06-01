@@ -130,9 +130,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
       } else {
         const p = await personSrv.getById(b.get('Mieter'));
         const ts = await timeSlotsSrv.getBookingTimeSlots(b.get('Key'));
-        const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(
-          b.get('Key')
-        );
+        const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(b.get('Key'));
 
         const contract = {
           title: b.get('Titel'),
@@ -158,7 +156,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
                 end: moment(t.get('Ende'))
               };
             })
-            .filter(t => t.type !== 'Reinigung')
+            .filter(t => t.type === 'Veranstaltung')
             .sort((a, b) => (a.beginn.isAfter(b.beginn) ? 1 : -1))
             .map(t => {
               return {

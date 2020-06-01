@@ -1,22 +1,43 @@
 const express = require('express');
-var services = require('../../pkg/services');
 const router = express.Router();
 
 const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-module.exports = (bookingSrv, itemsSrv) => {
+module.exports = (bookingSrv, itemsSrv, personSrv) => {
   /* GET home page. */
   router.get(
     '/bookings/:id',
     asyncMiddleware(async (req, res, next) => {
       const b = await bookingSrv.get(req.params.id);
+      const customerIds = b.get('Mieter');
+      var person = {};
+      if (customerIds) {
+        const customerId = customerIds[0];
+        const c = await personSrv.getById(customerId);
+        person = {
+          email: c.get('Email'),
+          city: c.get('Ort'),
+          postcode: c.get('PLZ'),
+          ano: c.get('Top'),
+          hno: c.get('HausNr'),
+          street: c.get('Strasse'),
+          umsatzsteuerbefreit: c.get('Umsatzsteuerbefreit'),
+          uid: c.get('UID'),
+          org: c.get('Organisation'),
+          lastName: c.get('Nachname'),
+          firstName: c.get('Vorname'),
+        }
+      }
       const status = b.get('Status');
       if (!status || status === 'Angefragt') {
-        console.log(JSON.stringify(b));
         res.status(200).json({
-          res: { id: b.id, title: b.get('Titel') },
+          res: { 
+            id: b.id, 
+            title: b.get('Titel'),
+            person: person,
+          },
           err: null
         });
       } else {
