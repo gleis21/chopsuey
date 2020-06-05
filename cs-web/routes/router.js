@@ -77,7 +77,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     asyncMiddleware(async (req, res, next) => {
       const browser = await puppeteer.launch();
       const page = await browser.newPage();
-      const contractUrl = `http://${user}:${password}@localhost:3000/bookings/${req.params.id}/contract`;
+      const contractUrl = `http://${gleisUser}:${gleisPassword}@localhost:3000/bookings/${req.params.id}/contract`;
       await page.goto(contractUrl, {
         waitUntil: 'networkidle2'
       });

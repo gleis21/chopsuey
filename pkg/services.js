@@ -77,11 +77,11 @@ class BookingService {
   }
 
   async create(b) {
-    const customer = await this.personSrv.getByEmail(b.customerEmail);
-    if (customer) {
-      return await this.table.create({ Titel: b.title, Mieter: [customer.getId()], PIN: b.pin });
+    var customer = await this.personSrv.getByEmail(b.customerEmail);
+    if (!customer) {
+      customer = await this.personSrv.createOrUpdate({email: b.customerEmail})
     }
-    return await this.table.create({ Titel: b.title, PIN: b.pin });
+    return await this.table.create({ Titel: b.title, Mieter: [customer.getId()], PIN: b.pin });
   }
 
   async update(b) {

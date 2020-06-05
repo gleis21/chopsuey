@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const { WebClient } = require('@slack/web-api');
+const slackClient = new WebClient(process.env.SLACK_TOKEN);
 
 const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -57,8 +59,8 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
         pin: pin
       };
       const r = await bookingSrv.create(booking);
-      const id = r.getId();
-      const editUrl = process.env.CS_BOOKING_EDIT_URL + '/' + id;
+      const editUrl = process.env.CS_BOOKING_EDIT_URL + '/' + r.getId();
+      
       res.status(200).json({
         res: { editUrl: editUrl, pin: pin },
         err: null
@@ -78,7 +80,16 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
         person: b.person,
         timeSlots: b.timeSlots
       };
-      const r = await bookingSrv.update(booking);
+      try {
+        const r = await bookingSrv.update(booking);
+        // Use the `chat.postMessage` method to send a message from this app
+        await slackClient.chat.postMessage({
+          channel: '#chopsuey-buchungen',
+          text: `Neue Anfrage für die Buchung "${booking.title}" von ${booking.person.email}`,
+        });
+      } catch (error) {
+        console.log(error);
+      }
       res.status(200).json({
         res: r,
         err: null
