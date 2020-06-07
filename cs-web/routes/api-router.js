@@ -62,7 +62,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
       const editUrl = process.env.CS_BOOKING_EDIT_URL + '/' + r.getId();
       
       res.status(200).json({
-        res: { editUrl: editUrl, pin: pin },
+        res: { editUrl: editUrl, email: b.customerEmail, pin: pin },
         err: null
       });
     })
@@ -87,13 +87,13 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
           channel: '#chopsuey-buchungen',
           text: `Neue Anfrage für die Buchung "${booking.title}" von ${booking.person.email}`,
         });
+        res.status(200).json({
+          res: r,
+          err: null
+        });
       } catch (error) {
         console.log(error);
       }
-      res.status(200).json({
-        res: r,
-        err: null
-      });
     })
   );
 

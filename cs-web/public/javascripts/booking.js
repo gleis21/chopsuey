@@ -104,7 +104,7 @@ Vue.component('booking-form', {
       } else {
         this.submitResult = {
           success: false,
-          msg: 'Ups... something went wrong.'
+          msg: 'Ups... das hätte nie passieren sollen.'
         };
       }
     }

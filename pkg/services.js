@@ -87,9 +87,12 @@ class BookingService {
   async update(b) {
     const person = await this.personSrv.createOrUpdate(b.person);
     const ts = await this.timeSlotsSrv.create(b.id, b.timeSlots);
-    const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(
+    var equipmentInvoiceItems = [];
+    if (b.equipment && b.equipment.length > 0) {
+    equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(
       b.equipment
     );
+    }
     const invoice = await this.invoiceSrv.createInvoice(equipmentInvoiceItems);
     const bk = {
       Titel: b.title,

@@ -25,7 +25,7 @@ Vue.component('booking-form', {
 
         this.submitResult = {
           success: true,
-          msg: 'LINK: ' + result.editUrl + ' | ' + 'PIN: ' + result.pin
+          msg: 'LINK: ' + result.editUrl + ' | ' + 'EMAIL: ' + result.email + ' | ' + 'PIN: ' + result.pin
         };
       } else {
         this.submitResult = {

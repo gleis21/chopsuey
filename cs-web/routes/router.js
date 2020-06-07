@@ -162,8 +162,8 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
               return {
                 room: t.room,
                 type: t.type,
-                beginn: t.beginn.format('DD.MM.YYYY hh:mm'),
-                end: t.end.format('DD.MM.YYYY hh:mm')
+                beginn: t.beginn.format('DD.MM.YYYY HH:mm'),
+                end: t.end.format('DD.MM.YYYY HH:mm')
               };
             }),
           invoiceItems: invoiceItems.map(e => {
