@@ -74,6 +74,8 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
       const b = req.body;
       const booking = {
         id: b.id,
+        notes: b.notes,
+        participantsCount: b. participantsCount,
         title: b.title,
         roomIds: [b.roomId],
         equipment: b.equipment,
@@ -113,7 +115,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
     '/equipment',
     asyncMiddleware(async (req, res, next) => {
       const equipment = (await itemsSrv.getEquipment()).map(r => {
-        return { id: r.id, name: r.get('Key') };
+        return { id: r.id, name: r.get('Key'), note: r.get('Beschreibung') };
       });
       res.status(200).json({
         res: equipment

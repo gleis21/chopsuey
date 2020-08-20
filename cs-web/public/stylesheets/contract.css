@@ -39,6 +39,24 @@ th.cell-padding {
   text-align: left;
 }
 
+td.content, th.content {
+  margin: 0;
+  border: 1px solid grey;
+  white-space: nowrap;
+  border-top-width: 0px;
+}
+
+.headcol {
+  position: absolute;
+  width: 5em;
+  left: 0;
+  top: auto;
+  border-top-width: 1px;
+  /*only relevant for first row*/
+  margin-top: -1px;
+  /*compensate for top border*/
+}
+
 @page {
   size: auto; /* auto is the initial value */
   margin: 0; /* this affects the margin in the printer settings */

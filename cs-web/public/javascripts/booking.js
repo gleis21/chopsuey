@@ -25,7 +25,8 @@ Vue.component('booking-form', {
               .add(2, 'd')
               .format('YYYY-MM-DD'),
             endH: 17,
-            endM: 0
+            endM: 0,
+            notes: ''
           }
         ]
       },
@@ -69,7 +70,7 @@ Vue.component('booking-form', {
     const equipment = await (await fetch('/api/equipment')).json();
     this.rooms = room.res;
     this.booking.equipment = equipment.res.map(e => {
-      return { id: e.id, name: e.name, count: 0 };
+      return { id: e.id, name: e.name, count: 0, note: e.note };
     });
     this.booking.timeSlots[0].roomId = this.rooms[0].id
     this.booking = { ...this.booking, ...booking.res };

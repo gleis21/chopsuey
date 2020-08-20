@@ -43,6 +43,7 @@ class InvoiceService {
 
   async createInvoiceItems(items) {
     const eqPrices = await this.getEquipmentPrices();
+
     // items have an id and count
     const invoiceItems = items
       .map(it => {
@@ -89,15 +90,15 @@ class BookingService {
     const ts = await this.timeSlotsSrv.create(b.id, b.timeSlots);
     var equipmentInvoiceItems = [];
     if (b.equipment && b.equipment.length > 0) {
-    equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(
-      b.equipment
-    );
+      equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(
+        b.equipment
+      );
     }
     const invoice = await this.invoiceSrv.createInvoice(equipmentInvoiceItems);
     const bk = {
       Titel: b.title,
       TeilnehmerInnenanzahl: b.participantsCount,
-      Status: 'Angefragt',
+      Status: 'Vorreserviert',
       Mieter: [person.getId()],
       Notes: b.notes,
       Timeslots: ts.map(s => s.getId()),
@@ -169,77 +170,6 @@ class TimeSlotsService {
   }
 
   async create(bookingID, timeSlots) {
-    const getTimeSlotsAfterToday = async () => {
-      const ts = await this.table
-      .select({ maxRecords: 1000, view: 'Zukunft' })
-      .firstPage();
-    const groupedByRoom = ts.reduce((acc, curr) => {
-      const roomIds = curr.get('Raum');
-      if (roomIds && roomIds.length === 1) {
-        const roomId = roomIds[0];
-        if (!acc[roomId]) acc[roomId] = [];
-        acc[roomId].push({
-          beginn: moment(curr.get('Beginn')),
-          end: moment(curr.get('Ende'))
-        });
-      }
-      return acc;
-    }, {});
-
-    return groupedByRoom;
-    };
-    const isBookable = async (roomId, beginn, end, futureBookingsByRoom) => {
-      if (Object.keys(futureBookingsByRoom).length === 0) {
-        return true;
-      }
-      const rooms = await this.itemsSrv.getRooms();
-      const gastroID = rooms.filter(r => r.get('Key') === 'Gastro')[0].getId();
-      const saalID = rooms.filter(r => r.get('Key') === 'Saal 21')[0].getId();
-      const salonID = rooms.filter(r => r.get('Key') === 'Salon 21')[0].getId();
-      const stationID = rooms
-        .filter(r => r.get('Key') === 'Station 21')[0]
-        .getId();
-      const saalSalonID = rooms
-        .filter(r => r.get('Key') === 'Saal + Salon')[0]
-        .getId();
-      const saalSalonStationID = rooms
-        .filter(r => r.get('Key') === 'Saal + Salon + Station')[0]
-        .getId();
-      const room = rooms.filter(r => r.getId() === roomId)[0];
-      let roomTimeslots = [];
-      if (
-        room.getId() === saalID ||
-        room.getId() === salonID ||
-        room.getId() === stationID ||
-        room.getId() === gastroID
-      ) {
-        roomTimeslots = futureBookingsByRoom[room.getId()];
-      } else if (room.getId() === saalSalonID) {
-        roomTimeslots = futureBookingsByRoom[saalSalonID]
-          .concat(futureBookingsByRoom[saalID])
-          .concat(futureBookingsByRoom[salonID]);
-      } else if (room.id === saalSalonStationID) {
-        roomTimeslots = futureBookingsByRoom[saalSalonStationID]
-          .concat(futureBookingsByRoom[saalID])
-          .concat(futureBookingsByRoom[salonID])
-          .concat(futureBookingsByRoom[stationID]);
-      }
-      if (roomTimeslots.filter(r => r).length == 0) {
-        return true;
-      }
-      const bookable = roomTimeslots
-        .filter(r => r)
-        .reduce((acc, curr) => {
-          const tsBeginn = curr.beginn;
-          const tsEnd = curr.end;
-          const bookable =
-            moment(beginn).isAfter(moment(tsEnd)) ||
-            moment(end).isBefore(moment(tsBeginn));
-          return acc && bookable;
-        }, true);
-  
-      return bookable;
-    };
     const slots = await Promise.all(timeSlots.map(async ts => {
       const beginn = moment(ts.beginnDate)
         .add(ts.beginnH, 'h')
@@ -249,8 +179,7 @@ class TimeSlotsService {
         .add(ts.endH, 'h')
         .add(ts.endM, 'minutes');
       const durSec = moment(end).diff(beginn, 'seconds');
-      const futureBookingsByRoom = await getTimeSlotsAfterToday()
-      const bookable = await isBookable(ts.roomId, beginn, end, futureBookingsByRoom);
+
       return {
         fields: {
           Beginn: beginn.toISOString(),
@@ -258,64 +187,11 @@ class TimeSlotsService {
           Type: 'Veranstaltung',
           Buchung: [bookingID],
           Raum: [ts.roomId],
-          Status: bookable ? 'OK' : 'Conflict'
+          Notes: ts.notes
         }
       };
     }));
     return await this.table.create(slots); // returns records (record.getId())
-  }
-
-  async isBookable(roomId, beginn, end, futureBookingsByRoom) {
-    if (Object.keys(futureBookingsByRoom).length === 0) {
-      return true;
-    }
-    const rooms = await this.itemsSrv.getRooms();
-    const gastroID = rooms.filter(r => r.get('Key') === 'Gastro')[0].getId();
-    const saalID = rooms.filter(r => r.get('Key') === 'Saal 21')[0].getId();
-    const salonID = rooms.filter(r => r.get('Key') === 'Salon 21')[0].getId();
-    const stationID = rooms
-      .filter(r => r.get('Key') === 'Station 21')[0]
-      .getId();
-    const saalSalonID = rooms
-      .filter(r => r.get('Key') === 'Saal + Salon')[0]
-      .getId();
-    const saalSalonStationID = rooms
-      .filter(r => r.get('Key') === 'Saal + Salon + Station')[0]
-      .getId();
-    const room = rooms.filter(r => r.getId() === roomId)[0];
-    let roomTimeslots = [];
-    if (
-      room.getId() === saalID ||
-      room.getId() === salonID ||
-      room.getId() === stationID ||
-      room.getId() === gastroID
-    ) {
-      roomTimeslots = futureBookingsByRoom[room.getId()];
-    } else if (room.getId() === saalSalonID) {
-      roomTimeslots = futureBookingsByRoom[saalSalonID]
-        .concat(futureBookingsByRoom[saalID])
-        .concat(futureBookingsByRoom[salonID]);
-    } else if (room.id === saalSalonStationID) {
-      roomTimeslots = futureBookingsByRoom[saalSalonStationID]
-        .concat(futureBookingsByRoom[saalID])
-        .concat(futureBookingsByRoom[salonID])
-        .concat(futureBookingsByRoom[stationID]);
-    }
-    if (roomTimeslots.filter(r => r).length == 0) {
-      return true;
-    }
-    const bookable = roomTimeslots
-      .filter(r => r)
-      .reduce((acc, curr) => {
-        const tsBeginn = curr.beginn;
-        const tsEnd = curr.end;
-        const bookable =
-          moment(beginn).isAfter(moment(tsEnd)) ||
-          moment(end).isBefore(moment(tsBeginn));
-        return acc && bookable;
-      }, true);
-
-    return bookable;
   }
 }
 

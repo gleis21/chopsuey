@@ -51,13 +51,18 @@
   </div>
   <div v-if="initialized">
         <div class="form-group">
-          <label for="title">Titel</label>
+          <label for="title">Veranstaltungstitel/Art der Veranstaltung:</label>
           <input type="text" required class="form-control" v-model="booking.title">
         </div>
         <div class="form-group">
           <label for="count">TeilnehmerInnenanzahl</label>
           <input type="text" required class="form-control" v-model="booking.participantsCount">
         </div>
+        <div class="form-group">
+          <label for="name">Organisation/Firma</label>
+          <input type="text" class="form-control" v-model="booking.person.org">
+        </div>
+        <p><b>Ansprechperson:</b></p>
         <div class="form-group">
           <label for="name">Vorname</label>
           <input type="text" required class="form-control" v-model="booking.person.firstName">
@@ -67,20 +72,11 @@
           <input type="text" required class="form-control" v-model="booking.person.lastName">
         </div>
         <div class="form-group">
-          <label for="name">Organisation/Firma</label>
-          <input type="text" class="form-control" v-model="booking.person.org">
+          <label for="email">E-Mail-Adresse</label>
+          <input type="email" required class="form-control" v-model="booking.person.email">
         </div>
-        <div class="form-group">
-          <label for="name">UID-Nummer</label>
-          <input type="text" class="form-control" v-model="booking.person.uid">
-        </div>
-        <div class="form-group">
-          <label for="umsatzsteuerbefreit">Die/Der MiterIn ist umsatzseuerbefreit</label>
-          <select class="form-control c-select" id="umsatzsteuerbefreit" v-model="booking.person.umsatzsteuerbefreit">
-            <option :value="true">Ja</option>
-            <option :value="false">Nein</option>
-          </select>
-        </div>
+        
+        <p><b>Rechnungsadresse:</b></p>
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="address">Strasse</label>
@@ -106,17 +102,31 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="email">E-Mail-Adresse</label>
-          <input type="email" required class="form-control" v-model="booking.person.email">
+          <label for="name">UID-Nummer</label>
+          <input type="text" class="form-control" v-model="booking.person.uid">
         </div>
+        <div class="form-group">
+          <label for="umsatzsteuerbefreit">Die/Der MiterIn ist umsatzseuerbefreit</label>
+          <select class="form-control c-select" id="umsatzsteuerbefreit" v-model="booking.person.umsatzsteuerbefreit">
+            <option :value="true">Ja</option>
+            <option :value="false">Nein</option>
+          </select>
+        </div>
+        
         <div style="padding: 10px" class="bg-light">
           <h4>Ausstattung</h4>
+          <p>Sofern nicht anders vereinbart sind im Grundpreis enthalten: W-LAN, Beamer, 1 Flipchart, 1 Pinnwand,
+            Sound System</p>
           <div class=" form-group row" v-for="e in booking.equipment">
             <label class="col-sm-2 col-form-label" for="equipment">{{e.name}}</label>
             <div class="col-sm-2">
               <input class="form-control" required type="number" v-model="e.count"></input>
             </div>
+            <div class="col-sm-4">
+              {{e.note}}
+            </div>
           </div>
+          <p>Technische Betreuung der Ton- und Lichtanlage bieten wir auf Anfrage gerne an.</p>
         </div>
         <div class="form-group">
           <label for="notes">Anmerkung</label>
@@ -136,7 +146,7 @@
 
           <div class="form-row">
             <div class="form-group col-md-4">
-              <label for="beginn">Begin</label>
+              <label for="beginn">Begin der Raumnutzung:</label>
               <input type="date" required v-model="ts.beginnDate" class="form-control" id="beginn">
             </div>
             <div class="form-group col-md-2">
@@ -155,7 +165,7 @@
 
           <div class="form-row">
             <div class="form-group col-md-4">
-              <label for="end">Ende</label>
+              <label for="end">Ende der Raumnutzung:</label>
               <input type="date" required v-model="ts.endDate" class="form-control" id="end">
             </div>
             <div class="form-group col-md-2">
@@ -170,6 +180,10 @@
                 <option v-for="m in mins" v-bind:value="m">{{ m }}</option>
               </select>
             </div>
+          </div>
+          <div class="form-group">
+            <label for="notes">Anmerkung</label>
+            <textarea class="form-control"  placeholder="Bitte die Zeiten des Aufbaus und Abbaus angeben." id="tsnotes" rows="5" v-model="ts.notes"></textarea>
           </div>
         </div>
       
