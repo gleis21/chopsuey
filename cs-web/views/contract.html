@@ -52,7 +52,6 @@
     <tbody>
       <tr>
         <td style="padding-left: 80px; padding-right: 80px;">
-          <h4>Buchungsanfrage Saal/Salon/Station – Belegungsvertrag</h4>
           <table>
             <tr>
               <td><b>Veranstaltungstitel/Art der Veranstaltung</b></td>
@@ -63,7 +62,7 @@
               </td>
             </tr>
             <tr>
-              <td><b>TeilnehmerInnenzahl: </b> <%= participantsCount %></td>
+              <td><b>TeilnehmerInnenzahl:&nbsp;&nbsp;</b> <%= participantsCount %></td>
             </tr>
             <tr>
               <td><b>VeranstalterIn (=MieterIn): </b></td>
@@ -75,58 +74,67 @@
             </tr>
           </table>
 
-          <table>
+          <table style="table-layout: fixed;">
             <tr>
-              <td>
+              <td colspan="2">
                 <b>Ansprechperson:</b>
               </td>
             </tr>
             <tr>
+              <td style="width: 35%;">Name:</td>
               <td>
-                Name: <%= person.name %>
+                 <%= person.name %>
               </td>
             </tr>
             <tr>
+              <td style="width: 35%;">Telefon:</td>
               <td>
-                Telefon: <%= person.telefon %>
+                <%= person.telefon %>
               </td>
             </tr>
             <tr>
+              <td style="width: 35%;">E-Mail-Adresse:</td>
               <td>
-                E-Mail-Adresse: <%= person.email %>
+                <%= person.email %>
               </td>
             </tr>
             <tr>
-              <td>
+              <td colspan="2">
                 <b>Rechnungsadresse:</b>
               </td>
             </tr>
             <tr>
+              <td style="width: 35%;">Name/Institution:</td>
               <td>
-                Name/Institution: <%= person.org %>
+                <%= person.org %>
               </td>
             </tr>
             <tr>
+              <td style="width: 35%;">Straße/Nummer: </td>
               <td>
-                Straße/Nummer: <%= person.address %>
+                <%= person.address %>
               </td>
             </tr>
             <tr>
+              <td style="width: 35%;">PLZ, Ort: </td>
               <td>
-                PLZ, Ort: <%= person.postCode %>, <%= person.city %>
+                <%= person.postCode %>, <%= person.city %>
               </td>
             </tr>
             <tr>
+              <td style="width: 35%;">UID-Nummer: </td>
               <td>
-                UID-Nummer: <%= person.uid %>
+                <%= person.uid %>
               </td>
             </tr>
             <tr>
+              <td style="width: 35%;">Der/Die MieterIn ist umsatzsteuerbefreit: </td>
               <td>
-                Der/Die MieterIn ist umsatzsteuerbefreit: <% if(person.umsatzsteuerbefreit){ %> Ja <% } else{ %>
+                <% if(person.umsatzsteuerbefreit){ %> Ja <% } else{ %>
                 Nein<%} %>
               </td>
             </tr>
+            <tr><td colspan="2"><br /><br /><b>Konditionen (wird vom Vermieter ausgefüllt, exkl. USt.)</b></td></tr>
             <tr class="section">
               <td colspan="2">
                 <br />
@@ -149,11 +157,10 @@
                 </table>
               </td>
             </tr>
-
             <tr class="section">
               <td colspan="2">
                 <br />
-                <b>Konditionen:</b>
+                <b>Ausstattung:</b>
                 <table class="border" style="border-collapse: collapse; width: 100%;">
                   <tr>
                     <th class="cell-padding border" scope="col"></th>
@@ -211,7 +218,7 @@
               </td>
             </tr>
             <tr class="section">
-              <td>
+              <td style="width: 60%;">
                 <br>
                 <br>
                 <br>
@@ -219,7 +226,7 @@
                 Datum, Unterschrift<br>
                 VeranstalterIn (= MieterIn)
               </td>
-              <td>
+              <td  style="width: 40%;">
                 <br>
                 <br>
                 <br>
