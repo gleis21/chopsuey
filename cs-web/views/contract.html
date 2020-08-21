@@ -157,6 +157,7 @@
                 </table>
               </td>
             </tr>
+            <% if(invoiceItems.equipment){ %> 
             <tr class="section">
               <td colspan="2">
                 <br />
@@ -166,19 +167,44 @@
                     <th class="cell-padding border" scope="col"></th>
                     <th class="cell-padding border" scope="col">Anzahl</th>
                     <th class="cell-padding border" scope="col">Preis</th>
+                    <th class="cell-padding border" scope="col">Rabatt</th>
                   </tr>
-                  <% invoiceItems.forEach( it => { %>
+                  <% invoiceItems.equipment.forEach( it => { %>
                   <tr>
                     <td class="cell-padding border"><%= it.name %></td>
                     <td class="cell-padding border">
-                      <% if(it.showCount){ %> <%= it.count %> <% } %>
+                      <%= it.count %>
                     </td>
                     <td class="cell-padding border"><%= it.price %> &euro;</td>
+                    <td class="cell-padding border"><%= it.discount %> &percnt;</td>
                   </tr>
                   <% }) %>
                 </table>
               </td>
             </tr>
+            <% } %>
+            <% if(invoiceItems.rooms){ %> 
+            <tr class="section">
+              <td colspan="2">
+                <br />
+                <b>Räume:</b>
+                <table class="border" style="border-collapse: collapse; width: 100%;">
+                  <tr>
+                    <th class="cell-padding border" scope="col"></th>
+                    <th class="cell-padding border" scope="col">Preis</th>
+                    <th class="cell-padding border" scope="col">Rabatt</th>
+                  </tr>
+                  <% invoiceItems.rooms.forEach( it => { %>
+                  <tr>
+                    <td class="cell-padding border"><%= it.name %></td>
+                    <td class="cell-padding border"><%= it.price %> &euro;</td>
+                    <td class="cell-padding border"><%= it.discount * 100 %> &percnt;</td>
+                  </tr>
+                  <% }) %>
+                </table>
+              </td>
+            </tr>
+            <% } %>
             <tr class="section">
               <td colspan="2">
                 <br>

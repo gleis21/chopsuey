@@ -131,7 +131,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
         const p = await personSrv.getById(b.get('Mieter'));
         const ts = await timeSlotsSrv.getBookingTimeSlots(b.get('Key'));
         const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(b.get('Key'));
-
+        console.log(JSON.stringify(invoiceItems));
         const contract = {
           title: b.get('Titel'),
           participantsCount: b.get('TeilnehmerInnenanzahl'),
@@ -166,14 +166,23 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
                 end: t.end.format('DD.MM.YYYY HH:mm')
               };
             }),
-          invoiceItems: invoiceItems.map(e => {
-            return {
-              name: e.get('ArtikelName'),
-              showCount: e.get('ArtikelTyp')[0] === 'Ausstattung',
-              count: e.get('Anzahl'),
-              price: e.get('SummeNetto')
-            };
-          }),
+          invoiceItems: {
+            equipment: invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Ausstattung').map(e => {
+              return {
+                name: e.get('ArtikelName'),
+                count: e.get('Anzahl'),
+                price: e.get('SummeNetto'),
+                discount: e.get('Rabatt')
+              };
+            }),
+            rooms: invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Raum').map(e => {
+              return {
+                name: e.get('ArtikelName'),
+                price: e.get('SummeNetto'),
+                discount: e.get('Rabatt')
+              };
+            })
+          },
           notes: b.get('Notes')
         };
 

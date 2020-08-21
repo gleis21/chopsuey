@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "CS_USER=a CS_PASSWORD=a CS_BOOKING_EDIT_URL=http://localhost:3000/bookings node ./bin/cs-web",
+    "startcaddy": "caddy start --config Caddyfile.dev",
+    "stopcaddy": "caddy stop",
+    "start": "./start.sh",
     "test": "echo no_tests_for_now"
   },
   "dependencies": {
