@@ -77,6 +77,10 @@ class BookingService {
     return await this.table.find(id);
   }
 
+  // Create a stub entry in the 'Buchungen' table to be updated by the tenant.
+  // - receives an object with the fields 'customerEmail', 'title' and 'pin'
+  // - checks if a customer with the given email-address already exists in the 
+  // 'Personen' table and creates a new one, if this is not the case. 
   async create(b) {
     var customer = await this.personSrv.getByEmail(b.customerEmail);
     if (!customer) {
