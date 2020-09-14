@@ -48,16 +48,20 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
     })
   );
 
+  // create new booking by booking_create.html
   router.post(
     '/bookings',
     asyncMiddleware(async (req, res, next) => {
       const b = req.body;
+      // Create a random PIN which the user will need to enter before 
+      // being able to add data to thebooking_update form.
       const pin = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       const booking = {
         title: b.title,
         customerEmail: b.customerEmail,
         pin: pin
       };
+      // Create a new entry in the booking table
       const r = await bookingSrv.create(booking);
       const editUrl = process.env.CS_BOOKING_EDIT_URL + '/' + r.getId();
       

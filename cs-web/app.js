@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const base = require('airtable').base('appdpZhhl9ZVvABFf');
+const base = require('airtable').base(process.env.AIRTABLE_BASE_ID);
 const personSrv = new services.PersonService(base);
 const itemsSrv = new services.BookableItemsService(base);
 const timeslotsSrv = new services.TimeSlotsService(base, itemsSrv);
