@@ -23,3 +23,27 @@ jobs:
       run: docker build . --file Dockerfile --tag gleis21/chopsuey:latest
     - name: Push the latest Docker image
       run: docker push gleis21/chopsuey:latest
+    - name: Deploy package to digitalocean
+      uses: appleboy/ssh-action@master
+      env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+          CS_USER: ${{ secrets.CS_USER }}
+          CS_PASSWORD: ${{ secrets.CS_PASSWORD }}
+          CS_BOOKING_EDIT_URL: ${{ secrets.CS_BOOKING_EDIT_URL }}
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+          CADDYFILE: ${{secrets.CADDYFILE}}
+      with:
+        host: ${{ secrets.HOST }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        envs: DOCKERHUB_USERNAME, DOCKERHUB_PASSWORD, CS_USER, CS_PASSWORD, CS_BOOKING_EDIT_URL, AIRTABLE_API_KEY, AIRTABLE_BASE_ID, SLACK_TOKEN, CADDYFILE
+        script: |
+          docker stop $(docker ps -a -q)
+          echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+          docker pull gleis21/chopsuey:latest
+          docker pull caddy:2-alpine
+          docker run -dit -p 3000:3000 gleis21/chopsuey:latest -e CS_USER=$CS_USER -e CS_PASSWORD=$CS_PASSWORD -e CS_BOOKING_EDIT_URL=$CS_BOOKING_EDIT_URL -e AIRTABLE_API_KEY=$AIRTABLE_API_KEY -e AIRTABLE_BASE_ID=$AIRTABLE_BASE_ID -e SLACK_TOKEN=$SLACK_TOKEN
+          echo > Caddyfile && echo $CADDYFILE >> Caddyfile
+          docker run -dit -p 80:80 -p 443:443 caddy:2-alpine -v $PWD/Caddyfile:/etc/caddy/Caddyfile
