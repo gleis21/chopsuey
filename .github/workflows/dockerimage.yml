@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Deploy to VPS
 
 on:
   release:
@@ -23,7 +23,7 @@ jobs:
       run: docker build . --file Dockerfile --tag gleis21/chopsuey:latest
     - name: Push the latest Docker image
       run: docker push gleis21/chopsuey:latest
-    - name: Deploy package to digitalocean
+    - name: Deploy to VPS
       uses: appleboy/ssh-action@master
       env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
