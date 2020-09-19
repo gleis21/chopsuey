@@ -3,9 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "startcaddy": "caddy start --config Caddyfile.dev",
-    "stopcaddy": "caddy stop",
-    "start": "./start.sh",
+    "start": "node ./bin/cs-web",
     "test": "echo no_tests_for_now"
   },
   "dependencies": {
