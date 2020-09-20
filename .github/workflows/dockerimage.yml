@@ -35,11 +35,12 @@ jobs:
           AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
           SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
           CADDYFILE: ${{secrets.CADDYFILE}}
+          CS_DOMAIN: ${{CS_DOMAIN}}
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_SSH_KEY }}
-        envs: DOCKERHUB_USERNAME, DOCKERHUB_PASSWORD, CS_USER, CS_PASSWORD, CS_BOOKING_EDIT_URL, AIRTABLE_API_KEY, AIRTABLE_BASE_ID, SLACK_TOKEN, CADDYFILE
+        envs: DOCKERHUB_USERNAME, DOCKERHUB_PASSWORD, CS_USER, CS_PASSWORD, CS_BOOKING_EDIT_URL, AIRTABLE_API_KEY, AIRTABLE_BASE_ID, SLACK_TOKEN, CADDYFILE, CS_DOMAIN
         script: |
           docker stop $(docker ps -a -q)
           docker rm $(docker ps -a -q)
@@ -50,6 +51,6 @@ jobs:
           docker network create --driver=bridge chopsuey-net
           echo "starting chopsuey container"
           docker run -dit --name chopsuey --network chopsuey-net -e CS_USER=$CS_USER -e CS_PASSWORD=$CS_PASSWORD -e CS_BOOKING_EDIT_URL=$CS_BOOKING_EDIT_URL -e AIRTABLE_API_KEY=$AIRTABLE_API_KEY -e AIRTABLE_BASE_ID=$AIRTABLE_BASE_ID -e SLACK_TOKEN=$SLACK_TOKEN gleis21/chopsuey:latest
-          echo > Caddyfile && echo -e "fe4794e2-185b-435a-a609-2fdd67e848f8.pub.instances.scw.cloud {\n  reverse_proxy http://chopsuey:3000 {\n    header_up Host {http.reverse_proxy.upstream.host}\n  }\n}" >> Caddyfile
+          echo > Caddyfile && echo -e "$CS_DOMAIN {\n  reverse_proxy http://chopsuey:3000 {\n    header_up Host {http.reverse_proxy.upstream.host}\n  }\n}" >> Caddyfile
           echo "starting caddy container"
           docker run -dit -p 80:80 -p 443:443 --network chopsuey-net -v $PWD/Caddyfile:/etc/caddy/Caddyfile -v caddy_data:/data -v caddy_config:/config caddy:2-alpine
