@@ -35,7 +35,7 @@ jobs:
           AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
           SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
           CADDYFILE: ${{secrets.CADDYFILE}}
-          CS_DOMAIN: ${{CS_DOMAIN}}
+          CS_DOMAIN: ${{secrets.CS_DOMAIN}}
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.VPS_USER }}
