@@ -82,11 +82,12 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
         waitUntil: 'networkidle2'
       });
       // /tmp/chopsuey dir must exist!!
-      if (!fs.existsSync('/tmp/chopsuey')) {
-        fs.mkdirSync('/tmp/chopsuey');
+      const tmpDir = '/tmp/chopsuey';
+      if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir);
       }
       const fileName = 'gleis21_' + new Date().valueOf().toString() + '.pdf';
-      const filePath = '/tmp/chopsuey/' + fileName;
+      const filePath = tmpDir + '/' + fileName;
       await page.pdf({ path: filePath, format: 'A4' });
 
       await browser.close();
@@ -131,7 +132,6 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
         const p = await personSrv.getById(b.get('Mieter'));
         const ts = await timeSlotsSrv.getBookingTimeSlots(b.get('Key'));
         const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(b.get('Key'));
-        console.log(JSON.stringify(invoiceItems));
         const contract = {
           title: b.get('Titel'),
           participantsCount: b.get('TeilnehmerInnenanzahl'),
@@ -168,18 +168,24 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
             }),
           invoiceItems: {
             equipment: invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Ausstattung').map(e => {
+              const discount = e.get('Rabatt') ? e.get('Rabatt') : 0;
+              const finalPrice = parseFloat(e.get('SummeNetto')) - (parseFloat(e.get('SummeNetto')) * discount)
               return {
                 name: e.get('ArtikelName'),
                 count: e.get('Anzahl'),
                 price: e.get('SummeNetto'),
-                discount: e.get('Rabatt')
+                discount: discount,
+                finalPrice: finalPrice
               };
             }),
             rooms: invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Raum').map(e => {
+              const discount = e.get('Rabatt') ? e.get('Rabatt') : 0;
+              const finalPrice = parseFloat(e.get('SummeNetto')) - (parseFloat(e.get('SummeNetto')) * discount)
               return {
                 name: e.get('ArtikelName'),
                 price: e.get('SummeNetto'),
-                discount: e.get('Rabatt')
+                discount: discount,
+                finalPrice: finalPrice
               };
             })
           },

@@ -1,4 +1,0 @@
-version: '2'
-services:
-    chopsuey:
-        image: gleis21/chopsuey:latest

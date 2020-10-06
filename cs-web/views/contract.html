@@ -161,13 +161,14 @@
             <tr class="section">
               <td colspan="2">
                 <br />
-                <b>Ausstattung:</b>
+                <b>Zusätzliche Ausstattung:</b>
                 <table class="border" style="border-collapse: collapse; width: 100%;">
                   <tr>
                     <th class="cell-padding border" scope="col"></th>
                     <th class="cell-padding border" scope="col">Anzahl</th>
                     <th class="cell-padding border" scope="col">Preis</th>
                     <th class="cell-padding border" scope="col">Rabatt</th>
+                    <th class="cell-padding border" scope="col">Endpreis</th>
                   </tr>
                   <% invoiceItems.equipment.forEach( it => { %>
                   <tr>
@@ -177,6 +178,7 @@
                     </td>
                     <td class="cell-padding border"><%= it.price %> &euro;</td>
                     <td class="cell-padding border"><%= it.discount %> &percnt;</td>
+                    <td class="cell-padding border"><%= it.finalPrice %> &euro;</td>
                   </tr>
                   <% }) %>
                 </table>
@@ -193,12 +195,14 @@
                     <th class="cell-padding border" scope="col"></th>
                     <th class="cell-padding border" scope="col">Preis</th>
                     <th class="cell-padding border" scope="col">Rabatt</th>
+                    <th class="cell-padding border" scope="col">Endpreis</th>
                   </tr>
                   <% invoiceItems.rooms.forEach( it => { %>
                   <tr>
                     <td class="cell-padding border"><%= it.name %></td>
                     <td class="cell-padding border"><%= it.price %> &euro;</td>
                     <td class="cell-padding border"><%= it.discount * 100 %> &percnt;</td>
+                    <td class="cell-padding border"><%= it.finalPrice %> &euro;</td>
                   </tr>
                   <% }) %>
                 </table>

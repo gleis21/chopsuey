@@ -1,7 +1,0 @@
-version: '2'
-services:
-    chopsuey:
-        restart: on-failure:10
-        expose:
-            - "3000"
-
