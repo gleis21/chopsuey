@@ -54,12 +54,52 @@
           <label for="email">E-Mail-Adresse des Kunden</label>
           <input type="email" required class="form-control" v-model="booking.customerEmail">
         </div>
+        <div class="form-group">
+          <label for="agent">Bearbeiter</label>
+          <select v-model="agent">
+            <template v-for="a in agents">
+              <option>{{a}}</option>
+            </template>
+          </select>
+        </div>
+        
         
       </div>
     <div class="row">
       <div class="col-md-12">
-      <div class="alert alert-success" role="alert" v-if="submitResult && submitResult.success">
-        {{submitResult.msg}}
+      <div v-if="submitResult && submitResult.success">
+        <div class="alert alert-success" role="alert">
+          <p>Die Buchung wurde erfolgreich angelegt. Bitte sende untenstehende Email an <a v-bind:href="'mailto:'+submitResult.email+'?subject=Ihre Buchung in Gleis 21'">{{submitResult.email}}</a></p>
+        </div>
+        <div>
+          <h4>Information zu früheren Buchungen</h4>
+          <template v-if="submitResult.customer">  
+            <ul>
+              <li v-for="b in submitResult.customer.Buchungen">
+              </li>
+            </ul> 
+        </template>
+        <template v-else>
+           <p>Dieser Mieter bucht zum ersten Mal.</p>
+        </template>
+        </div>
+        
+        <form id="msg-form">
+          
+          <textarea id="msg">
+            <template v-if="submitResult.customer">
+            Sehr geehrte(r) {{submitResult.customer.Vorname}} {{submitResult.customer.Nachname}},
+            </template>
+            <template v-else>
+            Hallo,
+            </template><br/>
+            vielen Dank für Ihr Interesse an Gleis 21! Bitte ergänzen Sie die Details zu 
+            Ihrer Buchung unter {{submitResult.editUrl}}.
+
+            Für die Bearbeitung benötigen Sie folgenden PIN-Code:
+            {{submitResult.pin}}
+          </textarea>
+        </form>
       </div>
       <div class="alert alert-danger" role="alert" v-if="submitResult && !submitResult.success">
         {{submitResult.msg}}

@@ -61,12 +61,22 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
         customerEmail: b.customerEmail,
         pin: pin
       };
+      
+      // try to get entry of person table by email if it was a customer (by limiting to the „Mieter“ view)
+      const c =  await personSrv.getByEmail(b.customerEmail, "Mieter");
+
       // Create a new entry in the booking table
       const r = await bookingSrv.create(booking);
+      
       const editUrl = process.env.CS_BOOKING_EDIT_URL + '/' + r.getId();
+
       
       res.status(200).json({
-        res: { editUrl: editUrl, email: b.customerEmail, pin: pin },
+        res: { 
+          editUrl: editUrl, 
+          email: b.customerEmail, 
+          customer: c ? c.fields : false,
+          pin: pin },
         err: null
       });
     })
@@ -112,6 +122,22 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
       res.status(200).json({
         res: rooms
       });
+    })
+  );
+
+  router.get(
+    '/agents',
+    asyncMiddleware(async (req, res, next) => {
+      console.log("calling /agents endpoint");
+      /* const agents = (await personSrv.list("Bearbeiter EG")).map(p => {
+        return { 
+          type: "irgendwos",
+          email: p.get('Email'),
+          name: p.get('Vorname') + " " + p.get('Nachname')
+        };
+       }); */
+      agents = await personSrv.list("Bearbeiter EG");
+      res.status(200).json(agents);
     })
   );
 

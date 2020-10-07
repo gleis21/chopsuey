@@ -1,4 +1,5 @@
 const moment = require('moment');
+const { NotExtended } = require('http-errors');
 
 class InvoiceService {
   constructor(base, itemsSrv) {
@@ -202,7 +203,38 @@ class TimeSlotsService {
 class PersonService {
   constructor(base) {
     this.table = base('Personen');
+    this.defaultView = 'Alle Personen';
+    this.personen = [];
   }
+
+  async list(view) {
+    // this is the actually selected Table View – defaults to 'Alle Personen'
+    const selectedView = view || this.defaultView;
+    // this will hold all records fetched from the API 
+    let records = []; 
+
+    // processPage runs on every results page returned by the API
+    const processPage = (pageRecords, fetchNextPage)=> {
+      // this.records = [...records, ...pageRecords]
+      pageRecords.forEach(r => {
+        records.push(r);
+      });
+      fetchNextPage();
+    }
+
+    // process Records runs after the last page has been fetched from the API
+    const processRecords = (err) => {
+      if (err) { console.error(err); return }
+      console.log(records);
+      return
+    }
+    
+    return await this.table
+      .select({
+        view: selectedView,
+        fields: ["Email", "Vorname", "Nachname"]
+    }).eachPage(processPage, processRecords);
+  };
 
   async createOrUpdate(p) {
     const defaultRole = 'MieterIn';
@@ -249,7 +281,7 @@ class PersonService {
   async getByEmail(email) {
     const r = await this.table
       .select({
-        view: 'Alle Personen',
+        view: this.defaultView,
         filterByFormula: '{Email}=' + "'" + email + "'"
       })
       .firstPage();
