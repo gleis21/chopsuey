@@ -215,18 +215,17 @@ class PersonService {
 
     // processPage runs on every results page returned by the API
     const processPage = (pageRecords, fetchNextPage)=> {
-      // this.records = [...records, ...pageRecords]
       pageRecords.forEach(r => {
         records.push(r);
       });
       fetchNextPage();
     }
 
-    // process Records runs after the last page has been fetched from the API
+    // processRecords runs after the last page has been fetched from the API
     const processRecords = (err) => {
       if (err) { console.error(err); return }
       console.log(records);
-      return
+      return records
     }
     
     return await this.table

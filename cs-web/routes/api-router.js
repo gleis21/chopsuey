@@ -128,16 +128,14 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
   router.get(
     '/agents',
     asyncMiddleware(async (req, res, next) => {
-      console.log("calling /agents endpoint");
-      /* const agents = (await personSrv.list("Bearbeiter EG")).map(p => {
+      const agents = (await personSrv.list("Bearbeiter EG")).map(p => {
         return { 
-          type: "irgendwos",
+          id: p.get('id'),
           email: p.get('Email'),
           name: p.get('Vorname') + " " + p.get('Nachname')
         };
-       }); */
-      agents = await personSrv.list("Bearbeiter EG");
-      res.status(200).json(agents);
+       });
+      res.status(200).json(agents.length);
     })
   );
 
