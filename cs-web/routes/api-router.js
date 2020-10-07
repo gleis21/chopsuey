@@ -17,6 +17,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
       var person = {};
       if (customerIds) {
         const customerId = customerIds[0];
+        console.log(customerId);
         const c = await personSrv.getById(customerId);
         person = {
           email: c.get('Email'),
@@ -33,7 +34,8 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
         }
       }
       const status = b.get('Status');
-      if (!status || status === 'Angefragt') {
+      console.log(status);
+      if (!status || status === 'Angefragt' || status === 'Vorreserviert') {
         res.status(200).json({
           res: { 
             id: b.id, 
@@ -43,7 +45,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
           err: null
         });
       } else {
-        res.status(403).json({ res: null, err: 403 });
+        res.status(400).json({ res: null, err: 1001 });
       }
     })
   );

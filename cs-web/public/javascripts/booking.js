@@ -1,10 +1,11 @@
 Vue.component('booking-form', {
   template: '#booking-form',
-  data: function() {
+  data: function () {
     return {
       initialized: false,
       initializerWidth: 20,
       submitResult: null,
+      error: null,
       loading: false,
       booking: {
         person: {},
@@ -65,30 +66,38 @@ Vue.component('booking-form', {
     this.initializerWidth = 60;
     const pathSegments = window.location.pathname.split('/');
     const id = pathSegments[pathSegments.length - 1];
-    const booking = await (await fetch('/api/bookings/' + id)).json();
-    const room = await (await fetch('/api/rooms')).json();
-    const equipment = await (await fetch('/api/equipment')).json();
-    this.rooms = room.res;
-    this.booking.equipment = equipment.res.map(e => {
-      return { id: e.id, name: e.name, count: 0, note: e.note };
-    });
-    this.booking.timeSlots[0].roomId = this.rooms[0].id
-    this.booking = { ...this.booking, ...booking.res };
 
+    const booking = await (await fetch('/api/bookings/' + id)).json();
+    if (booking.err) {
+      if (booking.err === 1001) {
+        this.error = 'Das Bearbeiten der Buchung ist nicht mehr möglich.';
+      } else {
+        this.error = 'Ups... das hätte nie passieren sollen.';
+      }
+    } else {
+      const room = await (await fetch('/api/rooms')).json();
+      const equipment = await (await fetch('/api/equipment')).json();
+      this.rooms = room.res;
+      this.booking.equipment = equipment.res.map(e => {
+        return { id: e.id, name: e.name, count: 0, note: e.note };
+      });
+      this.booking.timeSlots[0].roomId = this.rooms[0].id
+      this.booking = { ...this.booking, ...booking.res };
+    }
     this.initializerWidth = 100;
     setTimeout(() => (this.initialized = true), 150);
   },
   methods: {
-    addTimeSlot: function() {
+    addTimeSlot: function () {
       const lastRange = this.booking.timeSlots[
         this.booking.timeSlots.length - 1
       ];
       this.booking.timeSlots = [...this.booking.timeSlots, { ...lastRange }];
     },
-    deleteTimeSlot: function(index) {
+    deleteTimeSlot: function (index) {
       this.booking.timeSlots.splice(index, 1);
     },
-    submit: async function() {
+    submit: async function () {
       this.loading = true;
       this.booking.equipment = this.booking.equipment.filter(eq => eq.count > 0);
       const res = await fetch('/api/bookings/' + this.booking.id, {

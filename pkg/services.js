@@ -153,26 +153,6 @@ class TimeSlotsService {
     return x;
   }
 
-  async getTimeSlotsAfterToday() {
-    const ts = await this.table
-      .select({ maxRecords: 1000, view: 'Zukunft' })
-      .firstPage();
-    const groupedByRoom = ts.reduce((acc, curr) => {
-      const roomIds = curr.get('Raum');
-      if (roomIds && roomIds.length === 1) {
-        const roomId = roomIds[0];
-        if (!acc[roomId]) acc[roomId] = [];
-        acc[roomId].push({
-          beginn: moment(curr.get('Beginn')),
-          end: moment(curr.get('Ende'))
-        });
-      }
-      return acc;
-    }, {});
-
-    return groupedByRoom;
-  }
-
   async create(bookingID, timeSlots) {
     const slots = await Promise.all(timeSlots.map(async ts => {
       const beginn = moment(ts.beginnDate)
