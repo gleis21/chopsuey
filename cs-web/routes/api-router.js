@@ -33,7 +33,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
         }
       }
       const status = b.get('Status');
-      if (!status || status === 'Angefragt') {
+      if (!status || status === 'Vorreserviert') {
         res.status(200).json({
           res: { 
             id: b.id, 
@@ -59,7 +59,8 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
       const booking = {
         title: b.title,
         customerEmail: b.customerEmail,
-        pin: pin
+        pin: pin,
+        autoMail: autoMail
       };
       
       // try to get entry of person table by email if it was a customer (by limiting to the „Mieter“ view)
@@ -99,10 +100,8 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
       try {
         const r = await bookingSrv.update(booking);
         // Use the `chat.postMessage` method to send a message from this app
-        await slackClient.chat.postMessage({
-          channel: '#chopsuey-buchungen',
-          text: `Neue Anfrage für die Buchung "${booking.title}" von ${booking.person.email}`,
-        });
+        
+        
         res.status(200).json({
           res: r,
           err: null
