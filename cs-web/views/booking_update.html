@@ -141,6 +141,14 @@
           <textarea class="form-control" id="notes" rows="5" v-model="booking.notes"></textarea>
         </div>
 
+        <div class="alert alert-warning" role="alert">
+          <b>Hinweise zur Angabe von Raumnutzungszeiten:</b>
+          Bitte geben Sie hier den Zeitraum an, in dem Sie den Raum jeweils für Ihre Buchung benötigen.<br>
+          Bitte geben Sie bei öffentlichen Veranstaltungen bitte Beginn und Ende der Veranstaltung an, sodass 
+          wir sie ggf. direkt in unser Veranstaltungsprogramm (Newsletter, Plakate / Flyer) übernehmen können.
+          Teilen Sie uns allfällige Auf- oder Abbauzeiten im Anmerkungsfeld der jeweiligen Raumbuchung mit.
+        </div>
+
         <div class="jumbotron bg-light" v-for="(ts, index) in booking.timeSlots">
           <button type="button" class="btn btn-danger float-right" v-on:click="deleteTimeSlot(index)"><span class="fa fa-trash"></span></button>
           <div class="form-row">
