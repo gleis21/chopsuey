@@ -6,13 +6,15 @@ Vue.component('booking-form', {
       loading: false,
       booking: {
         title: '',
-        customerEmail: ''
+        customerEmail: '',
+        sendAutoMail: false
       }
     };
   },
   async mounted() {},
   methods: {
     submit: async function() {
+      console.log(JSON.stringify(this.booking));
       this.loading = true;
       const resp = await fetch('/api/bookings', {
         headers: { 'Content-Type': 'application/json' },

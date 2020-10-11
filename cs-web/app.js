@@ -33,7 +33,7 @@ const bookingSrv = new services.BookingService(
   invoiceSrv
 );
 
-app.use('/api', apiRouter(bookingSrv, itemsSrv, personSrv));
+app.use('/api', apiRouter(bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv));
 app.use(
   '/bookings',
   bookingsRouter(bookingSrv, invoiceSrv, timeslotsSrv, personSrv)

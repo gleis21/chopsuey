@@ -77,9 +77,12 @@ Vue.component('booking-form', {
     } else {
       const room = await (await fetch('/api/rooms')).json();
       const equipment = await (await fetch('/api/equipment')).json();
+      const bookedEquipment = await (await fetch('/api/bookings/' + id + '/bookedequipment')).json();
+
       this.rooms = room.res;
       this.booking.equipment = equipment.res.map(e => {
-        return { id: e.id, name: e.name, count: 0, note: e.note };
+        const bookedEqp = bookedEquipment.res.filter(r => r.equipmentId === e.id);
+        return { id: e.id, name: e.name, count: bookedEqp.length > 0 ? bookedEqp[0].numberBooked: 0, description: e.description };
       });
       this.booking.timeSlots[0].roomId = this.rooms[0].id
       this.booking = { ...this.booking, ...booking.res };

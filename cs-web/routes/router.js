@@ -130,8 +130,8 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
         res.status(403).json({});
       } else {
         const p = await personSrv.getById(b.get('Mieter'));
-        const ts = await timeSlotsSrv.getBookingTimeSlots(b.get('Key'));
-        const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(b.get('Key'));
+        const ts = await timeSlotsSrv.getBookingTimeSlots(b.getId());
+        const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(b.getId());
         const contract = {
           title: b.get('Titel'),
           participantsCount: b.get('TeilnehmerInnenanzahl'),

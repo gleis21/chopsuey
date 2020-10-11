@@ -1,13 +1,12 @@
 const express = require('express');
+const { InvoiceService } = require('../../pkg/services');
 const router = express.Router();
-const { WebClient } = require('@slack/web-api');
-const slackClient = new WebClient(process.env.SLACK_TOKEN);
 
 const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-module.exports = (bookingSrv, itemsSrv, personSrv) => {
+module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => {
   /* GET home page. */
   router.get(
     '/bookings/:id',
@@ -17,7 +16,6 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
       var person = {};
       if (customerIds) {
         const customerId = customerIds[0];
-        console.log(customerId);
         const c = await personSrv.getById(customerId);
         person = {
           email: c.get('Email'),
@@ -34,8 +32,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
         }
       }
       const status = b.get('Status');
-      console.log(status);
-      if (!status || status === 'Angefragt' || status === 'Vorreserviert') {
+      if (!status || status === 'Neu' || status === 'Vorreserviert') {
         res.status(200).json({
           res: { 
             id: b.id, 
@@ -61,7 +58,8 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
       const booking = {
         title: b.title,
         customerEmail: b.customerEmail,
-        pin: pin
+        pin: pin,
+        sendAutoMail: b.sendAutoMail
       };
       // Create a new entry in the booking table
       const r = await bookingSrv.create(booking);
@@ -90,18 +88,45 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
       };
       try {
         const r = await bookingSrv.update(booking);
-        // Use the `chat.postMessage` method to send a message from this app
-        await slackClient.chat.postMessage({
-          channel: '#chopsuey-buchungen',
-          text: `Neue Anfrage für die Buchung "${booking.title}" von ${booking.person.email}`,
-        });
+        
         res.status(200).json({
           res: r,
           err: null
         });
       } catch (error) {
         console.log(error);
+        throw new Error(error.toString());
       }
+    })
+  );
+
+  router.get(
+    '/bookings/:id/bookedequipment',
+    asyncMiddleware(async (req, res, next) => {
+      console.log('booking id:' + req.params.id);
+      const invoiceItems = (await invoiceSrv.getInvoceItemsByBooking(req.params.id));
+      const bookedequipment = invoiceItems
+      .filter(it => it.get('ArtikelTyp')[0] === 'Ausstattung')
+      .map(it => { 
+        return { equipmentId: it.get('ArtikelId')[0], numberBooked: it.get('Anzahl') };
+      });
+      res.status(200).json({
+        res: bookedequipment
+      });
+    })
+  );
+
+  router.get(
+    '/bookings/:id/eventtimeslots',
+    asyncMiddleware(async (req, res, next) => {
+      const eventtimeslots = (await timeslotsSrv.getBookingTimeSlots(req.params.id))
+      .filter(it => it.get('Type') === 'Veranstaltung')
+      .map(it => { 
+        return {  };
+      });
+      res.status(200).json({
+        res: eventtimeslots
+      });
     })
   );
 
@@ -121,7 +146,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv) => {
     '/equipment',
     asyncMiddleware(async (req, res, next) => {
       const equipment = (await itemsSrv.getEquipment()).map(r => {
-        return { id: r.id, name: r.get('Key'), note: r.get('Beschreibung') };
+        return { id: r.id, name: r.get('Key'), description: r.get('Beschreibung') };
       });
       res.status(200).json({
         res: equipment

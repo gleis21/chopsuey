@@ -8,7 +8,18 @@ class InvoiceService {
     this.itemsSrv = itemsSrv;
   }
 
-  async createInvoice(invoiceItems) {
+  async createInvoice(bookingId, invoiceItems) {
+    await this.deleteEquipmentInvoceItemsByBooking(bookingId);
+    const invoices = await this.getInvoceByBooking(bookingId);
+    if (invoices && invoices.length > 0) {
+      const invoice = invoices[0];
+      const existing = invoice.get('Rechnungsposten') ? invoice.get('Rechnungsposten') : [];
+      return await this.rechnungenTable.update(invoice.getId(), {
+        Rechnungsposten: [...existing, ...invoiceItems.map(it => it.getId())],
+        Status: invoice.get('Status'),
+        Rechnungsdatum: invoice.get('Rechnungsdatum')
+      });
+    }
     return await this.rechnungenTable.create({
       Rechnungsposten: invoiceItems.map(it => it.getId()),
       Status: 'Neu',
@@ -16,23 +27,33 @@ class InvoiceService {
     });
   }
 
-  async getInvoceByBooking(bookingKey) {
+  async getInvoceByBooking(bookingRecordId) {
     return await this.rechnungenTable
       .select({
         maxRecords: 1,
         view: 'Grid view',
-        filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
+        filterByFormula: '{BuchungRecordId}=' + "'" + bookingRecordId + "'"
       })
       .firstPage();
   }
 
-  async getInvoceItemsByBooking(bookingKey) {
+  async getInvoceItemsByBooking(bookingRecordId) {
     return await this.rechnungspostenTable
       .select({
         view: 'Grid view',
-        filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
+        filterByFormula: '{BuchungRecordId}=' + "'" + bookingRecordId + "'"
       })
       .firstPage();
+  }
+
+  async deleteEquipmentInvoceItemsByBooking(bookingRecordId) {
+    const equipmentItemsIds = (await this.getInvoceItemsByBooking(bookingRecordId))
+      .filter(it => it.get('ArtikelTyp')[0] === 'Ausstattung')
+      .map(it => it.getId());
+      console.log(equipmentItemsIds);
+      if (equipmentItemsIds && equipmentItemsIds.length > 0) {
+        await this.rechnungspostenTable.destroy(equipmentItemsIds);
+      }
   }
 
   async getEquipmentPrices() {
@@ -58,7 +79,7 @@ class InvoiceService {
         return {
           fields: {
             Anzahl: parseInt(p.count, 10),
-            Artikel: [p.priceId]
+            Preis: [p.priceId]
           }
         };
       });
@@ -86,26 +107,24 @@ class BookingService {
     if (!customer) {
       customer = await this.personSrv.createOrUpdate({email: b.customerEmail})
     }
-    return await this.table.create({ Titel: b.title, Mieter: [customer.getId()], PIN: b.pin });
+    return await this.table.create({ Titel: b.title, Mieter: [customer.getId()], PIN: b.pin, SendAutoMail: b.sendAutoMail, Status: 'Neu' });
   }
 
   async update(b) {
     const person = await this.personSrv.createOrUpdate(b.person);
-    const ts = await this.timeSlotsSrv.create(b.id, b.timeSlots);
+    const tsIds = await this.timeSlotsSrv.replaceEventBookingTimeSlots(b.id, b.timeSlots);
     var equipmentInvoiceItems = [];
     if (b.equipment && b.equipment.length > 0) {
-      equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(
-        b.equipment
-      );
+      equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(b.equipment);
     }
-    const invoice = await this.invoiceSrv.createInvoice(equipmentInvoiceItems);
+    const invoice = await this.invoiceSrv.createInvoice(b.id, equipmentInvoiceItems);
     const bk = {
       Titel: b.title,
       TeilnehmerInnenanzahl: b.participantsCount,
       Status: 'Vorreserviert',
       Mieter: [person.getId()],
       Notes: b.notes,
-      Timeslots: ts.map(s => s.getId()),
+      Timeslots: tsIds,
       Rechnungen: [invoice.getId()]
     };
     return await this.table.update(b.id, bk);
@@ -143,14 +162,31 @@ class TimeSlotsService {
     this.itemsSrv = itemsSrv;
   }
 
-  async getBookingTimeSlots(bookingKey) {
-    var x = await this.table
+  async getBookingTimeSlots(bookingRecordId) {
+    return await this.table
       .select({
         view: 'Alles',
-        filterByFormula: '{BuchungKey}=' + "'" + bookingKey + "'"
+        filterByFormula: '{BuchungRecordId}=' + "'" + bookingRecordId + "'"
       })
       .firstPage();
-    return x;
+  }
+
+  async replaceEventBookingTimeSlots(bookingRecordId, timeSlots) {
+    const allBookingTimeSlots = await this.getBookingTimeSlots(bookingRecordId);
+    console.log(allBookingTimeSlots);
+    const eventTimeSlotsIds = allBookingTimeSlots
+      .filter(r => r.get('Type') === 'Veranstaltung')
+      .map(r => r.getId());
+    console.log("ts to delete" + eventTimeSlotsIds);
+    if (eventTimeSlotsIds && eventTimeSlotsIds.length > 0) {
+      await this.table.destroy(eventTimeSlotsIds);
+    }
+    const otherTimeSlotsIds = allBookingTimeSlots
+    .filter(r => r.get('Type') !== 'Veranstaltung')
+    .map(r => r.getId());
+    console.log("otherTimeSlotsIds" + otherTimeSlotsIds);
+    const newTimeSlotsIds = (await this.create(bookingRecordId, timeSlots)).map(ts => ts.getId());
+    return [...otherTimeSlotsIds, ...newTimeSlotsIds];
   }
 
   async create(bookingID, timeSlots) {
