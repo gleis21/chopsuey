@@ -173,18 +173,15 @@ class TimeSlotsService {
 
   async replaceEventBookingTimeSlots(bookingRecordId, timeSlots) {
     const allBookingTimeSlots = await this.getBookingTimeSlots(bookingRecordId);
-    console.log(allBookingTimeSlots);
     const eventTimeSlotsIds = allBookingTimeSlots
       .filter(r => r.get('Type') === 'Veranstaltung')
       .map(r => r.getId());
-    console.log("ts to delete" + eventTimeSlotsIds);
     if (eventTimeSlotsIds && eventTimeSlotsIds.length > 0) {
       await this.table.destroy(eventTimeSlotsIds);
     }
     const otherTimeSlotsIds = allBookingTimeSlots
     .filter(r => r.get('Type') !== 'Veranstaltung')
     .map(r => r.getId());
-    console.log("otherTimeSlotsIds" + otherTimeSlotsIds);
     const newTimeSlotsIds = (await this.create(bookingRecordId, timeSlots)).map(ts => ts.getId());
     return [...otherTimeSlotsIds, ...newTimeSlotsIds];
   }

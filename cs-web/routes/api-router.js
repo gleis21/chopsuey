@@ -1,6 +1,7 @@
 const express = require('express');
 const { InvoiceService } = require('../../pkg/services');
 const router = express.Router();
+const moment = require('moment');
 
 const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -37,6 +38,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
           res: { 
             id: b.id, 
             title: b.get('Titel'),
+            notes: b.get('Notes'),
             person: person,
           },
           err: null
@@ -119,10 +121,22 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
   router.get(
     '/bookings/:id/eventtimeslots',
     asyncMiddleware(async (req, res, next) => {
+      var i = 1;
       const eventtimeslots = (await timeslotsSrv.getBookingTimeSlots(req.params.id))
       .filter(it => it.get('Type') === 'Veranstaltung')
       .map(it => { 
-        return {  };
+        return { 
+          id: i++,
+          roomId: it.get('Raum')[0],
+          type: 'Veranstaltung',
+          beginnDate: moment(it.get('Beginn')).format('YYYY-MM-DD'),
+          beginnH: moment(it.get('Beginn')).hours(),
+          beginnM: moment(it.get('Beginn')).minutes(),
+          endDate: moment(it.get('Beginn')).add(it.get('Duration'), 's').format('YYYY-MM-DD'),
+          endH: moment(it.get('Beginn')).add(it.get('Duration'), 's').hours(),
+          endM: moment(it.get('Beginn')).add(it.get('Duration'), 's').minutes(),
+          notes: it.get('Notes')
+         };
       });
       res.status(200).json({
         res: eventtimeslots

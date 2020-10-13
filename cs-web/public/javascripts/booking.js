@@ -12,24 +12,7 @@ Vue.component('booking-form', {
         participantsCount: 1,
         equipment: [],
         notes: '',
-        timeSlots: [
-          {
-            id: 1,
-            roomId: '',
-            type: 'Veranstaltung',
-            beginnDate: moment()
-              .add(2, 'd')
-              .format('YYYY-MM-DD'),
-            beginnH: 9,
-            beginnM: 0,
-            endDate: moment()
-              .add(2, 'd')
-              .format('YYYY-MM-DD'),
-            endH: 17,
-            endM: 0,
-            notes: ''
-          }
-        ]
+        timeSlots: []
       },
       rooms: [],
       equipment: [],
@@ -75,16 +58,38 @@ Vue.component('booking-form', {
         this.error = 'Ups... das hätte nie passieren sollen.';
       }
     } else {
-      const room = await (await fetch('/api/rooms')).json();
-      const equipment = await (await fetch('/api/equipment')).json();
-      const bookedEquipment = await (await fetch('/api/bookings/' + id + '/bookedequipment')).json();
+      const roomsRes = await (await fetch('/api/rooms')).json();
+      const equipmentRes = await (await fetch('/api/equipment')).json();
+      const bookedEquipmentRes = await (await fetch('/api/bookings/' + id + '/bookedequipment')).json();
+      const timeslotsRes = await (await fetch('/api/bookings/' + id + '/eventtimeslots')).json();
 
-      this.rooms = room.res;
-      this.booking.equipment = equipment.res.map(e => {
-        const bookedEqp = bookedEquipment.res.filter(r => r.equipmentId === e.id);
+      this.rooms = roomsRes.res;
+      this.booking.equipment = equipmentRes.res.map(e => {
+        const bookedEqp = bookedEquipmentRes.res.filter(r => r.equipmentId === e.id);
         return { id: e.id, name: e.name, count: bookedEqp.length > 0 ? bookedEqp[0].numberBooked: 0, description: e.description };
       });
-      this.booking.timeSlots[0].roomId = this.rooms[0].id
+      if (timeslotsRes.res && timeslotsRes.res.length > 0) {
+        this.booking.timeSlots = timeslotsRes.res
+      } else {
+        this.booking.timeSlots = [
+          {
+            id: 1,
+            roomId: this.rooms[0].id,
+            type: 'Veranstaltung',
+            beginnDate: moment()
+              .add(2, 'd')
+              .format('YYYY-MM-DD'),
+            beginnH: 9,
+            beginnM: 0,
+            endDate: moment()
+              .add(2, 'd')
+              .format('YYYY-MM-DD'),
+            endH: 17,
+            endM: 0,
+            notes: ''
+          }
+        ];
+      }
       this.booking = { ...this.booking, ...booking.res };
     }
     this.initializerWidth = 100;
