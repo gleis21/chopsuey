@@ -1,52 +1,24 @@
 const express = require('express');
 const moment = require('moment');
-var auth = require('basic-auth');
-var compare = require('tsscmp');
+
 const router = express.Router();
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
+const asyncMiddleware = require('../../pkg/middleware').asyncMiddleware;
+const bookingCredsMiddleware = require('../../pkg/middleware').bookingCredsMiddleware;
+const basicAuthMiddleware = require('../../pkg/middleware').basicAuthMiddleware;
+
 const gleisUser = process.env.CS_USER;
 const gleisPassword = process.env.CS_PASSWORD;
 
-const asyncMiddleware = fn => (req, res, next) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
-};
-function groupBy(xs, key) {
-  return xs.reduce(function(rv, x) {
-    (rv[x[key]] = rv[x[key]] || []).push(x);
-    return rv;
-  }, {});
-}
 
-function basicAuth(validUser, validPass) {
-  return (req, res, next) => {
-    var credentials = auth(req);
-
-    if (!credentials || !check(credentials.name, credentials.pass, validUser, validPass)) {
-      res.statusCode = 401;
-      res.setHeader('WWW-Authenticate', 'Basic realm="example"');
-      res.end('Access denied');
-    } else {
-      next();
-    }
-  }
-}
-
-function check(providedUserame, providedPass, validUsername, validPass) {
-  var valid = true;
-
-  valid = compare(providedUserame, validUsername) && valid;
-  valid = compare(providedPass, validPass) && valid;
-
-  return valid;
-}
 
 module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
   /* GET home page. */
   router.get(
     '/new',
-    basicAuth(gleisUser, gleisPassword),
+    basicAuthMiddleware(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
       res.render('booking_create');
     })
@@ -54,26 +26,19 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
 
   router.get(
     '/:id',
-    asyncMiddleware(async (req, res, next) => {
-      var id = req.params.id;
-      const b = await bookingSrv.get(req.params.id);
-      var userName = b.get('MieterEmail')[0];
-      var pin = b.get('PIN');
-      res.locals.customerUserName = userName;
-      res.locals.pin = pin
-      next()
-    }),
+    asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
     (req, res, next) => {
-      return basicAuth(res.locals.customerUserName, res.locals.pin)(req, res, next);
+      return basicAuthMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
     },
     asyncMiddleware(async (req, res, next) => {
+      res.cookie('cs-creds',Buffer.from(res.locals.customerUserName + ':' + res.locals.pin).toString('base64'), { maxAge: 900000, httpOnly: false, encode: String });
       res.render('booking_update');
     })
   );
 
   router.get(
     '/:id/contract/print',
-    basicAuth(gleisUser, gleisPassword),
+    basicAuthMiddleware(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
       const browser = await puppeteer.launch();
       const page = await browser.newPage();
@@ -103,7 +68,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
 
   // router.get(
   //   '/:id/invoice',
-  //   basicAuth(gleisUser, gleisPassword),
+  //   basicAuthMiddleware(gleisUser, gleisPassword),
   //   asyncMiddleware(async (req, res, next) => {
   //     const b = await bookingSrv.get(req.params.id);
   //     const invoice = await invoiceSrv.getInvoceByBooking(b.get('Key'));
@@ -123,7 +88,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
 
   router.get(
     '/:id/contract',
-    basicAuth(gleisUser, gleisPassword),
+    basicAuthMiddleware(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
       const b = await bookingSrv.get(req.params.id);
       if (b.get('Status') !== 'Vorreserviert') {

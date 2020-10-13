@@ -1,16 +1,25 @@
 const express = require('express');
 const { InvoiceService } = require('../../pkg/services');
 const router = express.Router();
+var auth = require('basic-auth');
+var compare = require('tsscmp');
 const moment = require('moment');
 
-const asyncMiddleware = fn => (req, res, next) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
-};
+const asyncMiddleware = require('../../pkg/middleware').asyncMiddleware;
+const bookingCredsMiddleware = require('../../pkg/middleware').bookingCredsMiddleware;
+const basicAuthMiddleware = require('../../pkg/middleware').basicAuthMiddleware;
+
+const gleisUser = process.env.CS_USER;
+const gleisPassword = process.env.CS_PASSWORD;
 
 module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => {
   /* GET home page. */
   router.get(
     '/bookings/:id',
+    asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
+    (req, res, next) => {
+      return basicAuthMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
+    },
     asyncMiddleware(async (req, res, next) => {
       const b = await bookingSrv.get(req.params.id);
       const customerIds = b.get('Mieter');
@@ -52,6 +61,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
   // create new booking by booking_create.html
   router.post(
     '/bookings',
+    basicAuthMiddleware(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
       const b = req.body;
       // Create a random PIN which the user will need to enter before 
@@ -76,6 +86,10 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
 
   router.put(
     '/bookings/:id',
+    asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
+    (req, res, next) => {
+      return basicAuthMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
+    },
     asyncMiddleware(async (req, res, next) => {
       const b = req.body;
       const booking = {
@@ -104,6 +118,10 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
 
   router.get(
     '/bookings/:id/bookedequipment',
+    asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
+    (req, res, next) => {
+      return basicAuthMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
+    },
     asyncMiddleware(async (req, res, next) => {
       console.log('booking id:' + req.params.id);
       const invoiceItems = (await invoiceSrv.getInvoceItemsByBooking(req.params.id));
@@ -120,6 +138,10 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
 
   router.get(
     '/bookings/:id/eventtimeslots',
+    asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
+    (req, res, next) => {
+      return basicAuthMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
+    },
     asyncMiddleware(async (req, res, next) => {
       var i = 1;
       const eventtimeslots = (await timeslotsSrv.getBookingTimeSlots(req.params.id))
@@ -145,7 +167,11 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
   );
 
   router.get(
-    '/rooms',
+    '/bookings/:id/availablerooms',
+    asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
+    (req, res, next) => {
+      return basicAuthMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
+    },
     asyncMiddleware(async (req, res, next) => {
       const rooms = (await itemsSrv.getRooms()).map(r => {
         return { id: r.id, name: r.get('Key') };
@@ -157,7 +183,11 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
   );
 
   router.get(
-    '/equipment',
+    '/bookings/:id/availableequipment',
+    asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
+    (req, res, next) => {
+      return basicAuthMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
+    },
     asyncMiddleware(async (req, res, next) => {
       const equipment = (await itemsSrv.getEquipment()).map(r => {
         return { id: r.id, name: r.get('Key'), description: r.get('Beschreibung') };
