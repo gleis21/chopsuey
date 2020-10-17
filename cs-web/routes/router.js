@@ -7,7 +7,7 @@ const fs = require('fs');
 
 const asyncMiddleware = require('../../pkg/middleware').asyncMiddleware;
 const bookingCredsMiddleware = require('../../pkg/middleware').bookingCredsMiddleware;
-const basicAuthMiddleware = require('../../pkg/middleware').basicAuthMiddleware;
+const authMiddleware = require('../../pkg/middleware').authMiddleware;
 
 const gleisUser = process.env.CS_USER;
 const gleisPassword = process.env.CS_PASSWORD;
@@ -18,7 +18,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
   /* GET home page. */
   router.get(
     '/new',
-    basicAuthMiddleware(gleisUser, gleisPassword),
+    authMiddleware(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
       res.render('booking_create');
     })
@@ -28,17 +28,17 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     '/:id',
     asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
     (req, res, next) => {
-      return basicAuthMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
+      return authMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
     },
     asyncMiddleware(async (req, res, next) => {
-      res.cookie('cs-creds',Buffer.from(res.locals.customerUserName + ':' + res.locals.pin).toString('base64'), { maxAge: 900000, httpOnly: false, encode: String });
+      res.cookie('cs-creds',Buffer.from(res.locals.customerUserName + ':' + res.locals.pin).toString('base64'), { maxAge: 900000, httpOnly: true, encode: String, overwrite: true});
       res.render('booking_update');
     })
   );
 
   router.get(
     '/:id/contract/print',
-    basicAuthMiddleware(gleisUser, gleisPassword),
+    authMiddleware(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
       const browser = await puppeteer.launch();
       const page = await browser.newPage();
@@ -68,7 +68,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
 
   // router.get(
   //   '/:id/invoice',
-  //   basicAuthMiddleware(gleisUser, gleisPassword),
+  //   authMiddleware(gleisUser, gleisPassword),
   //   asyncMiddleware(async (req, res, next) => {
   //     const b = await bookingSrv.get(req.params.id);
   //     const invoice = await invoiceSrv.getInvoceByBooking(b.get('Key'));
@@ -88,7 +88,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
 
   router.get(
     '/:id/contract',
-    basicAuthMiddleware(gleisUser, gleisPassword),
+    authMiddleware(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
       const b = await bookingSrv.get(req.params.id);
       if (b.get('Status') !== 'Vorreserviert') {

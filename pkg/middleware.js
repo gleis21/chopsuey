@@ -13,13 +13,20 @@ function bookingCredsMiddleware(bookingSrv) {
       }
 }
 
-function basicAuth(validUser, validPass) {
+function authMiddleware(validUser, validPass, tryCookie) {
     return (req, res, next) => {
-      var credentials = auth(req);
+      var credentials = null;
+      if(tryCookie && req.cookies && req.cookies['cs-creds']) {
+        const basicAuthCreds = Buffer.from(req.cookies['cs-creds'], 'base64').toString('utf8');
+        const c = basicAuthCreds.split(':');
+        credentials = { name: c[0], pass: c[1] };
+      } else {
+        credentials = auth(req);
+      }
   
       if (!credentials || !check(credentials.name, credentials.pass, validUser, validPass)) {
         res.statusCode = 401;
-        res.setHeader('WWW-Authenticate', 'Basic realm="example"');
+        res.setHeader('WWW-Authenticate', 'Basic realm="Glesi21"');
         res.end('Access denied');
       } else {
         next();
@@ -37,12 +44,11 @@ function basicAuth(validUser, validPass) {
   }
 
   const asyncMiddleware = fn => (req, res, next) => {
-    console.log(fn);
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 
   module.exports = {
     asyncMiddleware: asyncMiddleware,
     bookingCredsMiddleware: bookingCredsMiddleware,
-    basicAuthMiddleware: basicAuth
+    authMiddleware: authMiddleware
   };

@@ -7,7 +7,7 @@ const moment = require('moment');
 
 const asyncMiddleware = require('../../pkg/middleware').asyncMiddleware;
 const bookingCredsMiddleware = require('../../pkg/middleware').bookingCredsMiddleware;
-const basicAuthMiddleware = require('../../pkg/middleware').basicAuthMiddleware;
+const authMiddleware = require('../../pkg/middleware').authMiddleware;
 
 const gleisUser = process.env.CS_USER;
 const gleisPassword = process.env.CS_PASSWORD;
@@ -18,7 +18,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
     '/bookings/:id',
     asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
     (req, res, next) => {
-      return basicAuthMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
+      return authMiddleware(res.locals.customerUserName, res.locals.pin, true)(req, res, next);
     },
     asyncMiddleware(async (req, res, next) => {
       const b = await bookingSrv.get(req.params.id);
@@ -61,7 +61,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
   // create new booking by booking_create.html
   router.post(
     '/bookings',
-    basicAuthMiddleware(gleisUser, gleisPassword),
+    authMiddleware(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
       const b = req.body;
       // Create a random PIN which the user will need to enter before 
@@ -88,7 +88,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
     '/bookings/:id',
     asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
     (req, res, next) => {
-      return basicAuthMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
+      return authMiddleware(res.locals.customerUserName, res.locals.pin, true)(req, res, next);
     },
     asyncMiddleware(async (req, res, next) => {
       const b = req.body;
@@ -102,17 +102,12 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
         person: b.person,
         timeSlots: b.timeSlots
       };
-      try {
         const r = await bookingSrv.update(booking);
         
         res.status(200).json({
           res: r,
           err: null
         });
-      } catch (error) {
-        console.log(error);
-        throw new Error(error.toString());
-      }
     })
   );
 
@@ -120,10 +115,9 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
     '/bookings/:id/bookedequipment',
     asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
     (req, res, next) => {
-      return basicAuthMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
+      return authMiddleware(res.locals.customerUserName, res.locals.pin, true)(req, res, next);
     },
     asyncMiddleware(async (req, res, next) => {
-      console.log('booking id:' + req.params.id);
       const invoiceItems = (await invoiceSrv.getInvoceItemsByBooking(req.params.id));
       const bookedequipment = invoiceItems
       .filter(it => it.get('ArtikelTyp')[0] === 'Ausstattung')
@@ -140,7 +134,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
     '/bookings/:id/eventtimeslots',
     asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
     (req, res, next) => {
-      return basicAuthMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
+      return authMiddleware(res.locals.customerUserName, res.locals.pin, true)(req, res, next);
     },
     asyncMiddleware(async (req, res, next) => {
       var i = 1;
@@ -170,7 +164,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
     '/bookings/:id/availablerooms',
     asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
     (req, res, next) => {
-      return basicAuthMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
+      return authMiddleware(res.locals.customerUserName, res.locals.pin, true)(req, res, next);
     },
     asyncMiddleware(async (req, res, next) => {
       const rooms = (await itemsSrv.getRooms()).map(r => {
@@ -186,7 +180,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
     '/bookings/:id/availableequipment',
     asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
     (req, res, next) => {
-      return basicAuthMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
+      return authMiddleware(res.locals.customerUserName, res.locals.pin, true)(req, res, next);
     },
     asyncMiddleware(async (req, res, next) => {
       const equipment = (await itemsSrv.getEquipment()).map(r => {

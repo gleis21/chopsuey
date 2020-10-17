@@ -50,7 +50,6 @@ class InvoiceService {
     const equipmentItemsIds = (await this.getInvoceItemsByBooking(bookingRecordId))
       .filter(it => it.get('ArtikelTyp')[0] === 'Ausstattung')
       .map(it => it.getId());
-      console.log(equipmentItemsIds);
       if (equipmentItemsIds && equipmentItemsIds.length > 0) {
         await this.rechnungspostenTable.destroy(equipmentItemsIds);
       }

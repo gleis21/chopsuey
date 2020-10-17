@@ -1,8 +1,3 @@
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-}
 Vue.component('booking-form', {
   template: '#booking-form',
   data: function () {
@@ -64,28 +59,16 @@ Vue.component('booking-form', {
       }
     } else {
       const roomsRes = await (await fetch('/api/bookings/' + id + '/availablerooms', { 
-        method: 'get', 
-        headers: new Headers({
-          'Authorization': 'Basic '+getCookie('cs-creds'),
-        })
+        method: 'get'
       })).json();
       const equipmentRes = await (await fetch('/api/bookings/' + id + '/availableequipment', { 
-        method: 'get', 
-        headers: new Headers({
-          'Authorization': 'Basic '+getCookie('cs-creds'),
-        })
+        method: 'get'
       })).json();
       const bookedEquipmentRes = await (await fetch('/api/bookings/' + id + '/bookedequipment', { 
-        method: 'get', 
-        headers: new Headers({
-          'Authorization': 'Basic '+getCookie('cs-creds'),
-        })
+        method: 'get'
       })).json();
       const timeslotsRes = await (await fetch('/api/bookings/' + id + '/eventtimeslots', { 
-        method: 'get', 
-        headers: new Headers({
-          'Authorization': 'Basic '+getCookie('cs-creds'),
-        })
+        method: 'get'
       })).json();
 
       this.rooms = roomsRes.res;
@@ -134,8 +117,8 @@ Vue.component('booking-form', {
       this.loading = true;
       this.booking.equipment = this.booking.equipment.filter(eq => eq.count > 0);
       const res = await fetch('/api/bookings/' + this.booking.id, {
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Basic '+getCookie('cs-creds') },
         method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.booking)
       });
       this.loading = false;
