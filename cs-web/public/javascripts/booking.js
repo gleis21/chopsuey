@@ -58,10 +58,18 @@ Vue.component('booking-form', {
         this.error = 'Ups... das hätte nie passieren sollen.';
       }
     } else {
-      const roomsRes = await (await fetch('/api/rooms')).json();
-      const equipmentRes = await (await fetch('/api/equipment')).json();
-      const bookedEquipmentRes = await (await fetch('/api/bookings/' + id + '/bookedequipment')).json();
-      const timeslotsRes = await (await fetch('/api/bookings/' + id + '/eventtimeslots')).json();
+      const roomsRes = await (await fetch('/api/bookings/' + id + '/availablerooms', { 
+        method: 'get'
+      })).json();
+      const equipmentRes = await (await fetch('/api/bookings/' + id + '/availableequipment', { 
+        method: 'get'
+      })).json();
+      const bookedEquipmentRes = await (await fetch('/api/bookings/' + id + '/bookedequipment', { 
+        method: 'get'
+      })).json();
+      const timeslotsRes = await (await fetch('/api/bookings/' + id + '/eventtimeslots', { 
+        method: 'get'
+      })).json();
 
       this.rooms = roomsRes.res;
       this.booking.equipment = equipmentRes.res.map(e => {
@@ -109,8 +117,8 @@ Vue.component('booking-form', {
       this.loading = true;
       this.booking.equipment = this.booking.equipment.filter(eq => eq.count > 0);
       const res = await fetch('/api/bookings/' + this.booking.id, {
-        headers: { 'Content-Type': 'application/json' },
         method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.booking)
       });
       this.loading = false;

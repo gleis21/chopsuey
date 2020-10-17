@@ -14,7 +14,6 @@ Vue.component('booking-form', {
   async mounted() {},
   methods: {
     submit: async function() {
-      console.log(JSON.stringify(this.booking));
       this.loading = true;
       const resp = await fetch('/api/bookings', {
         headers: { 'Content-Type': 'application/json' },
