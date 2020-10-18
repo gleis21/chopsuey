@@ -50,6 +50,6 @@ jobs:
           docker network create --driver=bridge chopsuey-net
           echo "starting chopsuey container"
           docker run -dit --name chopsuey --network chopsuey-net -e CS_USER=$CS_USER -e CS_PASSWORD=$CS_PASSWORD -e CS_BOOKING_EDIT_URL=$CS_BOOKING_EDIT_URL -e AIRTABLE_API_KEY=$AIRTABLE_API_KEY -e AIRTABLE_BASE_ID=$AIRTABLE_BASE_ID gleis21/chopsuey:latest
-          echo > Caddyfile && echo -e "$CS_DOMAIN \n\n  route /buchung/* {\n    uri strip_prefix /buchung\n    reverse_proxy http://chopsuey:3000 {\n    header_up Host {http.reverse_proxy.upstream.host}\n  }\n}" >> Caddyfile
+          echo > Caddyfile && echo -e "$CS_DOMAIN\n\nroute /buchungssystem/* {\n  uri strip_prefix /buchungssystem\n  reverse_proxy http://chopsuey:3000 {\n      header_up Host {http.reverse_proxy.upstream.host}\n  }\n}" >> Caddyfile
           echo "starting caddy container"
           docker run -dit -p 80:80 -p 443:443 --network chopsuey-net -v $PWD/Caddyfile:/etc/caddy/Caddyfile -v caddy_data:/data -v caddy_config:/config caddy:2-alpine
