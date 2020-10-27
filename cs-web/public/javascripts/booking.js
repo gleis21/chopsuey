@@ -116,7 +116,7 @@ Vue.component('booking-form', {
     submit: async function () {
       this.loading = true;
       this.booking.equipment = this.booking.equipment.filter(eq => eq.count > 0);
-      const res = await fetch('/buchungssystem/buchungssystem/api/bookings/' + this.booking.id, {
+      const res = await fetch('/buchungssystem/api/bookings/' + this.booking.id, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.booking)
