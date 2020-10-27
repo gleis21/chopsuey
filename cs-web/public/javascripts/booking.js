@@ -50,7 +50,7 @@ Vue.component('booking-form', {
     const pathSegments = window.location.pathname.split('/');
     const id = pathSegments[pathSegments.length - 1];
 
-    const booking = await (await fetch('/api/bookings/' + id)).json();
+    const booking = await (await fetch('/buchungssystem/api/bookings/' + id)).json();
     if (booking.err) {
       if (booking.err === 1001) {
         this.error = 'Das Bearbeiten der Buchung ist nicht mehr möglich.';
@@ -58,16 +58,16 @@ Vue.component('booking-form', {
         this.error = 'Ups... das hätte nie passieren sollen.';
       }
     } else {
-      const roomsRes = await (await fetch('/api/bookings/' + id + '/availablerooms', { 
+      const roomsRes = await (await fetch('/buchungssystem/api/bookings/' + id + '/availablerooms', { 
         method: 'get'
       })).json();
-      const equipmentRes = await (await fetch('/api/bookings/' + id + '/availableequipment', { 
+      const equipmentRes = await (await fetch('/buchungssystem/api/bookings/' + id + '/availableequipment', { 
         method: 'get'
       })).json();
-      const bookedEquipmentRes = await (await fetch('/api/bookings/' + id + '/bookedequipment', { 
+      const bookedEquipmentRes = await (await fetch('/buchungssystem/api/bookings/' + id + '/bookedequipment', { 
         method: 'get'
       })).json();
-      const timeslotsRes = await (await fetch('/api/bookings/' + id + '/eventtimeslots', { 
+      const timeslotsRes = await (await fetch('/buchungssystem/api/bookings/' + id + '/eventtimeslots', { 
         method: 'get'
       })).json();
 
@@ -116,7 +116,7 @@ Vue.component('booking-form', {
     submit: async function () {
       this.loading = true;
       this.booking.equipment = this.booking.equipment.filter(eq => eq.count > 0);
-      const res = await fetch('/api/bookings/' + this.booking.id, {
+      const res = await fetch('/buchungssystem/buchungssystem/api/bookings/' + this.booking.id, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.booking)
