@@ -44,16 +44,11 @@ jobs:
         script: |
           docker stop chopsuey
           docker rm chopsuey
-          docker stop redis
-          docker rm redis
           docker stop caddy
           docker rm caddy
-          docker stop $(docker ps -a -q)
-          docker rm $(docker ps -a -q)
           echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
           docker pull gleis21/chopsuey:latest
           docker pull caddy:2-alpine
-          docker network rm chopsuey-net
           docker network rm gleis21-net
           docker network create --driver=bridge gleis21-net
           echo "starting chopsuey container"
