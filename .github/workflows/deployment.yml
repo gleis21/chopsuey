@@ -1,0 +1,71 @@
+name: Deploy to VPS
+
+on: 
+  workflow_dispatch:
+    inputs:
+      name:
+        description: deployment name
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+ 
+    steps:
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@master
+      env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+          CS_USER: ${{ secrets.CS_USER }}
+          CS_PASSWORD: ${{ secrets.CS_PASSWORD }}
+          CS_BOOKING_EDIT_URL: ${{ secrets.CS_BOOKING_EDIT_URL }}
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+          CADDYFILE: ${{secrets.CADDYFILE}}
+          CS_DOMAIN: ${{secrets.CS_DOMAIN}}
+          HH_ENV_CONFIG: ${{secrets.HH_ENV_CONFIG}}
+          HH_SERVICE_ACCOUNT_KEY_JSON: ${{secrets.HH_SERVICE_ACCOUNT_KEY_JSON}}
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: ${{ secrets.VPS_SSH_PORT }}
+        envs: DOCKERHUB_USERNAME, DOCKERHUB_PASSWORD, CS_USER, CS_PASSWORD, CS_BOOKING_EDIT_URL, AIRTABLE_API_KEY, AIRTABLE_BASE_ID, CADDYFILE, CS_DOMAIN, HH_ENV_CONFIG, HH_SERVICE_ACCOUNT_KEY_JSON
+        script: |
+          docker stop chopsuey
+          docker rm chopsuey
+          docker stop happy-hours
+          docker rm happy-hours
+          docker stop caddy
+          docker rm caddy
+          echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+          docker pull gleis21/chopsuey:latest
+          docker pull gleis21/happy-hours:latest
+          docker pull caddy:2-alpine
+          docker network rm gleis21-net
+          docker network create --driver=bridge gleis21-net
+          echo "starting happy-hours container"
+          echo $HH_ENV_CONFIG | base64 -d > .env
+          echo $HH_SERVICE_ACCOUNT_KEY_JSON | base64 -d > service_account_key.json
+          docker run -dit --name happy-hours --network gleis21-net -v $PWD/service_account_key.json:/opt/src/app/config/service_account_key.json $PWD/.env://opt/src/app/config/.env gleis21/happy-hours:latest
+          echo "starting chopsuey container"
+          docker run -dit --name chopsuey --network gleis21-net -e CS_USER=$CS_USER -e CS_PASSWORD=$CS_PASSWORD -e CS_BOOKING_EDIT_URL=$CS_BOOKING_EDIT_URL -e AIRTABLE_API_KEY=$AIRTABLE_API_KEY -e AIRTABLE_BASE_ID=$AIRTABLE_BASE_ID gleis21/chopsuey:latest
+          cat > Caddyfile <<EOF
+          $CS_DOMAIN
+          route /buchungssystem/* {
+            uri strip_prefix /buchungssystem
+            reverse_proxy http://chopsuey:3000 {
+                  header_up Host {http.reverse_proxy.upstream.host}
+            }
+          }
+
+          route /hours/* {
+            uri strip_prefix /hours
+            reverse_proxy http://happy-hours:8080 {
+                  header_up Host {http.reverse_proxy.upstream.host}
+            }
+          }
+          EOF
+          echo "starting caddy container"
+          docker run -dit --name caddy -p 80:80 -p 443:443 --network gleis21-net -v $PWD/Caddyfile:/etc/caddy/Caddyfile -v caddy_data:/data -v caddy_config:/config caddy:2-alpine
