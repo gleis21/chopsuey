@@ -63,9 +63,7 @@ jobs:
 
           route /hours/* {
             uri strip_prefix /hours
-            reverse_proxy http://happy-hours:8080 {
-                  header_up Host {http.reverse_proxy.upstream.host}
-            }
+            reverse_proxy http://happy-hours:8080
           }
           EOF
           echo "starting caddy container"
