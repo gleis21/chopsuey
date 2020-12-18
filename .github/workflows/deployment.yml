@@ -60,7 +60,7 @@ jobs:
                     header_up Host {http.reverse_proxy.upstream.host}
               }
             }
-            route /hours/* {
+            route /hours* {
               uri strip_prefix /hours
               reverse_proxy http://happy-hours:8080 {
                     header_up Host {http.reverse_proxy.upstream.host}
