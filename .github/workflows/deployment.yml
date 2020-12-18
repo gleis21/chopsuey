@@ -53,17 +53,13 @@ jobs:
           echo "starting chopsuey container"
           docker run -dit --name chopsuey --network gleis21-net -e CS_USER=$CS_USER -e CS_PASSWORD=$CS_PASSWORD -e CS_BOOKING_EDIT_URL=$CS_BOOKING_EDIT_URL -e AIRTABLE_API_KEY=$AIRTABLE_API_KEY -e AIRTABLE_BASE_ID=$AIRTABLE_BASE_ID gleis21/chopsuey:latest
           cat > Caddyfile <<EOF
-          $CS_DOMAIN
-          route /buchungssystem/* {
-            uri strip_prefix /buchungssystem
-            reverse_proxy http://chopsuey:3000 {
-                  header_up Host {http.reverse_proxy.upstream.host}
+          $CS_DOMAIN {
+            route /hours/* {
+              uri strip_prefix /hours
+              reverse_proxy http://happy-hours:8080 {
+                    header_up Host {http.reverse_proxy.upstream.host}
+              }
             }
-          }
-
-          route /hours/* {
-            uri strip_prefix /hours
-            reverse_proxy http://happy-hours:8080
           }
           EOF
           echo "starting caddy container"
