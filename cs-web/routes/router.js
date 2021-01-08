@@ -40,33 +40,29 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     '/:id/contract/print',
     authMiddleware(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
-      try {
-        const browser = await puppeteer.launch();
-        const page = await browser.newPage();
-        const contractUrl = `http://${gleisUser}:${gleisPassword}@localhost:3000/bookings/${req.params.id}/contract`;
-        await page.goto(contractUrl, {
-          waitUntil: 'networkidle2'
-        });
-        // /tmp/chopsuey dir must exist!!
-        const tmpDir = '/tmp/chopsuey';
-        if (!fs.existsSync(tmpDir)) {
-          fs.mkdirSync(tmpDir);
-        }
-        const fileName = 'gleis21_' + new Date().valueOf().toString() + '.pdf';
-        const filePath = tmpDir + '/' + fileName;
-        await page.pdf({ path: filePath, format: 'A4' });
-
-        await browser.close();
-
-        const rs = fs.createReadStream(filePath, { autoClose: true });
-        var stat = fs.statSync(filePath);
-        res.setHeader('Content-Length', stat.size);
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename=' + fileName);
-        rs.pipe(res);
-      } catch (e) {
-        console.log(e);
+      const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+      const page = await browser.newPage();
+      const contractUrl = `http://${gleisUser}:${gleisPassword}@localhost:3000/bookings/${req.params.id}/contract`;
+      await page.goto(contractUrl, {
+        waitUntil: 'networkidle2'
+      });
+      // /tmp/chopsuey dir must exist!!
+      const tmpDir = '/tmp/chopsuey';
+      if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir);
       }
+      const fileName = 'gleis21_' + new Date().valueOf().toString() + '.pdf';
+      const filePath = tmpDir + '/' + fileName;
+      await page.pdf({ path: filePath, format: 'A4' });
+
+      await browser.close();
+
+      const rs = fs.createReadStream(filePath, { autoClose: true });
+      var stat = fs.statSync(filePath);
+      res.setHeader('Content-Length', stat.size);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename=' + fileName);
+      rs.pipe(res);
     })
   );
 

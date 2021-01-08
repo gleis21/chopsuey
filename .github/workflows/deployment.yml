@@ -51,7 +51,7 @@ jobs:
           docker run -dit --name happy-hours --network gleis21-net -v $PWD/service_account_key.json:/opt/src/app/config/service_account_key.json -v $PWD/.env:/opt/src/app/config/.env gleis21/happy-hours:latest
           docker logs happy-hours
           echo "starting chopsuey container"
-          docker run -dit --name chopsuey --network gleis21-net -e CS_USER=$CS_USER -e CS_PASSWORD=$CS_PASSWORD -e CS_BOOKING_EDIT_URL=$CS_BOOKING_EDIT_URL -e AIRTABLE_API_KEY=$AIRTABLE_API_KEY -e AIRTABLE_BASE_ID=$AIRTABLE_BASE_ID gleis21/chopsuey:latest
+          docker run -dit --init --name chopsuey --network gleis21-net -e CS_USER=$CS_USER -e CS_PASSWORD=$CS_PASSWORD -e CS_BOOKING_EDIT_URL=$CS_BOOKING_EDIT_URL -e AIRTABLE_API_KEY=$AIRTABLE_API_KEY -e AIRTABLE_BASE_ID=$AIRTABLE_BASE_ID gleis21/chopsuey:latest
           cat > Caddyfile <<EOF
           $CS_DOMAIN {
             route /buchungssystem/* {
