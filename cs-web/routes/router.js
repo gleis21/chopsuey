@@ -31,7 +31,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
       return authMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
     },
     asyncMiddleware(async (req, res, next) => {
-      res.cookie('cs-creds',Buffer.from(res.locals.customerUserName + ':' + res.locals.pin).toString('base64'), { maxAge: 900000, httpOnly: true, encode: String, overwrite: true});
+      res.cookie('cs-creds', Buffer.from(res.locals.customerUserName + ':' + res.locals.pin).toString('base64'), { maxAge: 900000, httpOnly: true, encode: String, overwrite: true });
       res.render('booking_update');
     })
   );
@@ -40,29 +40,33 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     '/:id/contract/print',
     authMiddleware(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
-      const browser = await puppeteer.launch();
-      const page = await browser.newPage();
-      const contractUrl = `http://${gleisUser}:${gleisPassword}@localhost:3000/bookings/${req.params.id}/contract`;
-      await page.goto(contractUrl, {
-        waitUntil: 'networkidle2'
-      });
-      // /tmp/chopsuey dir must exist!!
-      const tmpDir = '/tmp/chopsuey';
-      if (!fs.existsSync(tmpDir)) {
-        fs.mkdirSync(tmpDir);
+      try {
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        const contractUrl = `http://${gleisUser}:${gleisPassword}@localhost:3000/bookings/${req.params.id}/contract`;
+        await page.goto(contractUrl, {
+          waitUntil: 'networkidle2'
+        });
+        // /tmp/chopsuey dir must exist!!
+        const tmpDir = '/tmp/chopsuey';
+        if (!fs.existsSync(tmpDir)) {
+          fs.mkdirSync(tmpDir);
+        }
+        const fileName = 'gleis21_' + new Date().valueOf().toString() + '.pdf';
+        const filePath = tmpDir + '/' + fileName;
+        await page.pdf({ path: filePath, format: 'A4' });
+
+        await browser.close();
+
+        const rs = fs.createReadStream(filePath, { autoClose: true });
+        var stat = fs.statSync(filePath);
+        res.setHeader('Content-Length', stat.size);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=' + fileName);
+        rs.pipe(res);
+      } catch (e) {
+        console.log(e);
       }
-      const fileName = 'gleis21_' + new Date().valueOf().toString() + '.pdf';
-      const filePath = tmpDir + '/' + fileName;
-      await page.pdf({ path: filePath, format: 'A4' });
-
-      await browser.close();
-
-      const rs = fs.createReadStream(filePath, { autoClose: true });
-      var stat = fs.statSync(filePath);
-      res.setHeader('Content-Length', stat.size);
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 'attachment; filename=' + fileName);
-      rs.pipe(res);
     })
   );
 
