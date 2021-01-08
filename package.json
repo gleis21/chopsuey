@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node ./bin/cs-web",
+    "start": "TZ='Europe/Amsterdam' node ./bin/cs-web",
     "test": "echo no_tests_for_now"
   },
   "dependencies": {
