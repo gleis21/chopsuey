@@ -198,7 +198,7 @@ class TimeSlotsService {
 
       return {
         fields: {
-          Beginn: beginn.toISOString(),
+          Beginn: beginn.toISOString(true),
           Duration: durSec,
           Type: 'Veranstaltung',
           Buchung: [bookingID],
