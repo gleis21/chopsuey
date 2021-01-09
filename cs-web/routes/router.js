@@ -40,7 +40,10 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     '/:id/contract/print',
     authMiddleware(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
-      const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+      const browser = await puppeteer.launch({
+        executablePath: process.env.CHROMIUM_PATH,
+        args: ['--no-sandbox'], // This was important. Can't remember why
+      });
       const page = await browser.newPage();
       const contractUrl = `http://${gleisUser}:${gleisPassword}@localhost:3000/bookings/${req.params.id}/contract`;
       await page.goto(contractUrl, {
