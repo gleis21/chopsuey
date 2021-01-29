@@ -136,6 +136,21 @@
           </div>
           <p>Technische Betreuung der Ton- und Lichtanlage bieten wir auf Anfrage gerne an.</p>
         </div>
+        <div style="padding: 10px" class="bg-light">
+          <h4>Verpflegung</h4>
+          <p>Sofern nicht anders vereinbart sind im Grundpreis enthalten: W-LAN, Beamer, 1 Flipchart, 1 Pinnwand,
+            Sound System</p>
+          <div class=" form-group row" v-for="e in booking.equipment">
+            <label class="col-sm-2 col-form-label" for="equipment">{{e.name}}</label>
+            <div class="col-sm-2">
+              <input class="form-control" required type="number" v-model="e.count"></input>
+            </div>
+            <div class="col-sm-4">
+              {{e.note}}
+            </div>
+          </div>
+          <p>Technische Betreuung der Ton- und Lichtanlage bieten wir auf Anfrage gerne an.</p>
+        </div>
         <div class="form-group">
           <label for="decription">Anmerkung</label>
           <textarea class="form-control" id="decription" rows="5" v-model="booking.notes"></textarea>
@@ -199,7 +214,7 @@
           </div>
           <div class="form-group">
             <label for="notes">Anmerkung</label>
-            <textarea class="form-control"  placeholder="Bitte die Zeiten des Aufbaus und Abbaus angeben." id="tsnotes" rows="5" v-model="ts.notes"></textarea>
+            <textarea class="form-control"  placeholder="Bitte geben Sie hier Beginn und Ende der Veranstaltung (Datum & Uhrzeit) ein." id="tsnotes" rows="5" v-model="ts.notes"></textarea>
           </div>
         </div>
       
