@@ -114,7 +114,7 @@ Vue.component('booking-form', {
       this.booking.timeSlots.splice(index, 1);
     },
     submit: async function () {
-      const invalidTimeSlotExists = this.booking.timeSlots.findIndex(ts => {
+      const invalidTimeSlotIndex = this.booking.timeSlots.findIndex(ts => {
         const beginn = moment(ts.beginnDate)
           .add(ts.beginnH, 'h')
           .add(ts.beginnM, 'minutes');
@@ -125,10 +125,10 @@ Vue.component('booking-form', {
 
         return end.isBefore(beginn)
       });
-      if (invalidTimeSlotExists) {
+      if (invalidTimeSlotIndex > -1) {
         this.submitResult = {
           success: false,
-          msg: 'Einer der Zeiträume ist ungültig. Bitte überprüfen Sie, ob das Ende nicht vor dem Beginn liegt.'
+          msg: `Zeitraum nr ${invalidTimeSlotIndex + 1} ist ungültig. Bitte überprüfen Sie, ob das Ende nicht vor dem Beginn liegt.`
         };
         return;
       }
