@@ -128,7 +128,7 @@
           <div class=" form-group row" v-for="e in booking.equipment">
             <label class="col-sm-2 col-form-label" for="equipment">{{e.name}}</label>
             <div class="col-sm-2">
-              <input class="form-control" required type="number" :max='e.quantity' v-model="e.count"></input>
+              <input class="form-control" required type="number" :min='0' :max='e.quantity' v-model="e.count"></input>
             </div>
             <div class="col-sm-4">
               {{e.description}}
