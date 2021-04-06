@@ -184,7 +184,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
     },
     asyncMiddleware(async (req, res, next) => {
       const equipment = (await itemsSrv.getEquipment()).map(r => {
-        return { id: r.id, name: r.get('Key'), description: r.get('Beschreibung') };
+        return { id: r.id, name: r.get('Key'), description: r.get('Beschreibung'), quantity: r.get('Anzahl') };
       });
       res.status(200).json({
         res: equipment
