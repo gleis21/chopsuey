@@ -114,6 +114,24 @@ Vue.component('booking-form', {
       this.booking.timeSlots.splice(index, 1);
     },
     submit: async function () {
+      const invalidTimeSlotExists = this.booking.timeSlots.findIndex(ts => {
+        const beginn = moment(ts.beginnDate)
+          .add(ts.beginnH, 'h')
+          .add(ts.beginnM, 'minutes');
+
+        const end = moment(ts.endDate)
+          .add(ts.endH, 'h')
+          .add(ts.endM, 'minutes');
+
+        return end.isBefore(beginn)
+      });
+      if (invalidTimeSlotExists) {
+        this.submitResult = {
+          success: false,
+          msg: 'Einer der Zeiträume ist ungültig. Bitte überprüfen Sie, ob das Ende nicht vor dem Beginn liegt.'
+        };
+        return;
+      }
       this.loading = true;
       this.booking.equipment = this.booking.equipment.filter(eq => eq.count > 0);
       const res = await fetch('/buchungssystem/api/bookings/' + this.booking.id, {
@@ -130,7 +148,7 @@ Vue.component('booking-form', {
       } else {
         this.submitResult = {
           success: false,
-          msg: 'Ups... das hätte nie passieren sollen.'
+          msg: 'Ups... das hätte nie passieren sollen. Bitte kontaktieren Sie uns unter hello@gleis21.wien'
         };
       }
     }
