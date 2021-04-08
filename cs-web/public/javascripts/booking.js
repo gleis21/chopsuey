@@ -74,8 +74,8 @@ Vue.component('booking-form', {
       this.rooms = roomsRes.res;
       this.booking.equipment = equipmentRes.res.map(e => {
         const bookedEqp = bookedEquipmentRes.res.filter(r => r.equipmentId === e.id);
-        return { id: e.id, name: e.name, count: bookedEqp.length > 0 ? bookedEqp[0].numberBooked: 0, description: e.description, quantity: e.quantity };
-      });
+        return { id: e.id, name: e.name, count: bookedEqp.length > 0 ? bookedEqp[0].numberBooked: 0, description: e.description, quantity: e.quantity, position: e.position };
+      }).sort((a, b) => a.position - b.position);
       if (timeslotsRes.res && timeslotsRes.res.length > 0) {
         this.booking.timeSlots = timeslotsRes.res
       } else {
