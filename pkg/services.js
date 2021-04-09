@@ -32,7 +32,7 @@ class InvoiceService {
       .select({
         maxRecords: 1,
         view: 'Grid view',
-        filterByFormula: '{BuchungRecordId}=' + "'" + bookingRecordId + "'"
+        filterByFormula: '{BuchungRecordId}=' + "'" + bookingRecordId + "'", pageSize: 100
       })
       .firstPage();
   }
@@ -41,7 +41,7 @@ class InvoiceService {
     return await this.rechnungspostenTable
       .select({
         view: 'Grid view',
-        filterByFormula: '{BuchungRecordId}=' + "'" + bookingRecordId + "'"
+        filterByFormula: '{BuchungRecordId}=' + "'" + bookingRecordId + "'", pageSize: 100
       })
       .firstPage();
   }
@@ -57,7 +57,7 @@ class InvoiceService {
 
   async getEquipmentPrices() {
     return await this.preiseTable
-      .select({ view: 'AusstattungPreise' })
+      .select({ view: 'AusstattungPreise', pageSize: 100 })
       .firstPage();
   }
 
@@ -152,7 +152,7 @@ class BookableItemsService {
   async getEquipment() {
     if (this.equipment.length === 0) {
       this.equipment = await this.table
-        .select({ view: 'Ausstattung' })
+        .select({ view: 'Ausstattung', pageSize: 100 })
         .firstPage();
     }
     return this.equipment;

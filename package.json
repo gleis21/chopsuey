@@ -15,11 +15,13 @@
     "ejs": "^2.7.1",
     "express": "~4.16.1",
     "express-validator": "^6.2.0",
+    "express-winston": "^4.1.0",
     "http-errors": "~1.6.3",
     "moment": "^2.24.0",
     "momentjs": "^2.0.0",
     "morgan": "~1.9.1",
     "puppeteer": "^2.0.0",
-    "tsscmp": "^1.0.6"
+    "tsscmp": "^1.0.6",
+    "winston": "^3.3.3"
   }
 }
