@@ -86,6 +86,7 @@ class InvoiceService {
           }
         };
       });
+      
     return await this.rechnungspostenTable.create(invoiceItems);
   }
 }
@@ -117,9 +118,16 @@ class BookingService {
     const person = await this.personSrv.createOrUpdate(b.person);
     const tsIds = await this.timeSlotsSrv.replaceEventBookingTimeSlots(b.id, b.timeSlots);
     var equipmentInvoiceItems = [];
+    
     if (b.equipment && b.equipment.length > 0) {
-      equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(b.equipment);
+      var i,j,tmp,chunk = 10;
+      for (i=0,j=b.equipment.length; i<j; i+=chunk) {
+          tmp = b.equipment.slice(i,i+chunk);
+          const tmpEquipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(tmp);
+          equipmentInvoiceItems = equipmentInvoiceItems.concat(tmpEquipmentInvoiceItems);
+      }
     }
+    
     const invoice = await this.invoiceSrv.createInvoice(b.id, equipmentInvoiceItems);
     const bk = {
       Titel: b.title,
