@@ -111,7 +111,7 @@ class BookingService {
     if (!customer) {
       customer = await this.personSrv.createOrUpdate({email: b.customerEmail})
     }
-    return await this.table.create({ Titel: b.title, Mieter: [customer.getId()], PIN: b.pin, SendAutoMail: b.sendAutoMail, Status: 'Neu' });
+    return await this.table.create({ Name: b.title, Mieter: [customer.getId()], PIN: b.pin, SendAutoMail: b.sendAutoMail, Status: 'Neu' });
   }
 
   async update(b) {
