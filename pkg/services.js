@@ -69,7 +69,7 @@ class InvoiceService {
       .map(it => {
         const prices = eqPrices.filter(ep => ep.get('Artikel')[0] === it.id);
         if (!prices || prices.length == 0) {
-          console.log('bo price found for artikel ' + it.id);
+          console.log('no price found for artikel ' + it.id);
         }
         return {
           priceId: eqPrices
@@ -120,6 +120,7 @@ class BookingService {
     var equipmentInvoiceItems = [];
     
     if (b.equipment && b.equipment.length > 0) {
+      // airtable throws error if you try to create more than 10 records at once
       var i,j,tmp,chunk = 10;
       for (i=0,j=b.equipment.length; i<j; i+=chunk) {
           tmp = b.equipment.slice(i,i+chunk);
