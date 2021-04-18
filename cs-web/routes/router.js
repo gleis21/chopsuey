@@ -112,8 +112,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
               p.get('Strasse') + ' ' + p.get('HausNr') + '/' + p.get('Top'),
             postCode: p.get('PLZ'),
             city: p.get('Ort'),
-            uid: p.get('UID'),
-            umsatzsteuerbefreit: p.get('Umsatzsteuerbefreit')
+            uid: p.get('UID')
           },
           timeSlots: ts
             .map(t => {

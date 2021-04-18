@@ -113,13 +113,6 @@
           <label for="name">UID-Nummer</label>
           <input type="text" class="form-control" v-model="booking.person.uid">
         </div>
-        <div class="form-group">
-          <label for="umsatzsteuerbefreit">Die/Der Miterin/Mieter ist umsatzsteuerbefreit</label>
-          <select class="form-control c-select" id="umsatzsteuerbefreit" v-model="booking.person.umsatzsteuerbefreit">
-            <option :value="true">Ja</option>
-            <option :value="false">Nein</option>
-          </select>
-        </div>
         
         <div style="padding: 10px" class="bg-light">
           <h4>Ausstattung</h4>

@@ -245,8 +245,7 @@ class PersonService {
         Top: p.ano,
         PLZ: p.postcode,
         Ort: p.city,
-        UID: p.uid,
-        Umsatzsteuerbefreit: p.umsatzsteuerbefreit
+        UID: p.uid
       });
       
       return updated;
@@ -262,8 +261,7 @@ class PersonService {
       Top: p.ano,
       PLZ: p.postcode,
       Ort: p.city,
-      UID: p.uid,
-      Umsatzsteuerbefreit: p.umsatzsteuerbefreit
+      UID: p.uid
     });
   }
 

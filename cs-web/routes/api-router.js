@@ -34,7 +34,6 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
           ano: c.get('Top'),
           hno: c.get('HausNr'),
           street: c.get('Strasse'),
-          umsatzsteuerbefreit: c.get('Umsatzsteuerbefreit'),
           uid: c.get('UID'),
           org: c.get('Organisation'),
           lastName: c.get('Nachname'),
