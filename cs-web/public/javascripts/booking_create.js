@@ -5,7 +5,7 @@ Vue.component('booking-form', {
       submitResult: null,
       loading: false,
       booking: {
-        title: '',
+        name: '',
         customerEmail: '',
         sendAutoMail: false
       }

@@ -101,7 +101,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
         const ts = await timeSlotsSrv.getBookingTimeSlots(b.getId());
         const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(b.getId());
         const contract = {
-          title: b.get('Titel'),
+          title: b.get('Name'),
           participantsCount: b.get('TeilnehmerInnenanzahl'),
           person: {
             name: p.get('Vorname') + ' ' + p.get('Nachname'),

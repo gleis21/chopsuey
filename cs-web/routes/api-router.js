@@ -45,7 +45,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
         res.status(200).json({
           res: { 
             id: b.id, 
-            title: b.get('Titel'),
+            name: b.get('Name'),
             notes: b.get('Notes'),
             person: person,
           },
@@ -95,7 +95,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
         id: b.id,
         notes: b.notes,
         participantsCount: b. participantsCount,
-        title: b.title,
+        name: b.name,
         roomIds: [b.roomId],
         equipment: b.equipment,
         person: b.person,

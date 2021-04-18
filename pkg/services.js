@@ -111,7 +111,7 @@ class BookingService {
     if (!customer) {
       customer = await this.personSrv.createOrUpdate({email: b.customerEmail})
     }
-    return await this.table.create({ Name: b.title, Mieter: [customer.getId()], PIN: b.pin, SendAutoMail: b.sendAutoMail, Status: 'Neu' });
+    return await this.table.create({ Name: b.name, Mieter: [customer.getId()], PIN: b.pin, SendAutoMail: b.sendAutoMail, Status: 'Neu' });
   }
 
   async update(b) {
@@ -131,7 +131,7 @@ class BookingService {
     
     const invoice = await this.invoiceSrv.createInvoice(b.id, equipmentInvoiceItems);
     const bk = {
-      Name: b.title,
+      Name: b.name,
       TeilnehmerInnenanzahl: b.participantsCount,
       Status: 'Vorreserviert',
       Mieter: [person.getId()],
