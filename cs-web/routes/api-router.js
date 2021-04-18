@@ -67,7 +67,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
       // being able to add data to thebooking_update form.
       const pin = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       const booking = {
-        title: b.title,
+        name: b.name,
         customerEmail: b.customerEmail,
         pin: pin,
         sendAutoMail: b.sendAutoMail
