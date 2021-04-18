@@ -131,7 +131,7 @@ class BookingService {
     
     const invoice = await this.invoiceSrv.createInvoice(b.id, equipmentInvoiceItems);
     const bk = {
-      Titel: b.title,
+      Name: b.title,
       TeilnehmerInnenanzahl: b.participantsCount,
       Status: 'Vorreserviert',
       Mieter: [person.getId()],
