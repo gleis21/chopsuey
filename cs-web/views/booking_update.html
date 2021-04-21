@@ -119,8 +119,17 @@
           <p>Sofern nicht anders vereinbart sind im Grundpreis enthalten: W-LAN, 1 Beamer, 1 Flipchart, 1 Pinnwand, 1 Funkmikrofon, Sound System</p>
           <div class=" form-group row" v-for="e in booking.equipment">
             <label class="col-sm-4 col-form-label" for="equipment">{{e.name}}</label>
-            <div class="col-sm-2">
-              <input class="form-control" required type="number" :min='0' :max='e.quantity' v-model="e.count"></input>
+            <div class="col-sm-3">
+              <select v-if="e.quantity == 1" class="form-control c-select" v-model="e.count">
+                <option :value="1">Ja</option>
+                <option :value="0">Nein</option>
+              </select>
+              <input v-else class="form-control" required type="number" :min='0' :max='e.quantity' v-model="e.count"></input>
+              <template v-if="e.notesTitle">
+                <br />
+                <b>{{e.notesTitle}}</b>
+                <textarea class="form-control" id="decription" rows="2" v-model="e.notes"></textarea>
+              </template>
             </div>
             <div class="col-sm-4">
               {{e.description}}
@@ -167,7 +176,10 @@
             <p class="mb-1">-> Workspaces</p>
           </a>
         </div>
-
+        <br/>
+        <br/>
+        <img src="../images/raumplan.png" style="width: 1110px">
+        <br/>
         <div class="jumbotron bg-light" v-for="(ts, index) in booking.timeSlots">
           <button type="button" class="btn btn-danger float-right" v-on:click="deleteTimeSlot(index)"><span class="fa fa-trash"></span></button>
           <div class="form-row">
@@ -240,8 +252,7 @@
       <div class="row">
         <div class="col-md-12">
       <button type="button" class="btn btn-primary" v-on:click="submit" style="width: 100px"><i class="fas fa-spinner fa-spin" v-if="loading"></i>{{loading ? '' : 'Absenden'}}</button>
-      <br/>
-      <img src="../images/raumplan.png" style="width: 1110px">
+      
         </div>
     </div>
     </div>

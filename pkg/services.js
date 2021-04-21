@@ -75,14 +75,16 @@ class InvoiceService {
           priceId: eqPrices
             .filter(ep => ep.get('Artikel')[0] === it.id)[0]
             .getId(),
-          count: it.count
+          count: it.count,
+          notes: it.notes
         };
       })
       .map(p => {
         return {
           fields: {
             Anzahl: parseInt(p.count, 10),
-            Preis: [p.priceId]
+            Preis: [p.priceId],
+            Anmerkung: p.notes
           }
         };
       });
@@ -93,7 +95,7 @@ class InvoiceService {
 
 class BookingService {
   constructor(base, timeSlotsSrv, personSrv, invoiceSrv) {
-    this.table = base('Buchungen');
+    this.table =  base('Buchungen');
     this.timeSlotsSrv = timeSlotsSrv;
     this.personSrv = personSrv;
     this.invoiceSrv = invoiceSrv;
