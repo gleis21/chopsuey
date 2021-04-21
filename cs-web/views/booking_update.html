@@ -125,7 +125,7 @@
                 <option :value="0">Nein</option>
               </select>
               <input v-else class="form-control" required type="number" :min='0' :max='e.quantity' v-model="e.count"></input>
-              <template v-if="e.notesTitle">
+              <template v-if="e.notesTitle && e.count > 0">
                 <br />
                 <b>{{e.notesTitle}}</b>
                 <textarea class="form-control" id="decription" rows="2" v-model="e.notes"></textarea>
