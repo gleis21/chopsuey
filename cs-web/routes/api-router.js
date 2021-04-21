@@ -121,7 +121,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
       const bookedequipment = invoiceItems
       .filter(it => it.get('ArtikelTyp')[0] === 'Ausstattung')
       .map(it => { 
-        return { equipmentId: it.get('ArtikelId')[0], numberBooked: it.get('Anzahl') };
+        return { equipmentId: it.get('ArtikelId')[0], numberBooked: it.get('Anzahl'), notes: it.get('Anmerkung') };
       });
       res.status(200).json({
         res: bookedequipment
@@ -183,7 +183,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
     },
     asyncMiddleware(async (req, res, next) => {
       const equipment = (await itemsSrv.getEquipment()).map(r => {
-        return { id: r.id, name: r.get('Key'), description: r.get('Beschreibung'), quantity: r.get('Anzahl'), position: r.get('Position') };
+        return { id: r.id, name: r.get('Key'), description: r.get('Beschreibung'), quantity: r.get('Anzahl'), position: r.get('Position'), notes: r.get('TitelAnmerkung') };
       });
       res.status(200).json({
         res: equipment
