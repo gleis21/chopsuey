@@ -162,6 +162,7 @@
                     <th class="cell-padding border" scope="col">Preis</th>
                     <th class="cell-padding border" scope="col">Rabatt</th>
                     <th class="cell-padding border" scope="col">Endpreis</th>
+                    <th class="cell-padding border" scope="col">Anmerkung</th>
                   </tr>
                   <% invoiceItems.equipment.forEach( it => { %>
                   <tr>
@@ -172,6 +173,7 @@
                     <td class="cell-padding border"><%= it.price %> &euro;</td>
                     <td class="cell-padding border"><%= it.discount %> &percnt;</td>
                     <td class="cell-padding border"><%= it.finalPrice %> &euro;</td>
+                    <td class="cell-padding border"><%= it.notes %></td>
                   </tr>
                   <% }) %>
                 </table>

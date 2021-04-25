@@ -50,9 +50,9 @@ class InvoiceService {
     const equipmentItemsIds = (await this.getInvoceItemsByBooking(bookingRecordId))
       .filter(it => it.get('ArtikelTyp')[0] === 'Ausstattung')
       .map(it => it.getId());
-      if (equipmentItemsIds && equipmentItemsIds.length > 0) {
-        await this.rechnungspostenTable.destroy(equipmentItemsIds);
-      }
+    if (equipmentItemsIds && equipmentItemsIds.length > 0) {
+      await this.rechnungspostenTable.destroy(equipmentItemsIds);
+    }
   }
 
   async getEquipmentPrices() {
@@ -61,24 +61,47 @@ class InvoiceService {
       .firstPage();
   }
 
-  async createInvoiceItems(items) {
+  calculatePrices(articlePrices, durationsInHours) {
+    if (articlePrices.length === 1) {
+      return articlePrices;
+    }
+    const variant2h = articlePrices.find(p => p.get('Variante') === "2 Stunden" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
+    const variant4h = articlePrices.find(p => p.get('Variante') === "halbtags" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
+    const variant1day = articlePrices.find(p => p.get('Variante') === "ganztags" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
+
+    return durationsInHours.map(dur => {
+      if (dur <= 2 && variant2h) {
+        return variant2h;
+      }
+      if (dur > 2 && dur <= 4 && variant4h) {
+        return variant4h;
+      }
+      if (dur > 4 && variant1day) {
+        return variant1day;
+      }
+    });
+  }
+
+  async createInvoiceItems(items, durations) {
     const eqPrices = await this.getEquipmentPrices();
 
     // items have an id and count
     const invoiceItems = items
       .map(it => {
-        const prices = eqPrices.filter(ep => ep.get('Artikel')[0] === it.id);
-        if (!prices || prices.length == 0) {
+        const articlePrices = eqPrices.filter(ep => ep.get('Artikel')[0] === it.id);
+        if (!articlePrices || articlePrices.length == 0) {
           console.log('no price found for artikel ' + it.id);
         }
-        return {
-          priceId: eqPrices
-            .filter(ep => ep.get('Artikel')[0] === it.id)[0]
-            .getId(),
-          count: it.count,
-          notes: it.notes
-        };
+
+        return this.calculatePrices(articlePrices, durations).map(p => {
+          return {
+            priceId: p.getId(),
+            count: it.count,
+            notes: it.notes
+          };
+        })
       })
+      .flat()
       .map(p => {
         return {
           fields: {
@@ -88,14 +111,22 @@ class InvoiceService {
           }
         };
       });
-      
-    return await this.rechnungspostenTable.create(invoiceItems);
+    var createdInvoiceItems = [];
+    // Airtable allows only 10 at once
+    var i, j, tmp, chunk = 10;
+    for (i = 0, j = invoiceItems.length; i < j; i += chunk) {
+      tmp = invoiceItems.slice(i, i + chunk);
+      const its = await this.rechnungspostenTable.create(tmp);
+      createdInvoiceItems = createdInvoiceItems.concat(its);
+    }
+
+    return createdInvoiceItems;
   }
 }
 
 class BookingService {
   constructor(base, timeSlotsSrv, personSrv, invoiceSrv) {
-    this.table =  base('Buchungen');
+    this.table = base('Buchungen');
     this.timeSlotsSrv = timeSlotsSrv;
     this.personSrv = personSrv;
     this.invoiceSrv = invoiceSrv;
@@ -111,7 +142,7 @@ class BookingService {
   async create(b) {
     var customer = await this.personSrv.getByEmail(b.customerEmail);
     if (!customer) {
-      customer = await this.personSrv.createOrUpdate({email: b.customerEmail})
+      customer = await this.personSrv.createOrUpdate({ email: b.customerEmail })
     }
     return await this.table.create({ Name: b.name, Mieter: [customer.getId()], PIN: b.pin, SendAutoMail: b.sendAutoMail, Status: 'Neu' });
   }
@@ -119,19 +150,19 @@ class BookingService {
   async update(b) {
     const person = await this.personSrv.createOrUpdate(b.person);
     const tsIds = await this.timeSlotsSrv.replaceEventBookingTimeSlots(b.id, b.timeSlots);
-    var equipmentInvoiceItems = [];
-    
+    const durations = await this.timeSlotsSrv.getDurations(b.timeSlots);
+
+
+    var invoiceItems = [];
     if (b.equipment && b.equipment.length > 0) {
-      // airtable throws error if you try to create more than 10 records at once
-      var i,j,tmp,chunk = 10;
-      for (i=0,j=b.equipment.length; i<j; i+=chunk) {
-          tmp = b.equipment.slice(i,i+chunk);
-          const tmpEquipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(tmp);
-          equipmentInvoiceItems = equipmentInvoiceItems.concat(tmpEquipmentInvoiceItems);
-      }
+      const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(b.equipment, durations);
+      invoiceItems = invoiceItems.concat(equipmentInvoiceItems);
     }
-    
-    const invoice = await this.invoiceSrv.createInvoice(b.id, equipmentInvoiceItems);
+    const rooms = b.timeSlots.map(ts => {return {id: ts.roomId, count: 1}})
+    const roomsInvoiceItems = await this.invoiceSrv.createInvoiceItems(rooms, durations);
+    invoiceItems = invoiceItems.concat(roomsInvoiceItems);
+
+    const invoice = await this.invoiceSrv.createInvoice(b.id, invoiceItems);
     const bk = {
       Name: b.name,
       TeilnehmerInnenanzahl: b.participantsCount,
@@ -194,10 +225,23 @@ class TimeSlotsService {
       await this.table.destroy(eventTimeSlotsIds);
     }
     const otherTimeSlotsIds = allBookingTimeSlots
-    .filter(r => r.get('Type') !== 'Veranstaltung')
-    .map(r => r.getId());
+      .filter(r => r.get('Type') !== 'Veranstaltung')
+      .map(r => r.getId());
     const newTimeSlotsIds = (await this.create(bookingRecordId, timeSlots)).map(ts => ts.getId());
     return [...otherTimeSlotsIds, ...newTimeSlotsIds];
+  }
+
+  async getDurations(timeSlots) {
+    return await Promise.all(timeSlots.map(async ts => {
+      const beginn = moment(ts.beginnDate)
+        .add(ts.beginnH, 'h')
+        .add(ts.beginnM, 'minutes');
+
+      const end = moment(ts.endDate)
+        .add(ts.endH, 'h')
+        .add(ts.endM, 'minutes');
+      return moment(end).diff(beginn, 'hours');
+    }));
   }
 
   async create(bookingID, timeSlots) {
@@ -236,7 +280,7 @@ class PersonService {
 
     const existing = await this.getByEmail(p.email);
     if (existing) {
-      const updated =  await this.table.update(existing.getId(), {
+      const updated = await this.table.update(existing.getId(), {
         Email: p.email,
         Vorname: p.firstName,
         Nachname: p.lastName,
@@ -249,7 +293,7 @@ class PersonService {
         Ort: p.city,
         UID: p.uid
       });
-      
+
       return updated;
     }
     return await this.table.create({

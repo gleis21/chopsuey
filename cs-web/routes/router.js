@@ -142,7 +142,8 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
                 count: e.get('Anzahl'),
                 price: e.get('SummeNetto'),
                 discount: discount,
-                finalPrice: finalPrice
+                finalPrice: finalPrice,
+                notes: e.get('Anmerkung')
               };
             }),
             rooms: invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Raum').map(e => {
