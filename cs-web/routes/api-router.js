@@ -94,7 +94,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
       const booking = {
         id: b.id,
         notes: b.notes,
-        participantsCount: b. participantsCount,
+        participantsCount: b.participantsCount,
         name: b.name,
         roomIds: [b.roomId],
         equipment: b.equipment,

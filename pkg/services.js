@@ -150,17 +150,19 @@ class BookingService {
   async update(b) {
     const person = await this.personSrv.createOrUpdate(b.person);
     const tsIds = await this.timeSlotsSrv.replaceEventBookingTimeSlots(b.id, b.timeSlots);
-    const durations = await this.timeSlotsSrv.getDurations(b.timeSlots);
-
-
+    
     var invoiceItems = [];
     if (b.equipment && b.equipment.length > 0) {
+      const durations = await this.timeSlotsSrv.getDurations(b.timeSlots);
       const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(b.equipment, durations);
       invoiceItems = invoiceItems.concat(equipmentInvoiceItems);
     }
-    const rooms = b.timeSlots.map(ts => {return {id: ts.roomId, count: 1}})
-    const roomsInvoiceItems = await this.invoiceSrv.createInvoiceItems(rooms, durations);
-    invoiceItems = invoiceItems.concat(roomsInvoiceItems);
+    b.timeSlots.forEach(ts => {
+      const rooms = [{id: ts.roomId, count: 1}];
+      const durations = [this.timeSlotsSrv.getDuration(ts)];
+      const roomsInvoiceItems = await this.invoiceSrv.createInvoiceItems(rooms, durations);
+      invoiceItems = invoiceItems.concat(roomsInvoiceItems);
+    });
 
     const invoice = await this.invoiceSrv.createInvoice(b.id, invoiceItems);
     const bk = {
@@ -231,9 +233,8 @@ class TimeSlotsService {
     return [...otherTimeSlotsIds, ...newTimeSlotsIds];
   }
 
-  async getDurations(timeSlots) {
-    return await Promise.all(timeSlots.map(async ts => {
-      const beginn = moment(ts.beginnDate)
+  getDuration(ts) {
+    const beginn = moment(ts.beginnDate)
         .add(ts.beginnH, 'h')
         .add(ts.beginnM, 'minutes');
 
@@ -241,6 +242,12 @@ class TimeSlotsService {
         .add(ts.endH, 'h')
         .add(ts.endM, 'minutes');
       return moment(end).diff(beginn, 'hours');
+
+  }
+
+  async getDurations(timeSlots) {
+    return await Promise.all(timeSlots.map(async ts => {
+      return this.getDuration(ts);
     }));
   }
 
