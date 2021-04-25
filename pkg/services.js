@@ -157,12 +157,13 @@ class BookingService {
       const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(b.equipment, durations);
       invoiceItems = invoiceItems.concat(equipmentInvoiceItems);
     }
-    b.timeSlots.forEach(ts => {
+    for (let i = 0; i < b.timeSlots.length; i++) {
+      const ts = b.timeSlots[i];
       const rooms = [{id: ts.roomId, count: 1}];
       const durations = [this.timeSlotsSrv.getDuration(ts)];
       const roomsInvoiceItems = await this.invoiceSrv.createInvoiceItems(rooms, durations);
       invoiceItems = invoiceItems.concat(roomsInvoiceItems);
-    });
+    }
 
     const invoice = await this.invoiceSrv.createInvoice(b.id, invoiceItems);
     const bk = {
