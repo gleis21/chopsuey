@@ -73,8 +73,17 @@ Vue.component('booking-form', {
 
       this.rooms = roomsRes.res;
       this.booking.equipment = equipmentRes.res.map(e => {
-        const bookedEqp = bookedEquipmentRes.res.filter(r => r.equipmentId === e.id);
-        return { id: e.id, name: e.name, count: bookedEqp.length > 0 ? bookedEqp[0].numberBooked: 0, description: e.description, quantity: e.quantity, position: e.position, notesTitle: e.notesTitle, notes: null };
+        const bookedEqp = bookedEquipmentRes.res.find(r => r.equipmentId === e.id);
+        return { 
+          id: e.id, 
+          name: e.name, 
+          count: bookedEqp ? bookedEqp.numberBooked: 0, 
+          description: e.description, 
+          quantity: e.quantity, 
+          position: e.position, 
+          notesTitle: e.notesTitle, 
+          notes: bookedEqp ? bookedEqp.notes: null 
+        };
       }).sort((a, b) => a.position - b.position);
       if (timeslotsRes.res && timeslotsRes.res.length > 0) {
         this.booking.timeSlots = timeslotsRes.res
@@ -133,11 +142,12 @@ Vue.component('booking-form', {
         return;
       }
       this.loading = true;
-      this.booking.equipment = this.booking.equipment.filter(eq => eq.count > 0);
+      const b = { ...this.booking};
+      b.equipment = b.equipment.filter(eq => eq.count > 0);
       const res = await fetch('/buchungssystem/api/bookings/' + this.booking.id, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.booking)
+        body: JSON.stringify(b)
       });
       this.loading = false;
       if (res.ok) {
