@@ -43,8 +43,8 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
       const status = b.get('Status');
       if (!status || status === 'Neu' || status === 'Vorreserviert') {
         res.status(200).json({
-          res: { 
-            id: b.id, 
+          res: {
+            id: b.id,
             name: b.get('Name'),
             notes: b.get('Notes'),
             person: person,
@@ -75,7 +75,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
       // Create a new entry in the booking table
       const r = await bookingSrv.create(booking);
       const editUrl = process.env.CS_BOOKING_EDIT_URL + '/' + r.getId();
-      
+
       res.status(200).json({
         res: { editUrl: editUrl, email: b.customerEmail, pin: pin },
         err: null
@@ -94,19 +94,19 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
       const booking = {
         id: b.id,
         notes: b.notes,
-        participantsCount: b.participantsCount,
+        participantsCount: parseInt(b.participantsCount, 10),
         name: b.name,
         roomIds: [b.roomId],
         equipment: b.equipment,
         person: b.person,
         timeSlots: b.timeSlots
       };
-        const r = await bookingSrv.update(booking);
-        
-        res.status(200).json({
-          res: r,
-          err: null
-        });
+      const r = await bookingSrv.update(booking);
+
+      res.status(200).json({
+        res: r,
+        err: null
+      });
     })
   );
 
@@ -119,10 +119,10 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
     asyncMiddleware(async (req, res, next) => {
       const invoiceItems = (await invoiceSrv.getInvoceItemsByBooking(req.params.id));
       const bookedequipment = invoiceItems
-      .filter(it => it.get('ArtikelTyp')[0] === 'Ausstattung')
-      .map(it => { 
-        return { equipmentId: it.get('ArtikelId')[0], numberBooked: it.get('Anzahl'), notes: it.get('Anmerkung') };
-      });
+        .filter(it => it.get('ArtikelTyp')[0] === 'Ausstattung')
+        .map(it => {
+          return { equipmentId: it.get('ArtikelId')[0], numberBooked: it.get('Anzahl'), notes: it.get('Anmerkung') };
+        });
       res.status(200).json({
         res: bookedequipment
       });
@@ -138,21 +138,21 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
     asyncMiddleware(async (req, res, next) => {
       var i = 1;
       const eventtimeslots = (await timeslotsSrv.getBookingTimeSlots(req.params.id))
-      .filter(it => it.get('Type') === 'Veranstaltung')
-      .map(it => { 
-        return { 
-          id: i++,
-          roomId: it.get('Raum')[0],
-          type: 'Veranstaltung',
-          beginnDate: moment(it.get('Beginn')).format('YYYY-MM-DD'),
-          beginnH: moment(it.get('Beginn')).hours(),
-          beginnM: moment(it.get('Beginn')).minutes(),
-          endDate: moment(it.get('Beginn')).add(it.get('Duration'), 's').format('YYYY-MM-DD'),
-          endH: moment(it.get('Beginn')).add(it.get('Duration'), 's').hours(),
-          endM: moment(it.get('Beginn')).add(it.get('Duration'), 's').minutes(),
-          notes: it.get('Notes')
-         };
-      });
+        .filter(it => it.get('Type') === 'Veranstaltung')
+        .map(it => {
+          return {
+            id: i++,
+            roomId: it.get('Raum')[0],
+            type: 'Veranstaltung',
+            beginnDate: moment(it.get('Beginn')).format('YYYY-MM-DD'),
+            beginnH: moment(it.get('Beginn')).hours(),
+            beginnM: moment(it.get('Beginn')).minutes(),
+            endDate: moment(it.get('Beginn')).add(it.get('Duration'), 's').format('YYYY-MM-DD'),
+            endH: moment(it.get('Beginn')).add(it.get('Duration'), 's').hours(),
+            endM: moment(it.get('Beginn')).add(it.get('Duration'), 's').minutes(),
+            notes: it.get('Notes')
+          };
+        });
       res.status(200).json({
         res: eventtimeslots
       });

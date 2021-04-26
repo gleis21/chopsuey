@@ -82,7 +82,7 @@ class InvoiceService {
     });
   }
 
-  async createInvoiceItems(items, durations) {
+  async createInvoiceItems(items, durations, participantsCount) {
     const eqPrices = await this.getEquipmentPrices();
 
     // items have an id and count
@@ -96,7 +96,7 @@ class InvoiceService {
         return this.calculatePrices(articlePrices, durations).map(p => {
           return {
             priceId: p.getId(),
-            count: it.count,
+            count: p.get('MultiplizierenMitTeilnehmerAnzahl') ? it.count * participantsCount: it.count,
             notes: it.notes
           };
         })
@@ -153,15 +153,15 @@ class BookingService {
     
     var invoiceItems = [];
     if (b.equipment && b.equipment.length > 0) {
-      const durations = await this.timeSlotsSrv.getDurations(b.timeSlots);
-      const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(b.equipment, durations);
+      const durations = this.timeSlotsSrv.getDurations(b.timeSlots);
+      const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(b.equipment, durations, b.participantsCount);
       invoiceItems = invoiceItems.concat(equipmentInvoiceItems);
     }
     for (let i = 0; i < b.timeSlots.length; i++) {
       const ts = b.timeSlots[i];
       const rooms = [{id: ts.roomId, count: 1}];
       const durations = [this.timeSlotsSrv.getDuration(ts)];
-      const roomsInvoiceItems = await this.invoiceSrv.createInvoiceItems(rooms, durations);
+      const roomsInvoiceItems = await this.invoiceSrv.createInvoiceItems(rooms, durations, b.participantsCount);
       invoiceItems = invoiceItems.concat(roomsInvoiceItems);
     }
 
@@ -246,10 +246,10 @@ class TimeSlotsService {
 
   }
 
-  async getDurations(timeSlots) {
-    return await Promise.all(timeSlots.map(async ts => {
+  getDurations(timeSlots) {
+    return timeSlots.map(ts => {
       return this.getDuration(ts);
-    }));
+    });
   }
 
   async create(bookingID, timeSlots) {
