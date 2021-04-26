@@ -9,7 +9,7 @@ class InvoiceService {
   }
 
   async createInvoice(bookingId, invoiceItems) {
-    await this.deleteEquipmentInvoceItemsByBooking(bookingId);
+    await this.deleteInvoceItemsByBooking(bookingId);
     const invoices = await this.getInvoceByBooking(bookingId);
     if (invoices && invoices.length > 0) {
       const invoice = invoices[0];
@@ -46,9 +46,8 @@ class InvoiceService {
       .firstPage();
   }
 
-  async deleteEquipmentInvoceItemsByBooking(bookingRecordId) {
+  async deleteInvoceItemsByBooking(bookingRecordId) {
     const equipmentItemsIds = (await this.getInvoceItemsByBooking(bookingRecordId))
-      .filter(it => it.get('ArtikelTyp')[0] === 'Ausstattung')
       .map(it => it.getId());
     if (equipmentItemsIds && equipmentItemsIds.length > 0) {
       await this.rechnungspostenTable.destroy(equipmentItemsIds);
