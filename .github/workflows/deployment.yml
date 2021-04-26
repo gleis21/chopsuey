@@ -39,6 +39,7 @@ jobs:
           docker rm happy-hours
           docker stop caddy
           docker rm caddy
+          docker image prune -a -f
           echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
           docker pull gleis21/chopsuey:latest
           docker pull gleis21/happy-hours:latest
