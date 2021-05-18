@@ -50,7 +50,11 @@ class InvoiceService {
     const equipmentItemsIds = (await this.getInvoceItemsByBooking(bookingRecordId))
       .map(it => it.getId());
     if (equipmentItemsIds && equipmentItemsIds.length > 0) {
-      await this.rechnungspostenTable.destroy(equipmentItemsIds);
+      var i, j, tmp, chunk = 10;
+      for (i = 0, j = equipmentItemsIds.length; i < j; i += chunk) {
+        tmp = equipmentItemsIds.slice(i, i + chunk);
+        await this.rechnungspostenTable.destroy(tmp);
+      }
     }
   }
 
@@ -95,7 +99,7 @@ class InvoiceService {
         return this.calculatePrices(articlePrices, durations).map(p => {
           return {
             priceId: p.getId(),
-            count: p.get('MultiplizierenMitTeilnehmerAnzahl') ? it.count * participantsCount: it.count,
+            count: p.get('MultiplizierenMitTeilnehmerAnzahl') ? it.count * participantsCount : it.count,
             notes: it.notes
           };
         })
@@ -149,7 +153,7 @@ class BookingService {
   async update(b) {
     const person = await this.personSrv.createOrUpdate(b.person);
     const tsIds = await this.timeSlotsSrv.replaceEventBookingTimeSlots(b.id, b.timeSlots);
-    
+
     var invoiceItems = [];
     if (b.equipment && b.equipment.length > 0) {
       const durations = this.timeSlotsSrv.getDurations(b.timeSlots);
@@ -158,7 +162,7 @@ class BookingService {
     }
     for (let i = 0; i < b.timeSlots.length; i++) {
       const ts = b.timeSlots[i];
-      const rooms = [{id: ts.roomId, count: 1}];
+      const rooms = [{ id: ts.roomId, count: 1 }];
       const durations = [this.timeSlotsSrv.getDuration(ts)];
       const roomsInvoiceItems = await this.invoiceSrv.createInvoiceItems(rooms, durations, b.participantsCount);
       invoiceItems = invoiceItems.concat(roomsInvoiceItems);
@@ -235,13 +239,13 @@ class TimeSlotsService {
 
   getDuration(ts) {
     const beginn = moment(ts.beginnDate)
-        .add(ts.beginnH, 'h')
-        .add(ts.beginnM, 'minutes');
+      .add(ts.beginnH, 'h')
+      .add(ts.beginnM, 'minutes');
 
-      const end = moment(ts.endDate)
-        .add(ts.endH, 'h')
-        .add(ts.endM, 'minutes');
-      return moment(end).diff(beginn, 'hours');
+    const end = moment(ts.endDate)
+      .add(ts.endH, 'h')
+      .add(ts.endM, 'minutes');
+    return moment(end).diff(beginn, 'hours');
 
   }
 
