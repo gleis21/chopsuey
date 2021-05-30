@@ -14,7 +14,7 @@ Vue.component('booking-form', {
         notes: '',
         timeSlots: []
       },
-      moeblierung: ['Block', 'Cafe', 'Carre', 'Geschwungene-Reihen', 'Kreis', 'U-Form'],
+      moeblierungen: ['Block', 'Cafe', 'Carre', 'Geschwungene-Reihen', 'Kreis', 'U-Form'],
       rooms: [],
       equipment: [],
       hours: [
