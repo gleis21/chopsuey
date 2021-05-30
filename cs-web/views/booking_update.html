@@ -180,6 +180,19 @@
         <br/>
         <img src="../images/raumplan.png" style="width: 1110px">
         <br/>
+        <b>Möblierung</b>
+        <ul class="list-group list-group-horizontal">
+          <li class="list-group-item"><img src="../images/moeblierung/block.jpg"> Block</li>
+          <li class="list-group-item"><img src="../images/moeblierung/cafe.jpg"> Cafe</li>
+          <li class="list-group-item"><img src="../images/moeblierung/carre.jpg"> Carre</li>
+        </ul>
+        <ul class="list-group list-group-horizontal">
+          <li class="list-group-item"><img src="../images/moeblierung/geschwungene-reihen.png"> Geschwungene Reihen</li>
+          <li class="list-group-item"><img src="../images/moeblierung/kreis.png">Kreis</li>
+          <li class="list-group-item"><img src="../images/moeblierung/uform.png">U-Form</li>
+        </ul>
+        <br/>
+        <br/>
         <div class="jumbotron bg-light" v-for="(ts, index) in booking.timeSlots">
           <button type="button" class="btn btn-danger float-right" v-on:click="deleteTimeSlot(index)"><span class="fa fa-trash"></span></button>
           <div class="form-row">
