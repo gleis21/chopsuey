@@ -120,7 +120,8 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
                 room: t.get('RaumName')[0],
                 type: t.get('Type'),
                 beginn: moment(t.get('Beginn')),
-                end: moment(t.get('Ende'))
+                end: moment(t.get('Ende')),
+                moeblierung: t.get('Moeblierung')
               };
             })
             .filter(t => t.type === 'Veranstaltung')
