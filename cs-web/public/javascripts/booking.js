@@ -94,6 +94,7 @@ Vue.component('booking-form', {
             id: 1,
             roomId: this.rooms[0].id,
             type: 'Veranstaltung',
+            moeblierung: 'Kreis',
             beginnDate: moment()
               .add(2, 'd')
               .format('YYYY-MM-DD'),
