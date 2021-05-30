@@ -273,7 +273,8 @@ class TimeSlotsService {
           Type: 'Veranstaltung',
           Buchung: [bookingID],
           Raum: [ts.roomId],
-          Notes: ts.notes
+          Notes: ts.notes,
+          Moeblierung: ts.moeblierung
         }
       };
     }));
