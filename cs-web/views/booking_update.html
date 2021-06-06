@@ -116,7 +116,7 @@
         
         <div style="padding: 10px" class="bg-light">
           <h4>Ausstattung</h4>
-          <p>Sofern nicht anders vereinbart sind im Grundpreis enthalten: W-LAN, 1 Beamer, 1 Flipchart, 1 Pinnwand, 1 Funkmikrofon, Sound System</p>
+          <p>Sofern nicht anders vereinbart sind im Grundpreis enthalten: W-LAN, 1 Beamer, 1 Flipchart, 1 Pinnwand, 1 White Board, 1 Funkmikrofon, Sound System, Möblierung</p>
           <div class=" form-group row" v-for="e in booking.equipment">
             <label class="col-sm-4 col-form-label" for="equipment">{{e.name}}</label>
             <div class="col-sm-3">
@@ -142,40 +142,33 @@
           <textarea class="form-control" id="decription" rows="5" v-model="booking.notes"></textarea>
         </div>
 
-        <div class="alert alert-warning" role="alert">
-          <b>Hinweise zur Angabe von Raumnutzungszeiten:</b>
-          Bitte geben Sie hier den Zeitraum an, in 
-          dem Sie den Raum jeweils für Ihre Buchung benötigen.
-          Bitte geben Sie Beginn und Ende Ihrer Veranstaltung, allfällige Auf- oder Abbauzeiten im 
-          Anmerkungsfeld an. 
-        </div>
-
-        <div class="list-group">
-          <a href="#" class="list-group-item list-group-item-action flex-column align-items-start" style="cursor: default">
+        <ul class="list-group">
+          <li class="list-group-item list-group-item flex-column align-items-start">
             <div class="d-flex w-100 justify-content-between">
               <h5 class="mb-1">SAAL 21</h5>
             </div>
-            <p class="mb-1">-> klein 84m&sup2; (max. 85 Personen)</p>
-            <p class="mb-1">-> groß 117m&sup2; (max. 99 Personen)</p>
+            <p class="mb-1">-> klein 84m&sup2; (max. 85 Personen *)</p>
+            <p class="mb-1">-> groß 117m&sup2; (max. 99 Personen *)</p>
             <p class="mb-1">-> eigener Backstage-Raum (16m&sup2;) im Untergeschoß</p>
-          </a>
-          <a href="#" class="list-group-item list-group-item-action flex-column align-items-start" style="cursor: default">
+          </li>
+          <li class="list-group-item list-group-item flex-column align-items-start">
             <div class="d-flex w-100 justify-content-between">
               <h5 class="mb-1">SALON 21</h5>
             </div>
-            <p class="mb-1">-> 33m&sup2; (max. 14 Personen)</p>
+            <p class="mb-1">-> 33m&sup2; (max. 14 Personen *)</p>
             <p class="mb-1">-> flexible Trennwandzum Saal</p>
-          </a>
-          <a href="#" class="list-group-item list-group-item-action flex-column align-items-start" style="cursor: default">
+          </li>
+          <li class="list-group-item list-group-item flex-column align-items-start">
             <div class="d-flex w-100 justify-content-between">
               <h5 class="mb-1">STATION 21</h5>
             </div>
-            <p class="mb-1">-> 15m&sup2; (max. 6 Personen)</p>
+            <p class="mb-1">-> 15m&sup2; (max. 6 Personen *)</p>
             <p class="mb-1">-> Medienraum</p>
             <p class="mb-1">-> Backstage</p>
             <p class="mb-1">-> Workspaces</p>
-          </a>
-        </div>
+          </li>
+        </ul>
+        <p><i><small><b>* Personen Anzahl berücksichtigt keine Corona Bedingungen.</b></small></i></p>
         <br/>
         <br/>
         <img src="../images/raumplan.png" style="width: 1110px">
@@ -252,6 +245,13 @@
           <div class="form-group">
             <label for="notes">Anmerkung</label>
             <textarea class="form-control"  placeholder="Bitte geben Sie hier Beginn und Ende der Veranstaltung (Datum & Uhrzeit) ein." id="tsnotes" rows="5" v-model="ts.notes"></textarea>
+          </div>
+          <div class="alert alert-warning" role="alert">
+            <b>Hinweise zur Angabe von Raumnutzungszeiten:</b>
+            Bitte geben Sie hier den Zeitraum an, in 
+            dem Sie den Raum jeweils für Ihre Buchung benötigen.
+            Bitte geben Sie Beginn und Ende Ihrer Veranstaltung, allfällige Auf- oder Abbauzeiten im 
+            Anmerkungsfeld an. 
           </div>
         </div>
       

@@ -31,7 +31,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
       return authMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
     },
     asyncMiddleware(async (req, res, next) => {
-      res.cookie('cs-creds', Buffer.from(res.locals.customerUserName + ':' + res.locals.pin).toString('base64'), { maxAge: 900000, httpOnly: true, encode: String, overwrite: true });
+      res.cookie('cs-creds', Buffer.from(res.locals.customerUserName + ':' + res.locals.pin).toString('base64'), { maxAge: 7200000, httpOnly: true, encode: String, overwrite: true });
       res.render('booking_update');
     })
   );
@@ -100,6 +100,32 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
         const p = await personSrv.getById(b.get('Mieter'));
         const ts = await timeSlotsSrv.getBookingTimeSlots(b.getId());
         const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(b.getId());
+
+        const equipment = invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Ausstattung').map(e => {
+          const discount = e.get('Rabatt') ? e.get('Rabatt') : 0;
+          const finalPrice = parseFloat(e.get('SummeNetto')) - (parseFloat(e.get('SummeNetto')) * discount)
+          return {
+            name: e.get('ArtikelName'),
+            count: e.get('Anzahl'),
+            price: e.get('SummeNetto'),
+            discount: discount,
+            finalPrice: finalPrice,
+            notes: e.get('Anmerkung')
+          };
+        });
+        const equipmentPriceSum = equipment.map(e => e.finalPrice).reduce((a, c) => a + c);
+        const rooms = invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Raum').map(e => {
+          const discount = e.get('Rabatt') ? e.get('Rabatt') : 0;
+          const finalPrice = parseFloat(e.get('SummeNetto')) - (parseFloat(e.get('SummeNetto')) * discount)
+          return {
+            name: e.get('ArtikelName'),
+            price: e.get('SummeNetto'),
+            discount: discount,
+            finalPrice: finalPrice
+          };
+        });
+        const roomsPriceSum = rooms.map(e => e.finalPrice).reduce((a, c) => a + c);
+
         const contract = {
           name: b.get('Name'),
           participantsCount: b.get('TeilnehmerInnenanzahl'),
@@ -135,28 +161,10 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
               };
             }),
           invoiceItems: {
-            equipment: invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Ausstattung').map(e => {
-              const discount = e.get('Rabatt') ? e.get('Rabatt') : 0;
-              const finalPrice = parseFloat(e.get('SummeNetto')) - (parseFloat(e.get('SummeNetto')) * discount)
-              return {
-                name: e.get('ArtikelName'),
-                count: e.get('Anzahl'),
-                price: e.get('SummeNetto'),
-                discount: discount,
-                finalPrice: finalPrice,
-                notes: e.get('Anmerkung')
-              };
-            }),
-            rooms: invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Raum').map(e => {
-              const discount = e.get('Rabatt') ? e.get('Rabatt') : 0;
-              const finalPrice = parseFloat(e.get('SummeNetto')) - (parseFloat(e.get('SummeNetto')) * discount)
-              return {
-                name: e.get('ArtikelName'),
-                price: e.get('SummeNetto'),
-                discount: discount,
-                finalPrice: finalPrice
-              };
-            })
+            equipment: equipment,
+            equipmentPriceSum: equipmentSum,
+            rooms: rooms,
+            roomsPriceSum: roomsPriceSum
           },
           notes: b.get('Notes')
         };

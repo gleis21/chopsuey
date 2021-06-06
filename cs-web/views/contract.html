@@ -138,6 +138,7 @@
                     <th class="cell-padding border" scope="col"></th>
                     <th class="cell-padding border" scope="col">von</th>
                     <th class="cell-padding border" scope="col">bis</th>
+                    <th class="cell-padding border" scope="col">Möblierung</th>
                   </tr>
                   <% timeSlots.forEach( t => { %>
                   <tr>
@@ -145,6 +146,7 @@
                     <td class="cell-padding border"><%= t.type %></td>
                     <td class="cell-padding border"><%= t.beginn %></td>
                     <td class="cell-padding border"><%= t.end %></td>
+                    <td class="cell-padding border"><%= t.moeblierung %></td>
                   </tr>
                   <% }) %>
                 </table>
@@ -176,6 +178,9 @@
                     <td class="cell-padding border"><%= it.notes %></td>
                   </tr>
                   <% }) %>
+                  <tr>
+                    <td colspan="6">Summe: <%= it.equipmentPriceSum %></td>
+                  </tr>
                 </table>
               </td>
             </tr>
@@ -200,6 +205,9 @@
                     <td class="cell-padding border"><%= it.finalPrice %> &euro;</td>
                   </tr>
                   <% }) %>
+                  <tr>
+                    <td colspan="4">Summe: <%= it.roomsPriceSum %></td>
+                  </tr>
                 </table>
               </td>
             </tr>
