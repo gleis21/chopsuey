@@ -162,7 +162,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
             }),
           invoiceItems: {
             equipment: equipment,
-            equipmentPriceSum: equipmentSum,
+            equipmentPriceSum: equipmentPriceSum,
             rooms: rooms,
             roomsPriceSum: roomsPriceSum
           },
