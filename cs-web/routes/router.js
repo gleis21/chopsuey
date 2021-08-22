@@ -8,6 +8,7 @@ const fs = require('fs');
 const asyncMiddleware = require('../../pkg/middleware').asyncMiddleware;
 const bookingCredsMiddleware = require('../../pkg/middleware').bookingCredsMiddleware;
 const authMiddleware = require('../../pkg/middleware').authMiddleware;
+const e = require('express');
 
 const gleisUser = process.env.CS_USER;
 const gleisPassword = process.env.CS_PASSWORD;
@@ -125,7 +126,9 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
           };
         });
         const roomsPriceSum = rooms.map(e => e.finalPrice).reduce((a, c) => a + c);
-
+        ts.forEach(el => {
+          console.log(el.get('Moeblierung'));
+        });
         const contract = {
           name: b.get('Name'),
           participantsCount: b.get('TeilnehmerInnenanzahl'),
