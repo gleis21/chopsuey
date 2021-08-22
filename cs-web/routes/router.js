@@ -126,9 +126,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
           };
         });
         const roomsPriceSum = rooms.map(e => e.finalPrice).reduce((a, c) => a + c);
-        ts.forEach(el => {
-          console.log(el.get('Moeblierung'));
-        });
+
         const contract = {
           name: b.get('Name'),
           participantsCount: b.get('TeilnehmerInnenanzahl'),
@@ -171,6 +169,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
           },
           notes: b.get('Notes')
         };
+        console.log(contract.timeSlots[0].moeblierung);
 
         res.render('contract', contract);
       }
