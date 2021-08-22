@@ -143,13 +143,15 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
           },
           timeSlots: ts
             .map(t => {
-              return {
+              console.log(t.get('Moeblierung'));
+              const x = {
                 room: t.get('RaumName')[0],
+                moeblierung: t.get('Moeblierung'),
                 type: t.get('Type'),
                 beginn: moment(t.get('Beginn')),
-                end: moment(t.get('Ende')),
-                moeblierung: t.get('Moeblierung')
+                end: moment(t.get('Ende'))
               };
+              console.log(x.moeblierung);
             })
             .filter(t => t.type === 'Veranstaltung')
             .sort((a, b) => (a.beginn.isAfter(b.beginn) ? 1 : -1))
