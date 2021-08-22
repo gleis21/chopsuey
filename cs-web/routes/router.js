@@ -152,6 +152,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
                 end: moment(t.get('Ende'))
               };
               console.log(x.moeblierung);
+              return x;
             })
             .filter(t => t.type === 'Veranstaltung')
             .sort((a, b) => (a.beginn.isAfter(b.beginn) ? 1 : -1))
