@@ -172,6 +172,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
           },
           notes: b.get('Notes')
         };
+        console.log(contract.timeSlots[0].type);
         console.log(contract.timeSlots[0].moeblierung);
 
         res.render('contract', contract);
