@@ -143,7 +143,6 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
           },
           timeSlots: ts
             .map(t => {
-              console.log(t.get('Moeblierung'));
               const x = {
                 room: t.get('RaumName')[0],
                 moeblierung: t.get('Moeblierung'),
@@ -151,7 +150,6 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
                 beginn: moment(t.get('Beginn')),
                 end: moment(t.get('Ende'))
               };
-              console.log(x.moeblierung);
               return x;
             })
             .filter(t => t.type === 'Veranstaltung')
@@ -161,7 +159,8 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
                 room: t.room,
                 type: t.type,
                 beginn: t.beginn.format('DD.MM.YYYY HH:mm'),
-                end: t.end.format('DD.MM.YYYY HH:mm')
+                end: t.end.format('DD.MM.YYYY HH:mm'),
+                moeblierung: t.moeblierung
               };
             }),
           invoiceItems: {
@@ -172,8 +171,6 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
           },
           notes: b.get('Notes')
         };
-        console.log(contract.timeSlots[0].type);
-        console.log(contract.timeSlots[0].moeblierung);
 
         res.render('contract', contract);
       }
