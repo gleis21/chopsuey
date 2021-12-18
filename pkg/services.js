@@ -91,7 +91,7 @@ class InvoiceService {
     // items have an id and count
     const invoiceItems = items
       .map(it => {
-        const articlePrices = eqPrices.filter(ep => ep.get('Artikel')[0] === it.id);
+        const articlePrices = eqPrices.filter(ep => ep.get('Artikel') && ep.get('Artikel')[0] === it.id);
         if (!articlePrices || articlePrices.length == 0) {
           console.log('no price found for artikel ' + it.id);
         }
