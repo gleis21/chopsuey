@@ -139,6 +139,7 @@
                     <th class="cell-padding border" scope="col">von</th>
                     <th class="cell-padding border" scope="col">bis</th>
                     <th class="cell-padding border" scope="col">Möblierung</th>
+                    <th class="cell-padding border" scope="col">Anmerkung</th>
                   </tr>
                   <% timeSlots.forEach( t => { %>
                   <tr>
@@ -147,6 +148,7 @@
                     <td class="cell-padding border"><%= t.beginn %></td>
                     <td class="cell-padding border"><%= t.end %></td>
                     <td class="cell-padding border"><%= t.moeblierung %></td>
+                    <td class="cell-padding border"><%= t.notes %></td>
                   </tr>
                   <% }) %>
                 </table>

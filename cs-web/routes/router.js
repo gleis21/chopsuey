@@ -148,7 +148,8 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
                 moeblierung: t.get('Moeblierung'),
                 type: t.get('Type'),
                 beginn: moment(t.get('Beginn')),
-                end: moment(t.get('Ende'))
+                end: moment(t.get('Ende')),
+                notes: t.get('Notes')
               };
               return x;
             })
@@ -160,7 +161,8 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
                 type: t.type,
                 beginn: t.beginn.format('DD.MM.YYYY HH:mm'),
                 end: t.end.format('DD.MM.YYYY HH:mm'),
-                moeblierung: t.moeblierung
+                moeblierung: t.moeblierung,
+                notes: t.notes
               };
             }),
           invoiceItems: {
