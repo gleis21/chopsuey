@@ -65,15 +65,18 @@ class InvoiceService {
   }
 
   calculatePrices(articlePrices, durationsInHours) {
-    console.log(JSON.stringify(articlePrices));
     if (articlePrices.length === 1) {
       return articlePrices;
     }
+    const variant1h = articlePrices.find(p => p.get('Variante') === "1 Stunde" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
     const variant2h = articlePrices.find(p => p.get('Variante') === "2 Stunden" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
     const variant4h = articlePrices.find(p => p.get('Variante') === "halbtags" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
     const variant1day = articlePrices.find(p => p.get('Variante') === "ganztags" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
 
     return durationsInHours.map(dur => {
+      if (dur === 1 && variant1h) {
+        return variant1h;
+      }
       if (dur <= 2 && (variant2h || variant4h)) {
         return variant2h ? variant2h : variant4h;
       }
@@ -83,6 +86,7 @@ class InvoiceService {
       if (dur > 4 && variant1day) {
         return variant1day;
       }
+      return articlePrices[0];
     });
   }
 
