@@ -65,6 +65,7 @@ class InvoiceService {
   }
 
   calculatePrices(articlePrices, durationsInHours) {
+    console.log(JSON.stringify(articlePrices));
     if (articlePrices.length === 1) {
       return articlePrices;
     }
@@ -73,8 +74,8 @@ class InvoiceService {
     const variant1day = articlePrices.find(p => p.get('Variante') === "ganztags" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
 
     return durationsInHours.map(dur => {
-      if (dur <= 2 && variant2h) {
-        return variant2h;
+      if (dur <= 2 && (variant2h || variant4h)) {
+        return variant2h ? variant2h : variant4h;
       }
       if (dur > 2 && dur <= 4 && variant4h) {
         return variant4h;
@@ -93,7 +94,7 @@ class InvoiceService {
       .map(it => {
         const articlePrices = eqPrices.filter(ep => ep.get('Artikel') && ep.get('Artikel')[0] === it.id);
         if (!articlePrices || articlePrices.length == 0) {
-          console.log('no price found for artikel ' + it.id);
+          console.log('error: no price found for artikel ' + it.id);
         }
 
         return this.calculatePrices(articlePrices, durations).map(p => {
