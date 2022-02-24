@@ -148,9 +148,14 @@
                     <td class="cell-padding border"><%= t.end %></td>
                     <td class="cell-padding border"><%= t.moeblierung %></td>
                   </tr>
+                  <% if(t.notes){ %> 
                   <tr>
-                    <td colspan="5" class="cell-padding border"><%= t.notes %></td>
+                    <td colspan="5" class="cell-padding border">
+                      <b>Anmerkung:</b>
+                      <%= t.notes %>
+                    </td>
                   </tr>
+                  <% }) %>
                   <% }) %>
                 </table>
               </td>
