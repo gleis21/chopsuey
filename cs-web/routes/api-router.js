@@ -47,6 +47,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
             id: b.id,
             name: b.get('Name'),
             notes: b.get('Notes'),
+            participantsCount: b.get('TeilnehmerInnenanzahl'),
             person: person,
           },
           err: null
