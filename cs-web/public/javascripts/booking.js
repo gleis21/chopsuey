@@ -109,6 +109,9 @@ Vue.component('booking-form', {
           }
         ];
       }
+      if (booking && booking.participantsCount > 1) {
+        this.booking.participantsCount = booking.participantsCount;
+      }
       this.booking = { ...this.booking, ...booking.res };
     }
     this.initializerWidth = 100;
