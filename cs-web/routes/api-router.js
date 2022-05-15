@@ -38,6 +38,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
           org: c.get('Organisation'),
           lastName: c.get('Nachname'),
           firstName: c.get('Vorname'),
+          tel: c.get('Tel'),
         }
       }
       const status = b.get('Status');

@@ -308,7 +308,8 @@ class PersonService {
         Top: p.ano,
         PLZ: p.postcode,
         Ort: p.city,
-        UID: p.uid
+        UID: p.uid,
+        Tel: p.tel
       });
 
       return updated;
@@ -324,7 +325,8 @@ class PersonService {
       Top: p.ano,
       PLZ: p.postcode,
       Ort: p.city,
-      UID: p.uid
+      UID: p.uid,
+      Tel: p.tel
     });
   }
 
