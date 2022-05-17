@@ -59,9 +59,26 @@ class InvoiceService {
   }
 
   async getEquipmentPrices() {
-    return await this.preiseTable
+    return await new Promise((resolve, reject) => {
+      const allPrices = [];
+      this.preiseTable
       .select({ view: 'AusstattungPreise', pageSize: 100 })
-      .firstPage();
+      .eachPage(
+        function page(records, fetchNextPage) {
+          records.forEach(record => {
+            allPrices.push(record);
+          });
+          fetchNextPage();
+        },
+        function done(err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(allPrices);
+          }
+        }
+      );
+    });
   }
 
   calculatePrices(articlePrices, durationsInHours) {
