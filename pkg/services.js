@@ -300,7 +300,15 @@ class TimeSlotsService {
         }
       };
     }));
-    return await this.table.create(slots); // returns records (record.getId())
+    var createdTimeSlots = [];
+    // Airtable allows only 10 at once
+    var i, j, tmp, chunk = 10;
+    for (i = 0, j = slots.length; i < j; i += chunk) {
+      tmp = slots.slice(i, i + chunk);
+      const its = await this.table.create(tmp);
+      createdTimeSlots = createdTimeSlots.concat(its);
+    }
+    return createdTimeSlots;
   }
 }
 
