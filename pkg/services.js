@@ -250,7 +250,12 @@ class TimeSlotsService {
       .filter(r => r.get('Type') === 'Veranstaltung')
       .map(r => r.getId());
     if (eventTimeSlotsIds && eventTimeSlotsIds.length > 0) {
-      await this.table.destroy(eventTimeSlotsIds);
+      var i, j, tmp, chunk = 10;
+      for (i = 0, j = eventTimeSlotsIds.length; i < j; i += chunk) {
+        tmp = eventTimeSlotsIds.slice(i, i + chunk);
+        await this.table.destroy(tmp);
+      }
+      
     }
     const otherTimeSlotsIds = allBookingTimeSlots
       .filter(r => r.get('Type') !== 'Veranstaltung')
