@@ -49,8 +49,11 @@ app.use(expressWinston.logger({
   expressFormat: true, // Use the default Express/morgan request formatting. Enabling this will override any msg if true. Will only output colors with colorize set to true
   colorize: true, // Color the text and status code, using the Express/morgan color palette (text: gray, status: default green, 3XX cyan, 4XX yellow, 5XX red).
 }));
-
-app.use('/api', apiRouter(bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv));
+var apiPath = '/api'
+if (process.env.CS_ENV === 'dev') {
+  apiPath = '/buchungssystem' + apiPath;
+}
+app.use(apiPath, apiRouter(bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv));
 app.use(
   '/bookings',
   bookingsRouter(bookingSrv, invoiceSrv, timeslotsSrv, personSrv)
