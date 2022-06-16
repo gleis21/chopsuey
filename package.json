@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "TZ='Europe/Vienna' CS_ENV=dev node ./bin/cs-web",
+    "start": "TZ='Europe/Vienna' node ./bin/cs-web",
     "test": "echo no_tests_for_now"
   },
   "dependencies": {
