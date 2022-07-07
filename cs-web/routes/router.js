@@ -114,7 +114,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
             notes: e.get('Anmerkung')
           };
         });
-        const equipmentPriceSum = equipment.map(e => e.finalPrice).reduce((a, c) => a + c);
+        const equipmentPriceSum = equipment.length === 0 ? 0: equipment.map(e => e.finalPrice).reduce((a, c) => a + c);
         const rooms = invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Raum').map(e => {
           const discount = e.get('Rabatt') ? e.get('Rabatt') : 0;
           const finalPrice = parseFloat(e.get('SummeNetto')) - (parseFloat(e.get('SummeNetto')) * discount)
