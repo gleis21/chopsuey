@@ -120,8 +120,10 @@
         
         <div style="padding: 10px" class="bg-light">
           <h4>Ausstattung</h4>
-          <p>Sofern nicht anders vereinbart sind im Grundpreis enthalten: W-LAN, 1 Beamer, 1 Flipchart, 1 Pinnwand, 1 White Board, 1 Funkmikrofon, Sound System, Möblierung</p>
+          <p>Sofern nicht anders vereinbart sind im Grundpreis enthalten: W-LAN, 1 Beamer, 1 Flipchart, 1 Pinnwand, 1 White Board, 1 Funkmikrofon, Sound System, Möblierung.</p>
           <p>Papier für Flipchart und Pinnwand wird von Gleis 21 bereit gestellt. Moderationsmaterial (inkl. Stifte) bringen Sie bitte selber mit. Vielen Dank!</p>
+          <p>Änderungen Ihrer Ausstattungswünsche sind bei Bedarf auch nach Vertragsabschluß möglich.</p>
+          <p><b>Alle Angaben sind Netto-Preise (exkl. USt).</b></p>
           <div class=" form-group row" v-for="e in booking.equipment">
             <label class="col-sm-4 col-form-label" for="equipment">{{e.name}}</label>
             <div class="col-sm-3">
@@ -161,7 +163,7 @@
               <h5 class="mb-1">SALON 21</h5>
             </div>
             <p class="mb-1">-> 33m&sup2; (max. 14 Personen *)</p>
-            <p class="mb-1">-> flexible Trennwandzum Saal</p>
+            <p class="mb-1">-> flexible Trennwand zum Saal</p>
           </li>
           <li class="list-group-item list-group-item flex-column align-items-start">
             <div class="d-flex w-100 justify-content-between">
@@ -171,6 +173,13 @@
             <p class="mb-1">-> Medienraum</p>
             <p class="mb-1">-> Backstage</p>
             <p class="mb-1">-> Workspaces</p>
+          </li>
+          <li class="list-group-item list-group-item flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-1">Chamäleon</h5>
+            </div>
+            <p class="mb-1">-> 28m&sup2;</p>
+            <p class="mb-1">-> offener Nebenraum an Foyer angrenzend</p>
           </li>
         </ul>
         <p><i><small><b>* Personen Anzahl berücksichtigt keine Corona Bedingungen.</b></small></i></p>
@@ -205,7 +214,7 @@
 
           <div class="form-row">
             <div class="form-group col-md-4">
-              <label for="beginn">Begin der Raumnutzung:</label>
+              <label for="beginn">Beginn der Raumnutzung (inkl. Aufbau):</label>
               <input type="date" required v-model="ts.beginnDate" class="form-control" id="beginn">
             </div>
             <div class="form-group col-md-2">
@@ -224,7 +233,7 @@
 
           <div class="form-row">
             <div class="form-group col-md-4">
-              <label for="end">Ende der Raumnutzung:</label>
+              <label for="end">Ende der Raumnutzung (inkl. Abbau):</label>
               <input type="date" required v-model="ts.endDate" class="form-control" id="end">
             </div>
             <div class="form-group col-md-2">
@@ -241,7 +250,7 @@
             </div>
           </div>
           <div class="alert alert-warning" role="alert">
-            Bitte beachten Sie, dass für Buchungen bis zu <b>4 Stunden</b> gilt der <b>Halbtagestarif</b>. Buchungen länger als 4 Stunden werden mit <b>Ganztagestarif</b> verrechnet.
+            Bitte beachten Sie: Halbatgstarif gilt für Einmietungen bis zu <b>4 Stunden</b> und abends ab <b>17 Uhr</b>. Buchungen untertags länger als 4 Stunden werden mit <b>Ganztagestarif</b> verrechnet.
           </div>
           <div class="form-row">
             <div class="form-group col-md-4">
@@ -253,20 +262,13 @@
           </div>
           <div class="form-group">
             <label for="notes">Anmerkung</label>
-            <textarea class="form-control"  placeholder="Bitte geben Sie hier Beginn und Ende der Veranstaltung (Datum & Uhrzeit) ein." id="tsnotes" rows="5" v-model="ts.notes"></textarea>
-          </div>
-          <div class="alert alert-warning" role="alert">
-            <b>Hinweise zur Angabe von Raumnutzungszeiten:</b>
-            Bitte geben Sie hier den Zeitraum an, in 
-            dem Sie den Raum jeweils für Ihre Buchung benötigen.
-            Bitte geben Sie Beginn und Ende Ihrer Veranstaltung, allfällige Auf- oder Abbauzeiten im 
-            Anmerkungsfeld an. 
+            <textarea class="form-control"  placeholder="Bitte geben Sie hier Beginn und Ende der Veranstaltung (Uhrzeit) ein." id="tsnotes" rows="5" v-model="ts.notes"></textarea>
           </div>
         </div>
       
       <div class="row">
       <div class="col-md-12">
-      <button type="button" class="btn btn-success float-right" v-on:click="addTimeSlot"><i class="fas fa-plus"></i>&nbsp;Zeiten hinzufügen</button>
+      <button type="button" class="btn btn-success float-right" v-on:click="addTimeSlot"><i class="fas fa-plus"></i>&nbsp;Weitere Termine</button>
       </div>
     </div>
       <div class="row">
