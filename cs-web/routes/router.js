@@ -90,6 +90,8 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
   //   })
   // );
 
+
+
   router.get(
     '/:id/contract',
     authMiddleware(gleisUser, gleisPassword),
@@ -100,6 +102,8 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
       } else {
         const p = await personSrv.getById(b.get('Mieter'));
         const ts = await timeSlotsSrv.getBookingTimeSlots(b.getId());
+        const invoices = await invoiceSrv.getInvoceByBooking(b.getId());
+        const invoice = invoices[0];
         const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(b.getId());
 
         const equipment = invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Ausstattung').map(e => {
@@ -136,7 +140,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
             email: p.get('Email'),
             org: p.get('Organisation'),
             address:
-              p.get('Strasse') + ' ' + p.get('HausNr') + '/' + p.get('Top'),
+              p.get('Strasse') ? p.get('Strasse'): '' + ' ' + p.get('HausNr') ? p.get('HausNr'): '' + p.get('Top') ? ('/' + p.get('Top')): '',
             postCode: p.get('PLZ'),
             city: p.get('Ort'),
             uid: p.get('UID')
@@ -171,10 +175,12 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
             rooms: rooms,
             roomsPriceSum: roomsPriceSum
           },
+          finalPriceSumNetto: invoice.get('SummeNettoInklRabatt'),
+          finalPriceSumBrutto: invoice.get('Summe / Brutto'),
           notes: b.get('Notes')
         };
 
-        res.render('contract', contract);
+        res.render('contract_wip', contract);
       }
     })
   );
