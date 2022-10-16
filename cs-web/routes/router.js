@@ -132,6 +132,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
         const roomsPriceSum = rooms.map(e => e.finalPrice).reduce((a, c) => a + c);
 
         const contract = {
+          bookingId: req.params.id,
           name: b.get('Name'),
           participantsCount: b.get('TeilnehmerInnenanzahl'),
           person: {
@@ -180,7 +181,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
           notes: b.get('Notes')
         };
 
-        res.render('contract_wip', contract);
+        res.render('contract_checkout', contract);
       }
     })
   );
