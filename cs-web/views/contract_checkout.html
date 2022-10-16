@@ -274,6 +274,7 @@
                         </div>
                         <div class="col-sm-3">
                           <button id="checkout-button" type="button" class="btn btn-primary float-right d-print-none">Zahlungspflichtig bestellen</button>
+                          <button id="print-button" type="button" class="btn btn-primary float-right d-print-none" style="display: none">Drucken</button>
                         </div>
                       </div>
         </div>
@@ -336,6 +337,9 @@
       document.getElementById('error-agb-gdpr').style.display = 'none';
       document.getElementById('error-generic').style.display = 'none';
       document.getElementById('success-msg').style.display = 'block';
+
+      document.getElementById('checkout-button').style.display = 'none';
+      document.getElementById('print-button').style.display = 'block';
     } else {
       checkoutButton.disabled = false;
       document.getElementById('error-generic').style.display = 'block';

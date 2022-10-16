@@ -90,101 +90,137 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
   //   })
   // );
 
+  async function generateContract(bookingId, b) {
+    const p = await personSrv.getById(b.get('Mieter'));
+    const ts = await timeSlotsSrv.getBookingTimeSlots(b.getId());
+    const invoices = await invoiceSrv.getInvoceByBooking(b.getId());
+    const invoice = invoices[0];
+    const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(b.getId());
 
+    const equipment = invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Ausstattung').map(e => {
+      const discount = e.get('Rabatt') ? e.get('Rabatt') : 0;
+      const finalPrice = parseFloat(e.get('SummeNetto')) - (parseFloat(e.get('SummeNetto')) * discount)
+      return {
+        name: e.get('ArtikelName'),
+        count: e.get('Anzahl'),
+        price: e.get('SummeNetto'),
+        discount: discount,
+        finalPrice: finalPrice,
+        notes: e.get('Anmerkung')
+      };
+    });
+    const equipmentPriceSum = equipment.length === 0 ? 0 : equipment.map(e => e.finalPrice).reduce((a, c) => a + c);
+    const rooms = invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Raum').map(e => {
+      const discount = e.get('Rabatt') ? e.get('Rabatt') : 0;
+      const finalPrice = parseFloat(e.get('SummeNetto')) - (parseFloat(e.get('SummeNetto')) * discount)
+      return {
+        name: e.get('ArtikelName'),
+        price: e.get('SummeNetto'),
+        discount: discount,
+        finalPrice: finalPrice
+      };
+    });
+    const roomsPriceSum = rooms.map(e => e.finalPrice).reduce((a, c) => a + c);
+
+    const contract = {
+      bookingId: bookingId,
+      name: b.get('Name'),
+      participantsCount: b.get('TeilnehmerInnenanzahl'),
+      person: {
+        name: p.get('Vorname') + ' ' + p.get('Nachname'),
+        telefon: p.get('Tel'),
+        email: p.get('Email'),
+        org: p.get('Organisation'),
+        address:
+          p.get('Strasse') ? p.get('Strasse') : '' + ' ' + p.get('HausNr') ? p.get('HausNr') : '' + p.get('Top') ? ('/' + p.get('Top')) : '',
+        postCode: p.get('PLZ'),
+        city: p.get('Ort'),
+        uid: p.get('UID')
+      },
+      timeSlots: ts
+        .map(t => {
+          const x = {
+            room: t.get('RaumName')[0],
+            moeblierung: t.get('Moeblierung'),
+            type: t.get('Type'),
+            beginn: moment(t.get('Beginn')),
+            end: moment(t.get('Ende')),
+            notes: t.get('Notes')
+          };
+          return x;
+        })
+        .filter(t => t.type === 'Veranstaltung')
+        .sort((a, b) => (a.beginn.isAfter(b.beginn) ? 1 : -1))
+        .map(t => {
+          return {
+            room: t.room,
+            type: t.type,
+            beginn: t.beginn.format('DD.MM.YYYY HH:mm'),
+            end: t.end.format('DD.MM.YYYY HH:mm'),
+            moeblierung: t.moeblierung,
+            notes: t.notes
+          };
+        }),
+      invoiceItems: {
+        equipment: equipment,
+        equipmentPriceSum: equipmentPriceSum,
+        rooms: rooms,
+        roomsPriceSum: roomsPriceSum
+      },
+      finalPriceSumNetto: invoice.get('SummeNettoInklRabatt'),
+      finalPriceSumBrutto: invoice.get('Summe / Brutto'),
+      notes: b.get('Notes')
+    };
+
+    return contract;
+  }
 
   router.get(
     '/:id/contract',
     authMiddleware(gleisUser, gleisPassword),
     asyncMiddleware(async (req, res, next) => {
-      const b = await bookingSrv.get(req.params.id);
-      if (b.get('Status') !== 'Vorreserviert') {
+      const bookingId = req.params.id;
+      const b = await bookingSrv.get(bookingId);
+      const contract = await generateContract(bookingId, b);
+      res.render('contract_checkout', contract);
+    })
+  );
+
+  router.get(
+    '/:id/checkout',
+    asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
+    (req, res, next) => {
+      return authMiddleware(res.locals.customerUserName, res.locals.pin, true)(req, res, next);
+    },
+    asyncMiddleware(async (req, res, next) => {
+      const bookingId = req.params.id;
+      const b = await bookingSrv.get(bookingId);
+      if (b.get('Status') !== 'Vertrag versandbereit') {
         res.status(403).json({});
       } else {
-        const p = await personSrv.getById(b.get('Mieter'));
-        const ts = await timeSlotsSrv.getBookingTimeSlots(b.getId());
-        const invoices = await invoiceSrv.getInvoceByBooking(b.getId());
-        const invoice = invoices[0];
-        const invoiceItems = await invoiceSrv.getInvoceItemsByBooking(b.getId());
-
-        const equipment = invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Ausstattung').map(e => {
-          const discount = e.get('Rabatt') ? e.get('Rabatt') : 0;
-          const finalPrice = parseFloat(e.get('SummeNetto')) - (parseFloat(e.get('SummeNetto')) * discount)
-          return {
-            name: e.get('ArtikelName'),
-            count: e.get('Anzahl'),
-            price: e.get('SummeNetto'),
-            discount: discount,
-            finalPrice: finalPrice,
-            notes: e.get('Anmerkung')
-          };
-        });
-        const equipmentPriceSum = equipment.length === 0 ? 0: equipment.map(e => e.finalPrice).reduce((a, c) => a + c);
-        const rooms = invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Raum').map(e => {
-          const discount = e.get('Rabatt') ? e.get('Rabatt') : 0;
-          const finalPrice = parseFloat(e.get('SummeNetto')) - (parseFloat(e.get('SummeNetto')) * discount)
-          return {
-            name: e.get('ArtikelName'),
-            price: e.get('SummeNetto'),
-            discount: discount,
-            finalPrice: finalPrice
-          };
-        });
-        const roomsPriceSum = rooms.map(e => e.finalPrice).reduce((a, c) => a + c);
-
-        const contract = {
-          bookingId: req.params.id,
-          name: b.get('Name'),
-          participantsCount: b.get('TeilnehmerInnenanzahl'),
-          person: {
-            name: p.get('Vorname') + ' ' + p.get('Nachname'),
-            telefon: p.get('Tel'),
-            email: p.get('Email'),
-            org: p.get('Organisation'),
-            address:
-              p.get('Strasse') ? p.get('Strasse'): '' + ' ' + p.get('HausNr') ? p.get('HausNr'): '' + p.get('Top') ? ('/' + p.get('Top')): '',
-            postCode: p.get('PLZ'),
-            city: p.get('Ort'),
-            uid: p.get('UID')
-          },
-          timeSlots: ts
-            .map(t => {
-              const x = {
-                room: t.get('RaumName')[0],
-                moeblierung: t.get('Moeblierung'),
-                type: t.get('Type'),
-                beginn: moment(t.get('Beginn')),
-                end: moment(t.get('Ende')),
-                notes: t.get('Notes')
-              };
-              return x;
-            })
-            .filter(t => t.type === 'Veranstaltung')
-            .sort((a, b) => (a.beginn.isAfter(b.beginn) ? 1 : -1))
-            .map(t => {
-              return {
-                room: t.room,
-                type: t.type,
-                beginn: t.beginn.format('DD.MM.YYYY HH:mm'),
-                end: t.end.format('DD.MM.YYYY HH:mm'),
-                moeblierung: t.moeblierung,
-                notes: t.notes
-              };
-            }),
-          invoiceItems: {
-            equipment: equipment,
-            equipmentPriceSum: equipmentPriceSum,
-            rooms: rooms,
-            roomsPriceSum: roomsPriceSum
-          },
-          finalPriceSumNetto: invoice.get('SummeNettoInklRabatt'),
-          finalPriceSumBrutto: invoice.get('Summe / Brutto'),
-          notes: b.get('Notes')
-        };
-
+        const contract = await generateContract(bookingId, b);
         res.render('contract_checkout', contract);
       }
     })
-  );
+  )
+
+  router.post(
+    '/:id/checkout',
+    asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
+    (req, res, next) => {
+      return authMiddleware(res.locals.customerUserName, res.locals.pin, true)(req, res, next);
+    },
+    asyncMiddleware(async (req, res, next) => {
+      const bookingId = req.params.id;
+      const b = await bookingSrv.get(bookingId);
+      if (b.get('Status') !== 'Vertrag versandbereit') {
+        res.status(403).json({});
+      } else {
+        await bookingSrv.updateStatus(bookingId, b, 'Vertrag unterschrieben');
+        res.status(200);
+      }
+    })
+  )
 
   return router;
 };
