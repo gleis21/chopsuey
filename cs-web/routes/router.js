@@ -182,7 +182,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
       const bookingId = req.params.id;
       const b = await bookingSrv.get(bookingId);
       const contract = await generateContract(bookingId, b);
-      res.render('contract_checkout', contract);
+      res.render('checkout', contract);
     })
   );
 
@@ -199,25 +199,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
         res.status(403).json({});
       } else {
         const contract = await generateContract(bookingId, b);
-        res.render('contract_checkout', contract);
-      }
-    })
-  )
-
-  router.post(
-    '/:id/checkout',
-    asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
-    (req, res, next) => {
-      return authMiddleware(res.locals.customerUserName, res.locals.pin, true)(req, res, next);
-    },
-    asyncMiddleware(async (req, res, next) => {
-      const bookingId = req.params.id;
-      const b = await bookingSrv.get(bookingId);
-      if (b.get('Status') !== 'Vertrag versandbereit') {
-        res.status(403).json({});
-      } else {
-        await bookingSrv.updateStatus(bookingId, b, 'Vertrag unterschrieben');
-        res.status(200);
+        res.render('checkout', contract);
       }
     })
   )

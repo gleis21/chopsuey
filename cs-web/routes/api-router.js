@@ -193,5 +193,23 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
     })
   );
 
+  router.post(
+    '/bookings/:id/checkout',
+    asyncMiddleware(bookingCredsMiddleware(bookingSrv)),
+    (req, res, next) => {
+      return authMiddleware(res.locals.customerUserName, res.locals.pin, true)(req, res, next);
+    },
+    asyncMiddleware(async (req, res, next) => {
+      const bookingId = req.params.id;
+      const b = await bookingSrv.get(bookingId);
+      if (b.get('Status') !== 'Vertrag versandbereit') {
+        res.status(403).json({});
+      } else {
+        await bookingSrv.updateStatus(bookingId, 'Vertrag unterschrieben');
+        res.status(200).json({});
+      }
+    })
+  )
+
   return router;
 };

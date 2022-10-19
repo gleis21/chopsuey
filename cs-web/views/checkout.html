@@ -309,42 +309,6 @@
     </div>
     <input type="hidden" id="bookingId" value="<%= bookingId %>">
 </body>
-<script>
-  const checkoutButton = document.getElementById('checkout-button');
-  checkoutButton.addEventListener('click', () => doCheckout(), false);
-  async function doCheckout() {
-    document.getElementById('error-agb-gdpr').style.display = 'none';
-    document.getElementById('error-generic').style.display = 'none';
-    document.getElementById('success-msg').style.display = 'none';
-    
-    const acceptAgb = document.getElementById('accept-agb');
-    const acceptGdpr = document.getElementById('accept-gdpr');
-
-    if (!acceptAgb.checked || !acceptGdpr.checked){
-      document.getElementById('error-agb-gdpr').style.display = 'block';
-      return;
-    }
-    checkoutButton.disabled = true;
-
-    const bookingId = document.getElementById('bookingId').value;
-    const res = await fetch('/buchungssystem/api/bookings/' + bookingId + '/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: '{}'
-    });
-    
-    if (res.ok) {
-      document.getElementById('error-agb-gdpr').style.display = 'none';
-      document.getElementById('error-generic').style.display = 'none';
-      document.getElementById('success-msg').style.display = 'block';
-
-      document.getElementById('checkout-button').style.display = 'none';
-      document.getElementById('print-button').style.display = 'block';
-    } else {
-      checkoutButton.disabled = false;
-      document.getElementById('error-generic').style.display = 'block';
-    }
-  }
-</script>
+<script src="../javascripts/checkout.js"></script>
 
 </html>

@@ -172,9 +172,8 @@ class BookingService {
     return await this.table.create({ Name: b.name, Mieter: [customer.getId()], PIN: b.pin, SendAutoMail: b.sendAutoMail, Status: 'Neu' });
   }
 
-  async updateStatus(bookingId, booking, newStatus) {
-    booking.Status = newStatus;
-    return await this.table.update(bookingId, booking);
+  async updateStatus(bookingId, newStatus) {
+    return await this.table.update(bookingId, {Status: newStatus});
   }
 
   async update(b) {
