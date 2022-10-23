@@ -182,7 +182,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
       const bookingId = req.params.id;
       const b = await bookingSrv.get(bookingId);
       const contract = await generateContract(bookingId, b);
-      res.render('checkout', contract);
+      res.render('contract', contract);
     })
   );
 
