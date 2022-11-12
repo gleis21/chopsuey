@@ -74,7 +74,9 @@
               <%= person.postCode %>
                 <%= person.city %>
             </div>
+            <% if(person.uid){ %>
             <div>UID-Nummer: <%= person.uid %>
+            <% } %>
             </div>
           </div>
         </div>

@@ -32,6 +32,7 @@ async function doCheckout() {
         document.getElementById('print-button').style.display = 'block';
         acceptAgb.disabled = true;
         acceptGdpr.disabled = true;
+        window.print()
     } else {
         checkoutButton.disabled = false;
         document.getElementById('error-generic').style.display = 'block';
