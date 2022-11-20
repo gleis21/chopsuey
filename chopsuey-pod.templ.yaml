@@ -1,0 +1,90 @@
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-4.3.0
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    io.kubernetes.cri-o.ContainerType/caddy: container
+    io.kubernetes.cri-o.ContainerType/cs: container
+    io.kubernetes.cri-o.SandboxID/caddy: 8965969013f4e0b6024f32f27150c68478288af64bee337d578eb66b9b09fe4
+    io.kubernetes.cri-o.SandboxID/cs: 8965969013f4e0b6024f32f27150c68478288af64bee337d578eb66b9b09fe4
+    io.kubernetes.cri-o.TTY/caddy: "true"
+    io.kubernetes.cri-o.TTY/cs: "true"
+    io.podman.annotations.autoremove/caddy: "FALSE"
+    io.podman.annotations.autoremove/cs: "FALSE"
+    io.podman.annotations.init/caddy: "FALSE"
+    io.podman.annotations.init/cs: "FALSE"
+    io.podman.annotations.privileged/caddy: "FALSE"
+    io.podman.annotations.privileged/cs: "FALSE"
+    io.podman.annotations.publish-all/caddy: "FALSE"
+    io.podman.annotations.publish-all/cs: "FALSE"
+    org.opencontainers.image.base.digest/cs: sha256:a345b93215c329360e095c5307e66f0c8f8bb2783ca795162c51241b
+    org.opencontainers.image.base.name/cs: docker.io/library/node:16-alpine
+  creationTimestamp: "2022-11-19T22:08:25Z"
+  labels:
+    app: chopsuey
+  name: chopsuey
+spec:
+  automountServiceAccountToken: false
+  containers:
+  - image: docker.io/library/caddy:2-alpine
+    name: caddy
+    ports:
+    - containerPort: 8080
+      hostPort: 8080
+    resources: {}
+    securityContext:
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_NET_RAW
+        - CAP_AUDIT_WRITE
+    tty: true
+    volumeMounts:
+    - mountPath: /etc/caddy/Caddyfile
+      name: Caddyfile-host-0
+    - mountPath: /config
+      name: caddy_config-pvc
+    - mountPath: /data
+      name: caddy_data-pvc
+  - args:
+    - npm
+    - start
+    env:
+    - name: CS_USER
+      value: ${CS_USER}
+    - name: CS_PASSWORD
+      value: ${CS_PASSWORD}
+    - name: CS_BOOKING_EDIT_URL
+      value: ${CS_BOOKING_EDIT_URL}
+    - name: AIRTABLE_API_KEY
+      value: ${AIRTABLE_API_KEY}
+    - name: AIRTABLE_BASE_ID
+      value: ${AIRTABLE_BASE_ID}
+    image: localhost/chopsuey:latest
+    name: cs
+    resources: {}
+    securityContext:
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_NET_RAW
+        - CAP_AUDIT_WRITE
+    tty: true
+  enableServiceLinks: false
+  hostname: chopsuey
+  restartPolicy: Never
+  volumes:
+  - name: caddy_config-pvc
+    persistentVolumeClaim:
+      claimName: caddy_config
+  - name: caddy_data-pvc
+    persistentVolumeClaim:
+      claimName: caddy_data
+  - hostPath:
+      path: $PWD/Caddyfile
+      type: File
+    name: Caddyfile-host-0
+status: {}

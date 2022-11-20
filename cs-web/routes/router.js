@@ -125,6 +125,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     const contract = {
       bookingId: bookingId,
       name: b.get('Name'),
+      status: b.get('Status'),
       participantsCount: b.get('TeilnehmerInnenanzahl'),
       person: {
         name: p.get('Vorname') + ' ' + p.get('Nachname'),
@@ -195,7 +196,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     asyncMiddleware(async (req, res, next) => {
       const bookingId = req.params.id;
       const b = await bookingSrv.get(bookingId);
-      if (b.get('Status') !== 'Vertrag zum Unterschreiben verschickt') {
+      if (b.get('Status') !== 'Vertrag zum Unterschreiben verschickt' || b.get('Status') !== 'Vertrag unterschrieben') {
         res.status(403).json({});
       } else {
         const contract = await generateContract(bookingId, b);

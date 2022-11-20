@@ -1,2 +1,5 @@
 #!/bin/bash
-CS_ENV=dev npm start
+
+envsubst < chopsuey-pod.templ.yaml | podman play kube --build --replace -
+
+
