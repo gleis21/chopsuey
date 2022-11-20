@@ -54,15 +54,15 @@ spec:
     - start
     env:
     - name: CS_USER
-      value: ${CS_USER}
+      value: ${CS_USER_DEV}
     - name: CS_PASSWORD
-      value: ${CS_PASSWORD}
+      value: ${CS_PASSWORD_DEV}
     - name: CS_BOOKING_EDIT_URL
-      value: ${CS_BOOKING_EDIT_URL}
+      value: ${CS_BOOKING_EDIT_URL_DEV}
     - name: AIRTABLE_API_KEY
-      value: ${AIRTABLE_API_KEY}
+      value: ${AIRTABLE_API_KEY_DEV}
     - name: AIRTABLE_BASE_ID
-      value: ${AIRTABLE_BASE_ID}
+      value: ${AIRTABLE_BASE_ID_DEV}
     image: localhost/chopsuey:latest
     name: cs
     resources: {}
