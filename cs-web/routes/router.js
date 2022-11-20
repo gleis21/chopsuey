@@ -196,11 +196,12 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     asyncMiddleware(async (req, res, next) => {
       const bookingId = req.params.id;
       const b = await bookingSrv.get(bookingId);
-      if (b.get('Status') !== 'Vertrag zum Unterschreiben verschickt' || b.get('Status') !== 'Vertrag unterschrieben') {
-        res.status(403).json({});
-      } else {
+      console.log(b.get('Status'));
+      if (b.get('Status') === 'Vertrag zum Unterschreiben verschickt' || b.get('Status') === 'Vertrag unterschrieben') {
         const contract = await generateContract(bookingId, b);
         res.render('checkout', contract);
+      } else {
+        res.status(403).json({});
       }
     })
   )

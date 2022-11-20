@@ -202,11 +202,11 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
     asyncMiddleware(async (req, res, next) => {
       const bookingId = req.params.id;
       const b = await bookingSrv.get(bookingId);
-      if (b.get('Status') !== 'Vertrag versandbereit') {
-        res.status(403).json({});
-      } else {
+      if (b.get('Status') === 'Vertrag zum Unterschreiben verschickt') {
         await bookingSrv.updateStatus(bookingId, 'Vertrag unterschrieben');
         res.status(200).json({});
+      } else {
+        res.status(403).json({});
       }
     })
   )
