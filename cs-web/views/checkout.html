@@ -246,7 +246,7 @@
                         Sie bekommen die Rechnung nach positivem Abschluss Ihrer Veranstaltung zugeschickt. Ausnahme:
                         bei Festen wird im Vorhinein abgerechnet.
                       </div>
-                      <% if(status === 'Vertrag zum Unterschreiben verschickt') { %>
+                      <% if(viewMode === 'checkout_mode') { %>
                       <br>
                       <br>
                       <input id="accept-agb" type="checkbox" /> Ich akzeptiere die <a href="/buchungssystem/files/gleis21-agb.pdf">Allgemeinen Geschäftsbedingungen des Vereins
@@ -264,7 +264,7 @@
                       <br>
                       <div class="row">
                         <div class="col-sm-9">
-                          <% if(status === 'Vertrag zum Unterschreiben verschickt') { %>
+                          <% if(viewMode === 'checkout_mode') { %>
                           <div id="error-agb-gdpr" class="alert alert-danger" style="display: none" role="alert">
                             Bitte akzeptieren Sie die Allgemeinen Geschäftsbedingungen und stimmen der elektronischen Speicherung und Verarbeitung der Daten zu.
                           </div>
@@ -277,11 +277,11 @@
                           <% } %>
                         </div>
                         <div class="col-sm-3">
-                          <% if(status === 'Vertrag zum Unterschreiben verschickt') { %>
+                          <% if(viewMode === 'checkout_mode') { %>
                           <button id="checkout-button" type="button" class="btn btn-primary float-right d-print-none">Zahlungspflichtig bestellen</button>
                           <button id="print-button" type="button" class="btn btn-primary float-right d-print-none" style="display: none">Bestätigung drucken</button>
                           <% } %>
-                          <% if(status === 'Vertrag unterschrieben') { %>
+                          <% if(viewMode === 'print_mode') { %>
                             <button id="print-button" type="button" class="btn btn-primary float-right d-print-none">Bestätigung drucken</button>
                           <% } %>
                         </div>

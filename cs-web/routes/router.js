@@ -90,7 +90,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
   //   })
   // );
 
-  async function generateContract(bookingId, b) {
+  async function generateContract(bookingId, b, preview) {
     const p = await personSrv.getById(b.get('Mieter'));
     const ts = await timeSlotsSrv.getBookingTimeSlots(b.getId());
     const invoices = await invoiceSrv.getInvoceByBooking(b.getId());
@@ -121,11 +121,17 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
       };
     });
     const roomsPriceSum = rooms.map(e => e.finalPrice).reduce((a, c) => a + c);
+    var viewMode = '';
+    if (preview || b.get('Status') === 'Vertrag unterschrieben') {
+      viewMode = 'print_mode'
+    } else if (b.get('Status') === 'Vertrag zum Unterschreiben verschickt') {
+      viewMode = 'checkout_mode'
+    }
 
     const contract = {
       bookingId: bookingId,
       name: b.get('Name'),
-      status: b.get('Status'),
+      viewMode: viewMode,
       participantsCount: b.get('TeilnehmerInnenanzahl'),
       person: {
         name: p.get('Vorname') + ' ' + p.get('Nachname'),
@@ -182,10 +188,21 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     asyncMiddleware(async (req, res, next) => {
       const bookingId = req.params.id;
       const b = await bookingSrv.get(bookingId);
-      const contract = await generateContract(bookingId, b);
+      const contract = await generateContract(bookingId, b, true);
       res.render('contract', contract);
     })
   );
+
+  router.get(
+    '/:id/checkout/preview',
+    authMiddleware(gleisUser, gleisPassword),
+    asyncMiddleware(async (req, res, next) => {
+      const bookingId = req.params.id;
+      const b = await bookingSrv.get(bookingId);
+      const contract = await generateContract(bookingId, b, true);
+      res.render('checkout', contract);
+    })
+  )
 
   router.get(
     '/:id/checkout',
@@ -196,9 +213,8 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     asyncMiddleware(async (req, res, next) => {
       const bookingId = req.params.id;
       const b = await bookingSrv.get(bookingId);
-      console.log(b.get('Status'));
       if (b.get('Status') === 'Vertrag zum Unterschreiben verschickt' || b.get('Status') === 'Vertrag unterschrieben') {
-        const contract = await generateContract(bookingId, b);
+        const contract = await generateContract(bookingId, b, false);
         res.render('checkout', contract);
       } else {
         res.status(403).json({});
