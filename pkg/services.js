@@ -176,6 +176,10 @@ class BookingService {
     return await this.table.update(bookingId, {Status: newStatus});
   }
 
+  async checkout(bookingId) {
+    return await this.table.update(bookingId, {Status: 'Vertrag unterschrieben', Checkoutzeit: moment().toISOString()});
+  }
+
   async update(b) {
     const person = await this.personSrv.createOrUpdate(b.person);
     const tsIds = await this.timeSlotsSrv.replaceEventBookingTimeSlots(b.id, b.timeSlots);

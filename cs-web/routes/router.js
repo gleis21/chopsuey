@@ -124,12 +124,14 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     var viewMode = '';
     if (preview || b.get('Status') === 'Vertrag unterschrieben') {
       viewMode = 'print_mode'
-    } else if (b.get('Status') === 'Vertrag zum Unterschreiben verschickt') {
+    } else if (b.get('Status') === 'Vertrag zum Unterschreiben verschickt' || b.get('Status') === 'CHECKOUT_TEST') {
       viewMode = 'checkout_mode'
     }
 
     const contract = {
       bookingId: bookingId,
+      status: b.get('Status'),
+      preview: preview,
       name: b.get('Name'),
       viewMode: viewMode,
       participantsCount: b.get('TeilnehmerInnenanzahl'),
@@ -213,7 +215,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     asyncMiddleware(async (req, res, next) => {
       const bookingId = req.params.id;
       const b = await bookingSrv.get(bookingId);
-      if (b.get('Status') === 'Vertrag zum Unterschreiben verschickt' || b.get('Status') === 'Vertrag unterschrieben') {
+      if (b.get('Status') === 'Vertrag zum Unterschreiben verschickt' || b.get('Status') === 'CHECKOUT_TEST' || b.get('Status') === 'Vertrag unterschrieben') {
         const contract = await generateContract(bookingId, b, false);
         res.render('checkout', contract);
       } else {

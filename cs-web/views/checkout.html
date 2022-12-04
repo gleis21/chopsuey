@@ -264,6 +264,11 @@
                       <br>
                       <div class="row">
                         <div class="col-sm-9">
+                          <% if(preview) { %>
+                            <div id="success-msg" class="alert alert-success" style="display: none" role="alert">
+                              Status: <%= status %>
+                            </div>
+                          <% } %>  
                           <% if(viewMode === 'checkout_mode') { %>
                           <div id="error-agb-gdpr" class="alert alert-danger" style="display: none" role="alert">
                             Bitte akzeptieren Sie die Allgemeinen Geschäftsbedingungen und stimmen der elektronischen Speicherung und Verarbeitung der Daten zu.
