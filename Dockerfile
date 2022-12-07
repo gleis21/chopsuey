@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:18-alpine
 
 RUN apk add --no-cache chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
