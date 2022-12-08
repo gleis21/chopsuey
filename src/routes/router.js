@@ -5,9 +5,9 @@ const router = express.Router();
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
-const asyncMiddleware = require('../../pkg/middleware').asyncMiddleware;
-const bookingCredsMiddleware = require('../../pkg/middleware').bookingCredsMiddleware;
-const authMiddleware = require('../../pkg/middleware').authMiddleware;
+const asyncMiddleware = require('../pkg/middleware').asyncMiddleware;
+const bookingCredsMiddleware = require('../pkg/middleware').bookingCredsMiddleware;
+const authMiddleware = require('../pkg/middleware').authMiddleware;
 const e = require('express');
 
 const gleisUser = process.env.CS_USER;

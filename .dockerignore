@@ -3,3 +3,6 @@ sessions
 logs
 config/.env
 config/service_account_key.json
+dist
+.github
+.vscode

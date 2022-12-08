@@ -6,7 +6,7 @@ var logger = require('morgan');
 
 var apiRouter = require('./routes/api-router');
 var bookingsRouter = require('./routes/router');
-var services = require('../pkg/services');
+var services = require('./pkg/services');
 
 var app = express();
 
