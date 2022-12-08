@@ -1,13 +1,13 @@
 const express = require('express');
-const { InvoiceService } = require('../../pkg/services');
+const { InvoiceService } = require('../pkg/services');
 const router = express.Router();
 var auth = require('basic-auth');
 var compare = require('tsscmp');
 const moment = require('moment');
 
-const asyncMiddleware = require('../../pkg/middleware').asyncMiddleware;
-const bookingCredsMiddleware = require('../../pkg/middleware').bookingCredsMiddleware;
-const authMiddleware = require('../../pkg/middleware').authMiddleware;
+const asyncMiddleware = require('../pkg/middleware').asyncMiddleware;
+const bookingCredsMiddleware = require('../pkg/middleware').bookingCredsMiddleware;
+const authMiddleware = require('../pkg/middleware').authMiddleware;
 
 const gleisUser = process.env.CS_USER;
 const gleisPassword = process.env.CS_PASSWORD;

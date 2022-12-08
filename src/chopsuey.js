@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-var app = require('../cs-web/app');
+var app = require('./app');
 var debug = require('debug')('chopsuey:server');
 var http = require('http');
 
