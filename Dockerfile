@@ -1,8 +1,5 @@
 FROM node:18-alpine
 
-RUN apk add --no-cache chromium
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
-ENV CHROMIUM_PATH /usr/bin/chromium-browser
 ENV APP_PATH=/opt/chopsuey
 
 RUN npm install -g typescript
