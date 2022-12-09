@@ -5,10 +5,12 @@
   <title>Chop Suey</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
-  <link rel="stylesheet" href="../stylesheets/fontawesome/css/all.min.css" />
+  <!-- <link rel="stylesheet" href="../stylesheets/fontawesome/css/all.min.css" /> -->
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"
     integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous"></script>
+  
+  <script src="https://use.fontawesome.com/1171925253.js"></script>
 
   <!--<link rel="stylesheet" href="/stylesheets/styles.css">-->
 </head>
@@ -271,7 +273,7 @@
       
       <div class="row">
       <div class="col-md-12">
-      <button type="button" class="btn btn-success float-right" v-on:click="addTimeSlot"><i class="fas fa-plus"></i>&nbsp;Weitere Termine</button>
+      <button type="button" class="btn btn-success float-right" v-on:click="addTimeSlot"><i class="fa fa-plus"></i>&nbsp;Weitere Termine</button>
       </div>
     </div>
       <div class="row">
@@ -286,7 +288,7 @@
       </div>
       <div class="row">
         <div class="col-md-12">
-      <button type="button" class="btn btn-primary" v-on:click="submit" style="width: 100px"><i class="fas fa-spinner fa-spin" v-if="loading"></i>{{loading ? '' : 'Absenden'}}</button>
+      <button type="button" class="btn btn-primary" v-on:click="submit" style="width: 100px"><i class="fa fa-spinner fa-spin" v-if="loading"></i>{{loading ? '' : 'Absenden'}}</button>
       
         </div>
     </div>
