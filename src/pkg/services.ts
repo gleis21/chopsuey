@@ -1,19 +1,25 @@
+import { Base, FieldSet, Record, Records, Table } from "airtable";
+
 const moment = require('moment');
 
 class InvoiceService {
-  constructor(base, itemsSrv) {
+  rechnungenTable: Table<FieldSet>;
+  rechnungspostenTable: Table<FieldSet>;
+  preiseTable: Table<FieldSet>;
+  itemsSrv: any;
+  constructor(base: Base, itemsSrv: any) {
     this.rechnungenTable = base('Rechnungen');
     this.rechnungspostenTable = base('Rechnungsposten');
     this.preiseTable = base('Preise');
     this.itemsSrv = itemsSrv;
   }
 
-  async createInvoice(bookingId, invoiceItems) {
+  async createInvoice(bookingId: string, invoiceItems) {
     await this.deleteInvoceItemsByBooking(bookingId);
     const invoices = await this.getInvoceByBooking(bookingId);
     if (invoices && invoices.length > 0) {
       const invoice = invoices[0];
-      const existing = invoice.get('Rechnungsposten') ? invoice.get('Rechnungsposten') : [];
+      const existing: any[]= invoice.get('Rechnungsposten') != undefined? invoice.get('Rechnungsposten') as any[]: [];
       return await this.rechnungenTable.update(invoice.getId(), {
         Rechnungsposten: [...existing, ...invoiceItems.map(it => it.getId())],
         Status: invoice.get('Status'),
@@ -27,7 +33,7 @@ class InvoiceService {
     });
   }
 
-  async getInvoceByBooking(bookingRecordId) {
+  async getInvoceByBooking(bookingRecordId: string) {
     return await this.rechnungenTable
       .select({
         maxRecords: 1,
@@ -37,7 +43,7 @@ class InvoiceService {
       .firstPage();
   }
 
-  async getInvoceItemsByBooking(bookingRecordId) {
+  async getInvoceItemsByBooking(bookingRecordId: string) {
     return await this.rechnungspostenTable
       .select({
         view: 'Grid view',
@@ -46,7 +52,7 @@ class InvoiceService {
       .firstPage();
   }
 
-  async deleteInvoceItemsByBooking(bookingRecordId) {
+  async deleteInvoceItemsByBooking(bookingRecordId:string) {
     const equipmentItemsIds = (await this.getInvoceItemsByBooking(bookingRecordId))
       .map(it => it.getId());
     if (equipmentItemsIds && equipmentItemsIds.length > 0) {
@@ -58,9 +64,9 @@ class InvoiceService {
     }
   }
 
-  async getEquipmentPrices() {
+  async getEquipmentPrices(): Promise<Record<FieldSet>[]> {
     return await new Promise((resolve, reject) => {
-      const allPrices = [];
+      const allPrices: Record<FieldSet>[] = [];
       this.preiseTable
       .select({ view: 'AusstattungPreise', pageSize: 100 })
       .eachPage(
@@ -107,11 +113,11 @@ class InvoiceService {
     });
   }
 
-  async createInvoiceItems(items, durations, participantsCount) {
+  async createInvoiceItems(items, durations, participantsCount): Promise<Record<FieldSet>[]> {
     const eqPrices = await this.getEquipmentPrices();
 
     // items have an id and count
-    const invoiceItems = items
+    const invoiceItems: Partial<FieldSet> = items
       .map(it => {
         const articlePrices = eqPrices.filter(ep => ep.get('Artikel') && ep.get('Artikel')[0] === it.id);
         if (!articlePrices || articlePrices.length == 0) {
@@ -138,7 +144,7 @@ class InvoiceService {
           }
         };
       });
-    var createdInvoiceItems = [];
+    var createdInvoiceItems: Record<FieldSet>[] = [];
     // Airtable allows only 10 at once
     var i, j, tmp, chunk = 10;
     for (i = 0, j = invoiceItems.length; i < j; i += chunk) {
@@ -152,13 +158,17 @@ class InvoiceService {
 }
 
 class BookingService {
-  constructor(base, timeSlotsSrv, personSrv, invoiceSrv) {
+  table: Table<FieldSet>;
+  timeSlotsSrv: TimeSlotsService;
+  personSrv: PersonService;
+  invoiceSrv: InvoiceService;
+  constructor(base: Base, timeSlotsSrv: TimeSlotsService, personSrv: PersonService, invoiceSrv: InvoiceService) {
     this.table = base('Buchungen');
     this.timeSlotsSrv = timeSlotsSrv;
     this.personSrv = personSrv;
     this.invoiceSrv = invoiceSrv;
   }
-  async get(id) {
+  async get(id: string) {
     return await this.table.find(id);
   }
 
@@ -174,11 +184,11 @@ class BookingService {
     return await this.table.create({ Name: b.name, Mieter: [customer.getId()], PIN: b.pin, SendAutoMail: b.sendAutoMail, Status: 'Neu' });
   }
 
-  async updateStatus(bookingId, newStatus) {
+  private async updateStatus(bookingId: string, newStatus:string) {
     return await this.table.update(bookingId, {Status: newStatus});
   }
 
-  async checkout(bookingId) {
+  async checkout(bookingId: string) {
     return await this.table.update(bookingId, {Status: 'Vertrag unterschrieben', Checkoutzeit: moment().toISOString()});
   }
 
@@ -186,7 +196,7 @@ class BookingService {
     const person = await this.personSrv.createOrUpdate(b.person);
     const createdTimeSlots = await this.timeSlotsSrv.replaceEventBookingTimeSlots(b.id, b.timeSlots);
 
-    var invoiceItems = [];
+    var invoiceItems: Record<FieldSet>[] = [];
     if (b.equipment && b.equipment.length > 0) {
       const durations = this.timeSlotsSrv.getDurations(createdTimeSlots);
       const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(b.equipment, durations, b.participantsCount);
@@ -215,7 +225,10 @@ class BookingService {
 }
 
 class BookableItemsService {
-  constructor(base) {
+  rooms: Records<FieldSet>;
+  equipment: Records<FieldSet>;
+  table: Table<FieldSet>;
+  constructor(base: Base) {
     this.table = base('Artikel');
     this.rooms = [];
     this.equipment = [];
@@ -240,12 +253,14 @@ class BookableItemsService {
 }
 
 class TimeSlotsService {
-  constructor(base, itemsSrv) {
+  table: Table<FieldSet>;
+  itemsSrv: BookableItemsService;
+  constructor(base: Base, itemsSrv: BookableItemsService) {
     this.table = base('Timeslots');
     this.itemsSrv = itemsSrv;
   }
 
-  async getBookingTimeSlots(bookingRecordId) {
+  async getBookingTimeSlots(bookingRecordId: string) {
     return await this.table
       .select({
         view: 'Alles',
@@ -254,7 +269,7 @@ class TimeSlotsService {
       .firstPage();
   }
 
-  async replaceEventBookingTimeSlots(bookingRecordId, timeSlots) {
+  async replaceEventBookingTimeSlots(bookingRecordId: string, timeSlots:Partial<FieldSet>) {
     const allBookingTimeSlots = await this.getBookingTimeSlots(bookingRecordId);
     const eventTimeSlotsIds = allBookingTimeSlots
       .filter(r => r.get('Type') === 'Veranstaltung')
@@ -284,7 +299,7 @@ class TimeSlotsService {
     });
   }
 
-  async create(bookingID, timeSlots) {
+  async create(bookingID: string, timeSlots) {
     const slots = await Promise.all(timeSlots.map(async ts => {
       const beginn = moment(ts.beginnDate)
         .add(ts.beginnH, 'h')
@@ -320,7 +335,8 @@ class TimeSlotsService {
 }
 
 class PersonService {
-  constructor(base) {
+  table: Table<FieldSet>;
+  constructor(base: Base) {
     this.table = base('Personen');
   }
 
@@ -366,7 +382,7 @@ class PersonService {
     return await this.table.find(id);
   }
 
-  async getByEmail(email) {
+  async getByEmail(email: string) {
     const r = await this.table
       .select({
         view: 'Alle Personen',
@@ -379,10 +395,10 @@ class PersonService {
   }
 }
 
-module.exports = {
-  BookingService: BookingService,
-  TimeSlotsService: TimeSlotsService,
-  BookableItemsService: BookableItemsService,
-  PersonService: PersonService,
-  InvoiceService: InvoiceService
+export {
+  BookingService,
+  TimeSlotsService,
+  BookableItemsService,
+  PersonService,
+  InvoiceService
 };

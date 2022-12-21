@@ -1,8 +1,9 @@
-var auth = require('basic-auth');
-var compare = require('tsscmp');
+import auth from 'basic-auth';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
+import compare from 'tsscmp';
 
-function bookingCredsMiddleware(bookingSrv) {
-    return async (req, res, next) => {
+function bookingCredsMiddleware(bookingSrv: any) {
+    return async (req: Request, res: Response, next: NextFunction) => {
         var id = req.params.id;
         const b = await bookingSrv.get(req.params.id);
         var userName = b.get('MieterEmail')[0];
@@ -13,8 +14,8 @@ function bookingCredsMiddleware(bookingSrv) {
       }
 }
 
-function authMiddleware(validUser, validPass, tryCookie) {
-    return (req, res, next) => {
+function authMiddleware(validUser: string, validPass: string, tryCookie: boolean) {
+    return (req: Request, res: Response, next: NextFunction) => {
       var credentials = null;
       if(tryCookie && req.cookies && req.cookies['cs-creds']) {
         const basicAuthCreds = Buffer.from(req.cookies['cs-creds'], 'base64').toString('utf8');
@@ -34,7 +35,7 @@ function authMiddleware(validUser, validPass, tryCookie) {
     }
   }
   
-  function check(providedUserame, providedPass, validUsername, validPass) {
+  function check(providedUserame: string, providedPass: string, validUsername: string, validPass:string): boolean {
     var valid = true;
   
     valid = compare(providedUserame, validUsername) && valid;
@@ -43,12 +44,14 @@ function authMiddleware(validUser, validPass, tryCookie) {
     return valid;
   }
 
-  const asyncMiddleware = fn => (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
+  const asyncMiddleware = (fn: (rq: Request, rs: Response, n: NextFunction) => any): (req: Request, res: Response, next: NextFunction) => void => {
+    return (req: Request, res: Response, next: NextFunction) => {
+      Promise.resolve(fn(req, res, next)).catch(next);
+    };
   };
 
-  module.exports = {
-    asyncMiddleware: asyncMiddleware,
-    bookingCredsMiddleware: bookingCredsMiddleware,
-    authMiddleware: authMiddleware
+ export {
+    asyncMiddleware,
+    bookingCredsMiddleware,
+    authMiddleware
   };

@@ -8,7 +8,6 @@ const fs = require('fs');
 const asyncMiddleware = require('../pkg/middleware').asyncMiddleware;
 const bookingCredsMiddleware = require('../pkg/middleware').bookingCredsMiddleware;
 const authMiddleware = require('../pkg/middleware').authMiddleware;
-const e = require('express');
 
 const gleisUser = process.env.CS_USER;
 const gleisPassword = process.env.CS_PASSWORD;
