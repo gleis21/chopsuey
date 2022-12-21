@@ -91,17 +91,16 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
     (req, res, next) => {
       return authMiddleware(res.locals.customerUserName, res.locals.pin, true)(req, res, next);
     },
-    asyncMiddleware(async (req, res, next) => {
-      const b = req.body;
+    asyncMiddleware(async (req, res) => {
       const booking = {
-        id: b.id,
-        notes: b.notes,
-        participantsCount: parseInt(b.participantsCount, 10),
-        name: b.name,
-        roomIds: [b.roomId],
-        equipment: b.equipment,
-        person: b.person,
-        timeSlots: b.timeSlots
+        id: req.body.id,
+        notes: req.body.notes,
+        participantsCount: parseInt(req.body.participantsCount, 10),
+        name: req.body.name,
+        roomIds: [req.body.roomId],
+        equipment: req.body.equipment,
+        person: req.body.person,
+        timeSlots: req.body.timeSlots
       };
       const r = await bookingSrv.update(booking);
 
