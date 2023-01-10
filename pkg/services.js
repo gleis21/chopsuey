@@ -82,34 +82,38 @@ class InvoiceService {
   }
 
   calculatePrices(articlePrices, durationsInHours) {
-    if (articlePrices.length === 1) {
-      return articlePrices;
-    }
+    
     const variant1h = articlePrices.find(p => p.get('Variante') === "1 Stunde" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
     const variant2h = articlePrices.find(p => p.get('Variante') === "2 Stunden" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
     const variant4h = articlePrices.find(p => p.get('Variante') === "halbtags" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
     const variant1day = articlePrices.find(p => p.get('Variante') === "ganztags" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
 
     return durationsInHours.map(dur => {
-      if (dur === 1 && variant1h) {
-        return variant1h;
+      var variant = null;
+      if (articlePrices.length === 1) {
+        variant = articlePrices[0];
+      } else if (dur.duration === 1 && variant1h) {
+        variant = variant1h;
+      } else if (dur.duration <= 2 && (variant2h || variant4h)) {
+        variant = variant2h ? variant2h : variant4h;
+      } else if (dur.duration > 2 && dur.duration <= 4 && variant4h) {
+        variant = variant4h;
+      } else if (dur.duration > 4 && variant1day) {
+        variant = variant1day;
+      } else{
+        variant = articlePrices[0];
       }
-      if (dur <= 2 && (variant2h || variant4h)) {
-        return variant2h ? variant2h : variant4h;
-      }
-      if (dur > 2 && dur <= 4 && variant4h) {
-        return variant4h;
-      }
-      if (dur > 4 && variant1day) {
-        return variant1day;
-      }
-      return articlePrices[0];
+      console.log('#######' + JSON.stringify(variant) + '###############')
+      return {priceVariant: variant, timeSlotId: dur.timeSlotId}
     });
   }
 
   async createInvoiceItems(items, durations, participantsCount) {
     const eqPrices = await this.getEquipmentPrices();
 
+    console.log('#############ITEMS##############');
+    console.log(JSON.stringify(items));
+    console.log('###########################');
     // items have an id and count
     const invoiceItems = items
       .map(it => {
@@ -120,9 +124,10 @@ class InvoiceService {
 
         return this.calculatePrices(articlePrices, durations).map(p => {
           return {
-            priceId: p.getId(),
-            count: p.get('MultiplizierenMitTeilnehmerAnzahl') ? it.count * participantsCount : it.count,
-            notes: it.notes
+            priceId: p.priceVariant.getId(),
+            count: p.priceVariant.get('MultiplizierenMitTeilnehmerAnzahl') ? it.count * participantsCount : it.count,
+            notes: it.notes,
+            timeSlotId: p.timeSlotId
           };
         })
       })
@@ -132,7 +137,8 @@ class InvoiceService {
           fields: {
             Anzahl: parseInt(p.count, 10),
             Preis: [p.priceId],
-            Anmerkung: p.notes
+            Anmerkung: p.notes,
+            Timeslots: [p.timeSlotId]
           }
         };
       });
@@ -182,17 +188,17 @@ class BookingService {
 
   async update(b) {
     const person = await this.personSrv.createOrUpdate(b.person);
-    const tsIds = await this.timeSlotsSrv.replaceEventBookingTimeSlots(b.id, b.timeSlots);
+    const createdTimeSlots = await this.timeSlotsSrv.replaceEventBookingTimeSlots(b.id, b.timeSlots);
 
     var invoiceItems = [];
     if (b.equipment && b.equipment.length > 0) {
-      const durations = this.timeSlotsSrv.getDurations(b.timeSlots);
+      const durations = this.timeSlotsSrv.getDurations(createdTimeSlots);
       const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(b.equipment, durations, b.participantsCount);
       invoiceItems = invoiceItems.concat(equipmentInvoiceItems);
     }
-    for (let i = 0; i < b.timeSlots.length; i++) {
-      const ts = b.timeSlots[i];
-      const rooms = [{ id: ts.roomId, count: 1 }];
+    for (let i = 0; i < createdTimeSlots.length; i++) {
+      const ts = createdTimeSlots[i];
+      const rooms = [{ id: ts.get('Raum')[0], count: 1 }];
       const durations = [this.timeSlotsSrv.getDuration(ts)];
       const roomsInvoiceItems = await this.invoiceSrv.createInvoiceItems(rooms, durations, b.participantsCount);
       invoiceItems = invoiceItems.concat(roomsInvoiceItems);
@@ -205,7 +211,7 @@ class BookingService {
       Status: 'Vorreserviert',
       Mieter: [person.getId()],
       Notes: b.notes,
-      Timeslots: tsIds,
+      Timeslots: createdTimeSlots.map(ts => ts.getId()),
       Rechnungen: [invoice.getId()]
     };
     return await this.table.update(b.id, bk);
@@ -266,22 +272,13 @@ class TimeSlotsService {
       
     }
     const otherTimeSlotsIds = allBookingTimeSlots
-      .filter(r => r.get('Type') !== 'Veranstaltung')
-      .map(r => r.getId());
-    const newTimeSlotsIds = (await this.create(bookingRecordId, timeSlots)).map(ts => ts.getId());
+      .filter(r => r.get('Type') !== 'Veranstaltung');
+    const newTimeSlotsIds = (await this.create(bookingRecordId, timeSlots));
     return [...otherTimeSlotsIds, ...newTimeSlotsIds];
   }
 
   getDuration(ts) {
-    const beginn = moment(ts.beginnDate)
-      .add(ts.beginnH, 'h')
-      .add(ts.beginnM, 'minutes');
-
-    const end = moment(ts.endDate)
-      .add(ts.endH, 'h')
-      .add(ts.endM, 'minutes');
-    return moment(end).diff(beginn, 'hours');
-
+    return { duration: moment.duration(ts.get('Duration')).get('hours'), timeSlotId: ts.getId() };
   }
 
   getDurations(timeSlots) {

@@ -12,6 +12,7 @@ const e = require('express');
 
 const gleisUser = process.env.CS_USER;
 const gleisPassword = process.env.CS_PASSWORD;
+const formater = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
 
 
 
@@ -176,8 +177,8 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
         rooms: rooms,
         roomsPriceSum: roomsPriceSum
       },
-      finalPriceSumNetto: invoice.get('SummeNettoInklRabatt'),
-      finalPriceSumBrutto: invoice.get('Summe / Brutto'),
+      finalPriceSumNetto: formater.format(invoice.get('SummeNettoInklRabatt')),
+      finalPriceSumBrutto: formater.format(invoice.get('Summe / Brutto')),
       notes: b.get('Notes')
     };
 
