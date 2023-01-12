@@ -19,12 +19,6 @@ Vue.component('booking-form', {
       equipment: [],
       hours: [
         0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
         7,
         8,
         9,
@@ -143,6 +137,23 @@ Vue.component('booking-form', {
         this.submitResult = {
           success: false,
           msg: `Zeitraum nr ${invalidTimeSlotIndex + 1} ist ungültig. Bitte überprüfen Sie, ob das Ende nicht vor dem Beginn liegt.`
+        };
+        return;
+      }
+
+      const maxEndExceededTimeSlotIndex = this.booking.timeSlots.findIndex(ts => {
+        const end = moment(ts.endDate)
+          .add(ts.endH, 'h')
+          .add(ts.endM, 'minutes');
+
+        const maxEnd = moment(ts.endDate)
+        .add(30, 'minutes');
+        return end.isAfter(maxEnd);
+      });
+      if (maxEndExceededTimeSlotIndex > -1) {
+        this.submitResult = {
+          success: false,
+          msg: `Zeitraum nr ${multipleDaysTimeSlotIndex + 1} ist ungültig. Das Ende darf maximal 00:30 sein.`
         };
         return;
       }
