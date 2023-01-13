@@ -53,31 +53,31 @@ Vue.component('booking-form', {
         this.error = 'Ups... das hätte nie passieren sollen.';
       }
     } else {
-      const roomsRes = await (await fetch('/buchungssystem/api/bookings/' + id + '/availablerooms', { 
+      const roomsRes = await (await fetch('/buchungssystem/api/bookings/' + id + '/availablerooms', {
         method: 'get'
       })).json();
-      const equipmentRes = await (await fetch('/buchungssystem/api/bookings/' + id + '/availableequipment', { 
+      const equipmentRes = await (await fetch('/buchungssystem/api/bookings/' + id + '/availableequipment', {
         method: 'get'
       })).json();
-      const bookedEquipmentRes = await (await fetch('/buchungssystem/api/bookings/' + id + '/bookedequipment', { 
+      const bookedEquipmentRes = await (await fetch('/buchungssystem/api/bookings/' + id + '/bookedequipment', {
         method: 'get'
       })).json();
-      const timeslotsRes = await (await fetch('/buchungssystem/api/bookings/' + id + '/eventtimeslots', { 
+      const timeslotsRes = await (await fetch('/buchungssystem/api/bookings/' + id + '/eventtimeslots', {
         method: 'get'
       })).json();
 
       this.rooms = roomsRes.res;
       this.booking.equipment = equipmentRes.res.map(e => {
         const bookedEqp = bookedEquipmentRes.res.find(r => r.equipmentId === e.id);
-        return { 
-          id: e.id, 
-          name: e.name, 
-          count: bookedEqp ? bookedEqp.numberBooked: 0, 
-          description: e.description, 
-          quantity: e.quantity, 
-          position: e.position, 
-          notesTitle: e.notesTitle, 
-          notes: bookedEqp ? bookedEqp.notes: null 
+        return {
+          id: e.id,
+          name: e.name,
+          count: bookedEqp ? bookedEqp.numberBooked : 0,
+          description: e.description,
+          quantity: e.quantity,
+          position: e.position,
+          notesTitle: e.notesTitle,
+          notes: bookedEqp ? bookedEqp.notes : null
         };
       }).sort((a, b) => a.position - b.position);
       if (timeslotsRes.res && timeslotsRes.res.length > 0) {
@@ -146,8 +146,9 @@ Vue.component('booking-form', {
           .add(ts.endH, 'h')
           .add(ts.endM, 'minutes');
 
-        const maxEnd = moment(ts.endDate)
-        .add(30, 'minutes');
+        const maxEnd = moment(ts.beginnDate)
+          .add(1, 'days')
+          .add(30, 'minutes');
         return end.isAfter(maxEnd);
       });
       if (maxEndExceededTimeSlotIndex > -1) {
@@ -158,7 +159,7 @@ Vue.component('booking-form', {
         return;
       }
       this.loading = true;
-      const b = { ...this.booking};
+      const b = { ...this.booking };
       b.equipment = b.equipment.filter(eq => eq.count > 0);
       const res = await fetch('/buchungssystem/api/bookings/' + this.booking.id, {
         method: 'PUT',
