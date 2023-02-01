@@ -154,7 +154,7 @@ Vue.component('booking-form', {
       if (maxEndExceededTimeSlotIndex > -1) {
         this.submitResult = {
           success: false,
-          msg: `Zeitraum nr ${multipleDaysTimeSlotIndex + 1} ist ungültig. Das Ende darf maximal 00:30 sein.`
+          msg: `Zeitraum nr ${maxEndExceededTimeSlotIndex + 1} ist ungültig. Das Ende darf maximal 00:30 sein.`
         };
         return;
       }
