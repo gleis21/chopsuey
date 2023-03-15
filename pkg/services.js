@@ -103,7 +103,6 @@ class InvoiceService {
       } else{
         variant = articlePrices[0];
       }
-      console.log('#######' + JSON.stringify(variant) + '###############')
       return {priceVariant: variant, timeSlotId: dur.timeSlotId}
     });
   }
@@ -111,9 +110,6 @@ class InvoiceService {
   async createInvoiceItems(items, durations, participantsCount) {
     const eqPrices = await this.getEquipmentPrices();
 
-    console.log('#############ITEMS##############');
-    console.log(JSON.stringify(items));
-    console.log('###########################');
     // items have an id and count
     const invoiceItems = items
       .map(it => {

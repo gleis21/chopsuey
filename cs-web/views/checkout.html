@@ -166,13 +166,47 @@
                       <%= it.notes %>
                     </td>
                   </tr>
-                  <% }) %>
+                <% }) %>
+                
 
               </tbody>
             </table>
             <b>Summe: <%= invoiceItems.equipmentPriceSum %> &euro;</b>
             <br />
-            <br />
+            <% } %>
+            <% if(invoiceItems.services){ %>
+              <b>Zusätzliche Leistungen:</b>
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Preis</th>
+                    <th>Rabatt</th>
+                    <th>Endpreis</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% invoiceItems.services.forEach( it=> { %>
+                    <tr>
+                      <td>
+                        <%= it.name %>
+                      </td>
+                      <td>
+                        <%= it.price %> &euro;
+                      </td>
+                      <td>
+                        <%= it.discount * 100 %> &percnt;
+                      </td>
+                      <td>
+                        <%= it.finalPrice %> &euro;
+                      </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+              </table>
+              <b>Summe: <%= invoiceItems.servicesPriceSum %> &euro;</b>
+              <br />
+              <br />
             <% } %>
 
               <% if(invoiceItems.rooms){ %>

@@ -122,6 +122,18 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
       };
     });
     const roomsPriceSum = rooms.map(e => e.finalPrice).reduce((a, c) => a + c);
+
+    const services = invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Service').map(e => {
+      const discount = e.get('Rabatt') ? e.get('Rabatt') : 0;
+      const finalPrice = parseFloat(e.get('SummeNetto')) - (parseFloat(e.get('SummeNetto')) * discount)
+      return {
+        name: e.get('ArtikelName'),
+        price: e.get('SummeNetto'),
+        discount: discount,
+        finalPrice: finalPrice
+      };
+    });
+    const servicesPriceSum = services.map(e => e.finalPrice).reduce((a, c) => a + c);
     var viewMode = '';
     if (preview || b.get('Status') === 'Vertrag unterschrieben') {
       viewMode = 'print_mode'
@@ -175,7 +187,9 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
         equipment: equipment,
         equipmentPriceSum: equipmentPriceSum,
         rooms: rooms,
-        roomsPriceSum: roomsPriceSum
+        roomsPriceSum: roomsPriceSum,
+        services: services,
+        servicesPriceSum: servicesPriceSum
       },
       finalPriceSumNetto: formater.format(invoice.get('SummeNettoInklRabatt')),
       finalPriceSumBrutto: formater.format(invoice.get('Summe / Brutto')),
