@@ -278,7 +278,8 @@ class TimeSlotsService {
   }
 
   getDuration(ts) {
-    return { duration: moment.duration(ts.get('Duration')).get('hours'), timeSlotId: ts.getId() };
+    // t.get('Duration') is in seconds but moment.duration expects ms
+    return { duration: moment.duration(ts.get('Duration')*1000).get('hours'), timeSlotId: ts.getId() };
   }
 
   getDurations(timeSlots) {
