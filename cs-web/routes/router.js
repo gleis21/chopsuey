@@ -133,7 +133,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
         finalPrice: finalPrice
       };
     });
-    const servicesPriceSum = services.map(e => e.finalPrice).reduce((a, c) => a + c);
+    const servicesPriceSum = services.length == 0 ? 0: services.map(e => e.finalPrice ? e.finalPrice: 0).reduce((a, c) => a + c);
     var viewMode = '';
     if (preview || b.get('Status') === 'Vertrag unterschrieben') {
       viewMode = 'print_mode'
