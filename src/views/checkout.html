@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="Gleis 21">
+
+  <title>Gleis 21 check-out</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+  
+  <script src="https://use.fontawesome.com/1171925253.js"></script>
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <img src="https://gleis21.wien/wp-content/uploads/2022/04/gleis21-logo-rot.png" class="custom-logo"
+          alt="Gleis 21" width="80" height="33">
+        <span class="float-right">
+          <h4>Miteinander Weichen stellen!</h4>
+        </span>
+
+      </div>
+      <div class="card-body">
+        <div class="row mb-6">
+          <div class="col-sm-12">
+            <div>
+              <strong>Veranstaltungstitel/Art der Veranstaltung</strong>
+            </div>
+            <div>
+              <%= name %>
+            </div>
+            <div><b>TeilnehmerInnenzahl:&nbsp;&nbsp;</b>
+              <%= participantsCount %>
+            </div>
+            <div><b>VeranstalterIn (=MieterIn): </b>
+              <%= person.org %>
+            </div>
+          </div>
+        </div>
+        <br>
+        <br>
+        <div class="row mb-6">
+          <div class="col-sm-6">
+            <div>
+              <b>Ansprechperson:</b>
+            </div>
+            <div>
+              <%= person.name %>
+            </div>
+            <div>
+              <%= person.telefon %>
+            </div>
+            <div>
+              <%= person.email %>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div>
+              <strong>Rechnungsadresse:</strong>
+            </div>
+            <div>
+              <%= person.org %>
+            </div>
+            <div>
+              <%= person.address %>
+            </div>
+            <div>
+              <%= person.postCode %>
+                <%= person.city %>
+            </div>
+            <% if(person.uid){ %>
+            <div>UID-Nummer: <%= person.uid %>
+            <% } %>
+            </div>
+          </div>
+        </div>
+
+        <br>
+        <b>Konditionen (wird vom Vermieter ausgefüllt, exkl. USt.)</b>
+        <br />
+        <br />
+        <br />
+        <b>Benutzungszeiträume:</b>
+        <br>
+        <div class="table-responsive-sm">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Raum</th>
+                <th></th>
+                <th>von</th>
+                <th>bis</th>
+                <th>Möblierung</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% timeSlots.forEach( t=> { %>
+                <tr>
+                  <td>
+                    <%= t.room %>
+                  </td>
+                  <td>
+                    <%= t.type %>
+                  </td>
+                  <td>
+                    <%= t.beginn %>
+                  </td>
+                  <td>
+                    <%= t.end %>
+                  </td>
+                  <td>
+                    <%= t.moeblierung %>
+                  </td>
+                </tr>
+                <% if(t.notes){ %>
+                  <tr>
+                    <td colspan="5">
+                      <b>Anmerkung:</b><br />
+                      <%= t.notes %>
+                    </td>
+                  </tr>
+                  <% } %>
+                    <% }) %>
+
+            </tbody>
+          </table>
+          <br />
+          <% if(invoiceItems.equipment){ %>
+            <b>Zusätzliche Ausstattung:</b>
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Anzahl</th>
+                  <th>Preis</th>
+                  <th>Rabatt</th>
+                  <th>Endpreis</th>
+                  <th>Anmerkung</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% invoiceItems.equipment.forEach( it=> { %>
+                  <tr>
+                    <td>
+                      <%= it.name %>
+                    </td>
+                    <td>
+                      <%= it.count %>
+                    </td>
+                    <td>
+                      <%= it.price %> &euro;
+                    </td>
+                    <td>
+                      <%= it.discount %> &percnt;
+                    </td>
+                    <td>
+                      <%= it.finalPrice %> &euro;
+                    </td>
+                    <td>
+                      <%= it.notes %>
+                    </td>
+                  </tr>
+                <% }) %>
+                
+
+              </tbody>
+            </table>
+            <b>Summe: <%= invoiceItems.equipmentPriceSum %> &euro;</b>
+            <br />
+            <% } %>
+            <% if(invoiceItems.services){ %>
+              <b>Zusätzliche Leistungen:</b>
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Preis</th>
+                    <th>Rabatt</th>
+                    <th>Endpreis</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% invoiceItems.services.forEach( it=> { %>
+                    <tr>
+                      <td>
+                        <%= it.name %>
+                      </td>
+                      <td>
+                        <%= it.price %> &euro;
+                      </td>
+                      <td>
+                        <%= it.discount * 100 %> &percnt;
+                      </td>
+                      <td>
+                        <%= it.finalPrice %> &euro;
+                      </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+              </table>
+              <b>Summe: <%= invoiceItems.servicesPriceSum %> &euro;</b>
+              <br />
+              <br />
+            <% } %>
+
+              <% if(invoiceItems.rooms){ %>
+                <b>Räume:</b>
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Preis</th>
+                      <th>Rabatt</th>
+                      <th>Endpreis</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% invoiceItems.rooms.forEach( it=> { %>
+                      <tr>
+                        <td>
+                          <%= it.name %>
+                        </td>
+                        <td>
+                          <%= it.price %> &euro;
+                        </td>
+                        <td>
+                          <%= it.discount * 100 %> &percnt;
+                        </td>
+                        <td>
+                          <%= it.finalPrice %> &euro;
+                        </td>
+                      </tr>
+                      <% }) %>
+                  </tbody>
+                </table>
+                <b>Summe: <%= invoiceItems.roomsPriceSum %> &euro;</b>
+                <br>
+                <% } %>
+                  <br>
+                  <br>
+                  <div class="card">
+                    <div class="card-header">
+                      <h4>Endbetrag:</h4>
+                    </div>
+                    <div class="card-body">
+                      <%= finalPriceSumNetto %> (<b>
+                          <%= finalPriceSumBrutto %>
+                        </b> inkl. 20% Umsatzsteuer)
+                    </div>
+                  </div>
+                  <br>
+                  <br>
+                  <div class="alert alert-info" role="alert">
+                    <b>Sofern nicht anders vereinbart sind im Gundpreis enthalten:</b> W-LAN, Beamer, 1 Flipchart, 1
+                    Pinnwand, Sound System</b>
+                  </div>
+                  <% if(notes){ %>
+                    <div class="alert alert-info" role="alert">
+                      <b>Anmerkung zur Buchung und Aufbausetting</b> (bzw. Skizze im Anhang):
+                      <br>
+                      <%= notes %>
+                    </div>
+                    <% } %>
+                      <div class="alert alert-info" role="alert">
+                        <b>Verpflegung:</b>
+                        <br>
+                        Wir empfehlen Gaumenfreundinnen Bio-Catering: https://www.gaumenfreundinnen.com Weitere
+                        Empfehlungen auf
+                        Anfrage.
+                      </div>
+                      <div class="alert alert-warning" role="alert">
+                        <b>Anmerkung:</b>
+                        <br>
+                        Sie bekommen die Rechnung nach positivem Abschluss Ihrer Veranstaltung zugeschickt. Ausnahme:
+                        bei Festen wird im Vorhinein abgerechnet.
+                      </div>
+                      <% if(viewMode === 'checkout_mode') { %>
+                      <br>
+                      <br>
+                      <input id="accept-agb" type="checkbox" /> Ich akzeptiere die <a href="/buchungssystem/files/gleis21-agb.pdf">Allgemeinen Geschäftsbedingungen des Vereins
+                      Wohnprojekt Gleis 21</a>.
+                      <br>
+                      <input id="accept-gdpr" type="checkbox" /> Ich stimme der elektronischen Speicherung und Verarbeitung meiner Daten
+                      für
+                      diese und ggf. künftige Vermietung zu.
+                      <% } %>
+
+
+                      <br>
+                      <br>
+                      <br>
+                      <br>
+                      <div class="row">
+                        <div class="col-sm-9">
+                          <% if(preview) { %>
+                            <div id="success-msg" class="alert alert-success" role="alert">
+                              Status: <%= status %>
+                            </div>
+                          <% } %>  
+                          <% if(viewMode === 'checkout_mode') { %>
+                          <div id="error-agb-gdpr" class="alert alert-danger" style="display: none" role="alert">
+                            Bitte akzeptieren Sie die Allgemeinen Geschäftsbedingungen und stimmen der elektronischen Speicherung und Verarbeitung der Daten zu.
+                          </div>
+                          <div id="error-generic" class="alert alert-danger" style="display: none" role="alert">
+                            Ups... das hätte nie passieren sollen. Bitte versuchen Sie nochmal oder kontaktieren Sie uns unter hello@gleis21.wien
+                          </div>
+                          <div id="success-msg" class="alert alert-success" style="display: none" role="alert">
+                            Die Buchung wurde erfolgreich abgeschloßen!
+                          </div>
+                          <% } %>
+                        </div>
+                        <div class="col-sm-3">
+                          <% if(viewMode === 'checkout_mode') { %>
+                          <button id="checkout-button" type="button" class="btn btn-primary float-right d-print-none">Zahlungspflichtig bestellen</button>
+                          <button id="print-button" type="button" class="btn btn-primary float-right d-print-none" style="display: none">Bestätigung drucken</button>
+                          <% } %>
+                          <% if(viewMode === 'print_mode') { %>
+                            <button id="print-button" type="button" class="btn btn-primary float-right d-print-none">Bestätigung drucken</button>
+                          <% } %>
+                        </div>
+                      </div>
+                      <br>
+        </div>
+
+      </div>
+      <div class="card-footer text-muted">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm">
+              WOHNPROJEKT GLEIS 21
+            </div>
+            <div class="col-sm">
+              <b>WEB: </b>www.gleis21.wien
+            </div>
+            <div class="col-sm">
+              <b>UID: </b>ATU70349508
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm">
+              1100 Wien, Bloch-Bauer-Promenade 22
+            </div>
+            <div class="col-sm">
+              <b>MAIL: </b>hello@gleis21.wien
+            </div>
+            <div class="col-sm">
+              <b>ZVR-ZAHL: </b>585895816
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id="bookingId" value="<%= bookingId %>">
+</body>
+<script src="/buchungssystem/javascripts/checkout.js"></script>
+
+</html>

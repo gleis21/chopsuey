@@ -6,6 +6,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   annotations:
+    bind-mount-options: $PWD/Caddyfile:z
     io.kubernetes.cri-o.ContainerType/caddy: container
     io.kubernetes.cri-o.ContainerType/cs: container
     io.kubernetes.cri-o.SandboxID/caddy: 8965969013f4e0b6024f32f27150c68478288af64bee337d578eb66b9b09fe4
@@ -21,7 +22,7 @@ metadata:
     io.podman.annotations.publish-all/caddy: "FALSE"
     io.podman.annotations.publish-all/cs: "FALSE"
     org.opencontainers.image.base.digest/cs: sha256:a345b93215c329360e095c5307e66f0c8f8bb2783ca795162c51241b
-    org.opencontainers.image.base.name/cs: docker.io/library/node:16-alpine
+    org.opencontainers.image.base.name/cs: docker.io/library/node:18-alpine
   creationTimestamp: "2022-11-19T22:08:25Z"
   labels:
     app: chopsuey
