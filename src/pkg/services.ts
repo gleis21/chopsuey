@@ -14,7 +14,7 @@ class InvoiceService {
     this.itemsSrv = itemsSrv;
   }
 
-  async createInvoice(bookingId: string, invoiceItems) {
+  async createInvoice(bookingId: string, invoiceItems: Array<any>) {
     await this.deleteInvoceItemsByBooking(bookingId);
     const invoices = await this.getInvoceByBooking(bookingId);
     if (invoices && invoices.length > 0) {
@@ -87,7 +87,7 @@ class InvoiceService {
     });
   }
 
-  calculatePrices(articlePrices, durationsInHours) {
+  calculatePrices(articlePrices: Array<any>, durationsInHours: Array<any>) {
     
     const variant1h = articlePrices.find(p => p.get('Variante') === "1 Stunde" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
     const variant2h = articlePrices.find(p => p.get('Variante') === "2 Stunden" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
@@ -113,11 +113,11 @@ class InvoiceService {
     });
   }
 
-  async createInvoiceItems(items, durations, participantsCount): Promise<Record<FieldSet>[]> {
-    const eqPrices = await this.getEquipmentPrices();
+  async createInvoiceItems(items: Array<any>, durations: Array<any>, participantsCount: number): Promise<Record<FieldSet>[]> {
+    const eqPrices: Array<any> = await this.getEquipmentPrices();
 
     // items have an id and count
-    const invoiceItems: Partial<FieldSet> = items
+    const invoiceItems: Array<any> = items
       .map(it => {
         const articlePrices = eqPrices.filter(ep => ep.get('Artikel') && ep.get('Artikel')[0] === it.id);
         if (!articlePrices || articlePrices.length == 0) {
@@ -176,7 +176,7 @@ class BookingService {
   // - receives an object with the fields 'customerEmail', 'title' and 'pin'
   // - checks if a customer with the given email-address already exists in the 
   // 'Personen' table and creates a new one, if this is not the case. 
-  async create(b) {
+  async create(b: any) {
     var customer = await this.personSrv.getByEmail(b.customerEmail);
     if (!customer) {
       customer = await this.personSrv.createOrUpdate({ email: b.customerEmail })
@@ -192,7 +192,7 @@ class BookingService {
     return await this.table.update(bookingId, {Status: 'Vertrag unterschrieben', Checkoutzeit: moment().toISOString()});
   }
 
-  async update(b) {
+  async update(b: any) {
     const person = await this.personSrv.createOrUpdate(b.person);
     const createdTimeSlots = await this.timeSlotsSrv.replaceEventBookingTimeSlots(b.id, b.timeSlots);
 
@@ -203,7 +203,7 @@ class BookingService {
       invoiceItems = invoiceItems.concat(equipmentInvoiceItems);
     }
     for (let i = 0; i < createdTimeSlots.length; i++) {
-      const ts = createdTimeSlots[i];
+      const ts: any = createdTimeSlots[i];
       const rooms = [{ id: ts.get('Raum')[0], count: 1 }];
       const durations = [this.timeSlotsSrv.getDuration(ts)];
       const roomsInvoiceItems = await this.invoiceSrv.createInvoiceItems(rooms, durations, b.participantsCount);
@@ -269,7 +269,7 @@ class TimeSlotsService {
       .firstPage();
   }
 
-  async replaceEventBookingTimeSlots(bookingRecordId: string, timeSlots:Partial<FieldSet>) {
+  async replaceEventBookingTimeSlots(bookingRecordId: string, timeSlots:Array<any>): Promise<Records<FieldSet>> {
     const allBookingTimeSlots = await this.getBookingTimeSlots(bookingRecordId);
     const eventTimeSlotsIds = allBookingTimeSlots
       .filter(r => r.get('Type') === 'Veranstaltung')
@@ -288,18 +288,18 @@ class TimeSlotsService {
     return [...otherTimeSlotsIds, ...newTimeSlotsIds];
   }
 
-  getDuration(ts) {
+  getDuration(ts: any) {
     // t.get('Duration') is in seconds but moment.duration expects ms
     return { duration: moment.duration(ts.get('Duration')*1000).get('hours'), timeSlotId: ts.getId() };
   }
 
-  getDurations(timeSlots) {
+  getDurations(timeSlots: Records<FieldSet>) {
     return timeSlots.map(ts => {
       return this.getDuration(ts);
     });
   }
 
-  async create(bookingID: string, timeSlots) {
+  async create(bookingID: string, timeSlots: Array<any>) {
     const slots = await Promise.all(timeSlots.map(async ts => {
       const beginn = moment(ts.beginnDate)
         .add(ts.beginnH, 'h')
@@ -322,7 +322,7 @@ class TimeSlotsService {
         }
       };
     }));
-    var createdTimeSlots = [];
+    var createdTimeSlots: Array<any> = [];
     // Airtable allows only 10 at once
     var i, j, tmp, chunk = 10;
     for (i = 0, j = slots.length; i < j; i += chunk) {
@@ -340,7 +340,7 @@ class PersonService {
     this.table = base('Personen');
   }
 
-  async createOrUpdate(p) {
+  async createOrUpdate(p: any) {
     const defaultRole = 'MieterIn';
 
     const existing = await this.getByEmail(p.email);
@@ -378,7 +378,7 @@ class PersonService {
     });
   }
 
-  async getById(id) {
+  async getById(id: string) {
     return await this.table.find(id);
   }
 
