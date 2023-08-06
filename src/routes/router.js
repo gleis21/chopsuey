@@ -139,6 +139,16 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     } else if (b.get('Status') === 'Vertrag zum Unterschreiben verschickt' || b.get('Status') === 'CHECKOUT_TEST') {
       viewMode = 'checkout_mode'
     }
+    var adr = '';
+    if (p.get('Strasse')) {
+      adr += p.get('Strasse');
+      if (p.get('HausNr')) {
+        adr += '' + p.get('HausNr');
+        if (p.get('Top')) {
+          adr += '/' + p.get('Top');
+        }
+      }
+    }
 
     const contract = {
       bookingId: bookingId,
@@ -152,8 +162,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
         telefon: p.get('Tel'),
         email: p.get('Email'),
         org: p.get('Organisation'),
-        address:
-          p.get('Strasse') ? p.get('Strasse') : '' + ' ' + p.get('HausNr') ? p.get('HausNr') : '' + p.get('Top') ? ('/' + p.get('Top')) : '',
+        address: adr,
         postCode: p.get('PLZ'),
         city: p.get('Ort'),
         uid: p.get('UID')
