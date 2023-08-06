@@ -143,7 +143,7 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     if (p.get('Strasse')) {
       adr += p.get('Strasse');
       if (p.get('HausNr')) {
-        adr += '' + p.get('HausNr');
+        adr += ' ' + p.get('HausNr');
         if (p.get('Top')) {
           adr += '/' + p.get('Top');
         }
