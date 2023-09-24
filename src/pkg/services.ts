@@ -87,12 +87,13 @@ class InvoiceService {
     });
   }
 
-  calculatePrices(articlePrices: Array<any>, durationsInHours: Array<any>) {
-    
-    const variant1h = articlePrices.find(p => p.get('Variante') === "1 Stunde" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
-    const variant2h = articlePrices.find(p => p.get('Variante') === "2 Stunden" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
-    const variant4h = articlePrices.find(p => p.get('Variante') === "halbtags" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
-    const variant1day = articlePrices.find(p => p.get('Variante') === "ganztags" && (!p.get('Typ') || p.get('Typ') == "Regulärer Tarif"));
+  calculatePrices(articlePrices: Array<any>, durationsInHours: Array<any>, isNGO: boolean) {
+    const tariff = isNGO ? "NGO Tarif": "Regulärer Tarif";
+
+    const variant1h = articlePrices.find(p => p.get('Variante') === "1 Stunde" && (!p.get('Typ') || p.get('Typ') == tariff));
+    const variant2h = articlePrices.find(p => p.get('Variante') === "2 Stunden" && (!p.get('Typ') || p.get('Typ') == tariff));
+    const variant4h = articlePrices.find(p => p.get('Variante') === "halbtags" && (!p.get('Typ') || p.get('Typ') == tariff));
+    const variant1day = articlePrices.find(p => p.get('Variante') === "ganztags" && (!p.get('Typ') || p.get('Typ') == tariff));
 
     return durationsInHours.map(dur => {
       var variant = null;
@@ -113,7 +114,7 @@ class InvoiceService {
     });
   }
 
-  async createInvoiceItems(items: Array<any>, durations: Array<any>, participantsCount: number): Promise<Record<FieldSet>[]> {
+  async createInvoiceItems(items: Array<any>, durations: Array<any>, participantsCount: number, isNGO: boolean): Promise<Record<FieldSet>[]> {
     const eqPrices: Array<any> = await this.getEquipmentPrices();
 
     // items have an id and count
@@ -124,7 +125,7 @@ class InvoiceService {
           console.log('error: no price found for artikel ' + it.id);
         }
 
-        return this.calculatePrices(articlePrices, durations).map(p => {
+        return this.calculatePrices(articlePrices, durations, isNGO).map(p => {
           return {
             priceId: p.priceVariant.getId(),
             count: p.priceVariant.get('MultiplizierenMitTeilnehmerAnzahl') ? it.count * participantsCount : it.count,
@@ -195,18 +196,19 @@ class BookingService {
   async update(b: any) {
     const person = await this.personSrv.createOrUpdate(b.person);
     const createdTimeSlots = await this.timeSlotsSrv.replaceEventBookingTimeSlots(b.id, b.timeSlots);
+    console.log("is NGO " + b.isNGO);
 
     var invoiceItems: Record<FieldSet>[] = [];
     if (b.equipment && b.equipment.length > 0) {
       const durations = this.timeSlotsSrv.getDurations(createdTimeSlots);
-      const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(b.equipment, durations, b.participantsCount);
+      const equipmentInvoiceItems = await this.invoiceSrv.createInvoiceItems(b.equipment, durations, b.participantsCount, b.isNGO);
       invoiceItems = invoiceItems.concat(equipmentInvoiceItems);
     }
     for (let i = 0; i < createdTimeSlots.length; i++) {
       const ts: any = createdTimeSlots[i];
       const rooms = [{ id: ts.get('Raum')[0], count: 1 }];
       const durations = [this.timeSlotsSrv.getDuration(ts)];
-      const roomsInvoiceItems = await this.invoiceSrv.createInvoiceItems(rooms, durations, b.participantsCount);
+      const roomsInvoiceItems = await this.invoiceSrv.createInvoiceItems(rooms, durations, b.participantsCount, b.isNGO);
       invoiceItems = invoiceItems.concat(roomsInvoiceItems);
     }
 
@@ -218,7 +220,8 @@ class BookingService {
       Mieter: [person.getId()],
       Notes: b.notes,
       Timeslots: createdTimeSlots.map(ts => ts.getId()),
-      Rechnungen: [invoice.getId()]
+      Rechnungen: [invoice.getId()],
+      NGO: b.isNGO
     };
     return await this.table.update(b.id, bk);
   }

@@ -72,6 +72,11 @@
           <label for="name">Organisation/Firma</label>
           <input type="text" class="form-control" v-model="booking.person.org">
         </div>
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" v-model="booking.isNGO" id="isNgo">
+          <label class="form-check-label" for="isNgo"> Die oben genannte Organisation ist eine NGO.</label>
+        </div>
+        <br/><br/>
         <p><b>Ansprechperson:</b></p>
         <div class="form-group">
           <label for="name">Vorname</label>

@@ -12,7 +12,8 @@ Vue.component('booking-form', {
         participantsCount: 1,
         equipment: [],
         notes: '',
-        timeSlots: []
+        timeSlots: [],
+        isNGO: false
       },
       moeblierungen: ['Ohne Möblierung', 'Block', 'Cafe', 'Carre', 'Geschwungene-Reihen', 'Kreis', 'U-Form', 'Kino Bestuhlung', 'Andere'],
       rooms: [],

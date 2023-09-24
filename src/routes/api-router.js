@@ -50,6 +50,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
             notes: b.get('Notes'),
             participantsCount: b.get('TeilnehmerInnenanzahl'),
             person: person,
+            isNGO: b.get('NGO')
           },
           err: null
         });
@@ -100,7 +101,8 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
         roomIds: [req.body.roomId],
         equipment: req.body.equipment,
         person: req.body.person,
-        timeSlots: req.body.timeSlots
+        timeSlots: req.body.timeSlots,
+        isNGO: req.body.isNGO
       };
       const r = await bookingSrv.update(booking);
 
