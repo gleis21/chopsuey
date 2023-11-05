@@ -210,6 +210,30 @@
               <br />
               <br />
             <% } %>
+            <% if(invoiceItems.deposits){ %>
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Kaution</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% invoiceItems.deposits.forEach( it=> { %>
+                    <tr>
+                      <td>
+                        <%= it.name %>
+                      </td>
+                      <td>
+                        <%= it.price %> &euro;
+                      </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+              </table>
+              <br />
+              <br />
+            <% } %>
 
               <% if(invoiceItems.rooms){ %>
                 <b>Räume:</b>

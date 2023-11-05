@@ -133,6 +133,19 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
       };
     });
     const servicesPriceSum = services.length == 0 ? 0: services.map(e => e.finalPrice ? e.finalPrice: 0).reduce((a, c) => a + c);
+
+    const deposits = invoiceItems.filter(e => e.get('ArtikelTyp')[0] === 'Kaution').map(e => {
+      const discount = e.get('Rabatt') ? e.get('Rabatt') : 0;
+      const finalPrice = parseFloat(e.get('SummeNetto')) - (parseFloat(e.get('SummeNetto')) * discount)
+      return {
+        name: e.get('ArtikelName'),
+        price: e.get('SummeNetto'),
+        discount: discount,
+        finalPrice: finalPrice
+      };
+    });
+    const depositsPriceSum = deposits.length == 0 ? 0: deposits.map(e => e.finalPrice ? e.finalPrice: 0).reduce((a, c) => a + c);
+
     var viewMode = '';
     if (preview || b.get('Status') === 'Vertrag unterschrieben') {
       viewMode = 'print_mode'
@@ -197,7 +210,9 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
         rooms: rooms,
         roomsPriceSum: roomsPriceSum,
         services: services,
-        servicesPriceSum: servicesPriceSum
+        servicesPriceSum: servicesPriceSum,
+        deposits: deposits,
+        depositsPriceSum: depositsPriceSum
       },
       finalPriceSumNetto: formater.format(invoice.get('SummeNettoInklRabatt')),
       finalPriceSumBrutto: formater.format(invoice.get('Summe / Brutto')),
