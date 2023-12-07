@@ -196,7 +196,6 @@ class BookingService {
   async update(b: any) {
     const person = await this.personSrv.createOrUpdate(b.person);
     const createdTimeSlots = await this.timeSlotsSrv.replaceEventBookingTimeSlots(b.id, b.timeSlots);
-    console.log("is NGO " + b.isNGO);
 
     var invoiceItems: Record<FieldSet>[] = [];
     if (b.equipment && b.equipment.length > 0) {
@@ -221,7 +220,8 @@ class BookingService {
       Notes: b.notes,
       Timeslots: createdTimeSlots.map(ts => ts.getId()),
       Rechnungen: [invoice.getId()],
-      NGO: b.isNGO
+      NGO: b.isNGO,
+      WoherKennstDuUns: b.hau
     };
     return await this.table.update(b.id, bk);
   }
@@ -308,7 +308,7 @@ class TimeSlotsService {
         .add(ts.beginnH, 'h')
         .add(ts.beginnM, 'minutes');
 
-      const end = moment(ts.endDate)
+      const end = moment(ts.beginnDate)
         .add(ts.endH, 'h')
         .add(ts.endM, 'minutes');
       const durSec = moment(end).diff(beginn, 'seconds');

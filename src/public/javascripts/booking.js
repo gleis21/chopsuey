@@ -13,9 +13,18 @@ Vue.component('booking-form', {
         equipment: [],
         notes: '',
         timeSlots: [],
-        isNGO: false
+        isNGO: false,
+        hau: ''
       },
       moeblierungen: ['Ohne Möblierung', 'Block', 'Cafe', 'Carre', 'Geschwungene-Reihen', 'Kreis', 'U-Form', 'Kino Bestuhlung', 'Andere'],
+      hauOptions: [
+        'Website',
+        'Social media',
+        'Newsletter',
+        'Freunde und Bekannte',
+        'Google',
+        'Sonstiges'
+      ],
       rooms: [],
       equipment: [],
       hours: [
@@ -95,9 +104,6 @@ Vue.component('booking-form', {
               .format('YYYY-MM-DD'),
             beginnH: 9,
             beginnM: 0,
-            endDate: moment()
-              .add(2, 'd')
-              .format('YYYY-MM-DD'),
             endH: 17,
             endM: 0,
             notes: ''
@@ -128,7 +134,7 @@ Vue.component('booking-form', {
           .add(ts.beginnH, 'h')
           .add(ts.beginnM, 'minutes');
 
-        const end = moment(ts.endDate)
+        const end = moment(ts.beginnDate)
           .add(ts.endH, 'h')
           .add(ts.endM, 'minutes');
 
@@ -143,7 +149,7 @@ Vue.component('booking-form', {
       }
 
       const maxEndExceededTimeSlotIndex = this.booking.timeSlots.findIndex(ts => {
-        const end = moment(ts.endDate)
+        const end = moment(ts.beginnDate)
           .add(ts.endH, 'h')
           .add(ts.endM, 'minutes');
 
@@ -171,7 +177,7 @@ Vue.component('booking-form', {
       if (res.ok) {
         this.submitResult = {
           success: true,
-          msg: 'Ihre Anfrage wurde erfolgreich gespeichert.'
+          msg: 'Ihre Buchung wurde erfolgreich gespeichert! Bitte beachten Sie, dass die Reservierung erst durch Bestätigung des Vertrages fixiert wird. Ein Link zum Vertrag wird Ihnen per E-Mail übermittelt.'
         };
       } else {
         this.submitResult = {

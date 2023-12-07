@@ -102,7 +102,8 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
         equipment: req.body.equipment,
         person: req.body.person,
         timeSlots: req.body.timeSlots,
-        isNGO: req.body.isNGO
+        isNGO: req.body.isNGO,
+        hau: req.body.hau
       };
       const r = await bookingSrv.update(booking);
 
