@@ -65,7 +65,7 @@
           <input type="text" required class="form-control" v-model="booking.name">
         </div>
         <div class="form-group">
-          <label for="count">TeilnehmerInnenanzahl bzw. geschätzte Publikumsanzahl + KünstlerInnen</label>
+          <label for="count">Gesamtteilnehmerzahl (inklusive Publikum und Künstler) – max: 100. </label>
           <input type="number" :min='1' required class="form-control" v-model="booking.participantsCount">
         </div>
         <div class="form-group">
@@ -127,7 +127,7 @@
         
         <div style="padding: 10px" class="bg-light">
           <h4>Ausstattung</h4>
-          <p>Sofern nicht anders vereinbart sind im Grundpreis enthalten: W-LAN, 1 Beamer, 1 Flipchart, 1 Pinnwand, 1 White Board, 1 Funkmikrofon, Sound System, Möblierung.</p>
+          <p>Im Grundpreis sind W-LAN, 1 Beamer, 1 Flipchart, 1 Pinnwand, 1 Whiteboard, 1 Funkmikrofon, Sound-System, Möblierung sowie das Saalherrichten inbegriffen.</p>
           <p>Papier für Flipchart und Pinnwand wird von Gleis 21 bereit gestellt. Moderationsmaterial (inkl. Stifte) bringen Sie bitte selber mit. Vielen Dank!</p>
           <p>Änderungen Ihrer Ausstattungswünsche sind bei Bedarf auch nach Vertragsabschluß möglich.</p>
           <p><b>Alle Angaben sind Netto-Preise (exkl. USt).</b></p>
@@ -256,10 +256,10 @@
             </div>
           </div>
           <div class="alert alert-warning" role="alert">
-            Bitte beachten Sie: <b>Halbtagstarif</b> gilt für Einmietungen <b>bis zu 4 Stunden</b> und abends ab <b>17 Uhr</b>. Buchungen untertags <b>länger als 4 Stunden</b> werden mit <b>Ganztagstarif</b> verrechnet.
+            Bitte beachten Sie: Der <b>Halbtagstarif</b> gilt für Einmietungen von <b>bis zu 5 Stunden (inklusive Ihres eigenen Auf- und Abbaus)</b> und abends ab <b>17 Uhr</b>. Buchungen während des Tages, die <b>länger als 5 Stunden dauern</b>, werden mit dem <b>Ganztagstarif</b> verrechnet.
           </div>
           <div class="alert alert-warning" role="alert">
-            Wenn Sie unsere Räume untertags an mehreren Tagen hintereinander buchen, könnte dazwischen eine Abendveranstaltung sein. Ihr Aufbausetting wird für den nächsten Tag von Gleis 21 wieder hergestellt, es gibt die Möglichkeit, Materialien in anderen Nebenräumen zwischen zu lagern oder gegen Aufpreis eine "Über-Nacht-Buchung" zu machen. 
+            Wenn Sie unsere Räume an mehreren aufeinanderfolgenden Tagen während des Tages buchen, könnte dazwischen eine Abendveranstaltung stattfinden. Ihr Aufbausetting wird für den nächsten Tag von Gleis 21 wiederhergestellt. Es besteht die Möglichkeit, Materialien in anderen Nebenräumen zwischenzulagern oder gegen Aufpreis eine Über-Nacht-Buchung vorzunehmen.
           </div>
           <div class="form-row">
             <div class="form-group col-md-4">
@@ -276,7 +276,7 @@
         </div>
         <div class="form-row">
           <div class="form-group col-md-6">
-            <label for="beginn">Wie hast du von uns erfahren?</label>
+            <label for="beginn">Wie haben Sie von uns erfahren?</label>
             <select class="form-control" id="hear-about-us" v-model="booking.hau">
               <option v-for="hau in hauOptions" v-bind:value="hau">{{ hau }}</option>
             </select>
