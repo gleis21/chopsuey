@@ -103,9 +103,9 @@ class InvoiceService {
         variant = variant1h;
       } else if (dur.duration <= 2 && (variant2h || variant4h)) {
         variant = variant2h ? variant2h : variant4h;
-      } else if (dur.duration > 2 && dur.duration <= 4 && variant4h) {
+      } else if (dur.duration > 2 && dur.duration <= 5 && variant4h) {
         variant = variant4h;
-      } else if (dur.duration > 4 && variant1day) {
+      } else if (dur.duration > 5 && variant1day) {
         variant = variant1day;
       } else{
         variant = articlePrices[0];
