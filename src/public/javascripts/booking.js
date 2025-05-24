@@ -129,6 +129,28 @@ Vue.component('booking-form', {
       this.booking.timeSlots.splice(index, 1);
     },
     submit: async function () {
+      if (!this.booking.name) {
+        this.submitResult = {
+          success: false,
+          msg: `Veranstaltungstitel/Art der Veranstaltung fehlt!`
+        };
+        return;
+      }
+      if (!this.booking.participantsCount) {
+        this.submitResult = {
+          success: false,
+          msg: `Gesamtteilnehmerzahl fehlt!`
+        };
+        return;
+      }
+      if (!this.booking.person.org) {
+        this.submitResult = {
+          success: false,
+          msg: `Organisation/Firma fehlt!`
+        };
+        return;
+      }
+      
       const invalidTimeSlotIndex = this.booking.timeSlots.findIndex(ts => {
         const beginn = moment(ts.beginnDate)
           .add(ts.beginnH, 'h')
