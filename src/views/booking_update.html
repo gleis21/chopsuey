@@ -138,7 +138,7 @@
             </div>
             <p class="mb-1">-> Veranstaltungsraum 117m&sup2; (max. 100 Personen*)</p>
             <p class="mb-1">-> Foyer (zusätzliche 38m&sup2;) inkludiert</p>
-            <p class="mb-1">-> eBackstage** (zusätzliche 15m&sup2;) inkludiert</p>
+            <p class="mb-1">-> Backstage** (zusätzliche 15m&sup2;) inkludiert</p>
           </li>
           <li class="list-group-item list-group-item flex-column align-items-start">
             <div class="d-flex w-100 justify-content-between">
@@ -153,29 +153,16 @@
               <h5 class="mb-1">Salon</h5>
             </div>
             <p class="mb-1">-> Veranstaltungsraum 33m&sup2; (max. 15 Personen *)</p>
-            <p class="mb-1">-> flexible Trennwand zum Saal</p>
-          </li>
-          <li class="list-group-item list-group-item flex-column align-items-start">
-            <div class="d-flex w-100 justify-content-between">
-              <h5 class="mb-1">STATION 21</h5>
-            </div>
-            <p class="mb-1">-> 15m&sup2; (max. 6 Personen *)</p>
-            <p class="mb-1">-> Medienraum</p>
-            <p class="mb-1">-> Backstage</p>
-            <p class="mb-1">-> Workspaces</p>
-          </li>
-          <li class="list-group-item list-group-item flex-column align-items-start">
-            <div class="d-flex w-100 justify-content-between">
-              <h5 class="mb-1">Chamäleon</h5>
-            </div>
-            <p class="mb-1">-> 28m&sup2;</p>
-            <p class="mb-1">-> offener Nebenraum an Foyer angrenzend</p>
+            <p class="mb-1">-> Backstage** (zusätzliche 15m²) inkludiert</p>
+            <p class="mb-1">-> flexible Trennwand zum Saal klein (bei Bedarf) (siehe Raumplan oben)</p>
           </li>
         </ul>
-        <p><i><small><b>* Personen Anzahl berücksichtigt keine Corona Bedingungen.</b></small></i></p>
+        <p><i><small><b>* max. Personenanzahl hängt stark von der Möblierung ab! (bitte klären Sie das mit der Ansprechperson)</b></small></i></p>
+        <p><i><small><b>** kann als Medienraum/Backstage/Workspaces verwendet werden</b></small></i></p>
+        <p><i><small><b>*** je nach Verfügbarkeit, kann auch ein zusätzlicher Backstage-Raum (16m²) im Untergeschoß zur Verfügung gestellt werden</b></small></i></p>
         
         <br/>
-        <b>Möblierung</b>
+        <b>Möblierungen</b>
         <ul class="list-group list-group-horizontal">
           <li class="list-group-item"><img src="../images/moeblierung/block.jpg"> Block</li>
           <li class="list-group-item"><img src="../images/moeblierung/cafe.jpg"> Cafe</li>
@@ -210,7 +197,7 @@
 
           <div class="form-row">
             <div class="form-group col-md-4">
-              <label for="beginn">Beginn der Raumnutzung (inkl. Aufbau):</label>
+              <label for="beginn">Beginn der Raumnutzung (inkl. Ihrer eigenen Vorbereitung):</label>
               <select id="hour" class="form-control" v-model="ts.beginnH">
                 <option v-for="h in hours" :value="h">{{h}} Uhr</option>
               </select>
@@ -238,7 +225,7 @@
             </div>
           </div>
           <div class="alert alert-warning" role="alert">
-            Bitte beachten Sie: Der <b>Halbtagstarif</b> gilt für Einmietungen von <b>bis zu 5 Stunden (inklusive Ihres eigenen Auf- und Abbaus)</b> und abends ab <b>17 Uhr</b>. Buchungen während des Tages, die <b>länger als 5 Stunden dauern</b>, werden mit dem <b>Ganztagstarif</b> verrechnet.
+            Bitte beachten Sie: Der <b>Halbtagstarif</b> gilt für Einmietungen von <b>bis zu 5 Stunden (inkl. Ihrer eigenen Vorbereitung, Auf- und Abbau)</b> und abends ab <b>17 Uhr</b>. Buchungen während des Tages, die <b>länger als 5 Stunden dauern</b>, werden mit dem <b>Ganztagstarif</b> verrechnet.
           </div>
           <div class="alert alert-warning" role="alert">
             Wenn Sie unsere Räume an mehreren aufeinanderfolgenden Tagen während des Tages buchen, könnte dazwischen eine Abendveranstaltung stattfinden. Ihr Aufbausetting wird für den nächsten Tag von Gleis 21 wiederhergestellt. Es besteht die Möglichkeit, Materialien in anderen Nebenräumen zwischenzulagern oder gegen Aufpreis eine Über-Nacht-Buchung vorzunehmen.
@@ -269,7 +256,7 @@
             <button type="button" class="btn btn-success float-right" v-on:click="addTimeSlot"><i class="fa fa-plus"></i>&nbsp;Weitere Termine</button>
           </div>
         </div>
-        <p><b>5. Ausstattung buchen:</b></p>
+        <p><b>6. Ausstattung buchen:</b></p>
         <div style="padding: 10px" class="bg-light">
           <h4>Ausstattung</h4>
           <p>Im Grundpreis sind W-LAN, 1 Beamer, 1 Flipchart, 1 Pinnwand, 1 Whiteboard, 1 Funkmikrofon, Sound-System, Möblierung sowie das Saalherrichten inbegriffen.</p>
