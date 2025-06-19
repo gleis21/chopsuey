@@ -150,6 +150,63 @@ Vue.component('booking-form', {
         };
         return;
       }
+      if (!this.booking.person.firstName) {
+        this.submitResult = {
+          success: false,
+          msg: `Ansprechperson/Vorname fehlt!`
+        };
+        return;
+      }
+      if (!this.booking.person.lastName) {
+        this.submitResult = {
+          success: false,
+          msg: `Ansprechperson/Nachname fehlt!`
+        };
+        return;
+      }
+      if (!this.booking.person.email) {
+        this.submitResult = {
+          success: false,
+          msg: `Ansprechperson/E-Mail-Adresse fehlt!`
+        };
+        return;
+      }
+      if (!this.booking.person.tel) {
+        this.submitResult = {
+          success: false,
+          msg: `Ansprechperson/Telefonnummer fehlt!`
+        };
+        return;
+      }
+
+      if (!this.booking.person.street) {
+        this.submitResult = {
+          success: false,
+          msg: `Ansprechperson/Straße fehlt!`
+        };
+        return;
+      }
+      if (!this.booking.person.hno) {
+        this.submitResult = {
+          success: false,
+          msg: `Ansprechperson/Hausnummer fehlt!`
+        };
+        return;
+      }
+      if (!this.booking.person.postcode) {
+        this.submitResult = {
+          success: false,
+          msg: `Ansprechperson/PLZ fehlt!`
+        };
+        return;
+      }
+      if (!this.booking.person.city) {
+        this.submitResult = {
+          success: false,
+          msg: `Ansprechperson/Stadt fehlt!`
+        };
+        return;
+      }
       
       const invalidTimeSlotIndex = this.booking.timeSlots.findIndex(ts => {
         const beginn = moment(ts.beginnDate)
