@@ -170,7 +170,7 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
       return authMiddleware(res.locals.customerUserName, res.locals.pin, true)(req, res, next);
     },
     asyncMiddleware(async (req, res, next) => {
-      const rooms = (await itemsSrv.getRooms()).map(r => {
+      const rooms = (await itemsSrv.getRooms()).filter(r => !r.get('Deleted')).map(r => {
         return { id: r.id, name: r.get('Key') };
       });
       res.status(200).json({
