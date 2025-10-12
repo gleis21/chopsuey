@@ -130,6 +130,7 @@
         <p><b>Raumplan:</b></p>
         <img src="../images/raumplan.png" style="width: 1110px">
         <br/>
+        <br/>
         <p><b>Raumvarianten:</b></p>
         <ul class="list-group">
           <li class="list-group-item list-group-item flex-column align-items-start">
@@ -228,7 +229,7 @@
             Bitte beachten Sie: Der <b>Halbtagstarif</b> gilt für Einmietungen von <b>bis zu 5 Stunden (inkl. Ihrer eigenen Vorbereitung, Auf- und Abbau)</b> und abends ab <b>17 Uhr</b>. Buchungen während des Tages, die <b>länger als 5 Stunden dauern</b>, werden mit dem <b>Ganztagstarif</b> verrechnet.
           </div>
           <div class="alert alert-warning" role="alert">
-            Wenn Sie unsere Räume an mehreren aufeinanderfolgenden Tagen während des Tages buchen, könnte dazwischen eine Abendveranstaltung stattfinden. Ihr Aufbausetting wird für den nächsten Tag von Gleis 21 wiederhergestellt. Es besteht die Möglichkeit, Materialien in anderen Nebenräumen zwischenzulagern oder gegen Aufpreis eine Über-Nacht-Buchung vorzunehmen.
+            Wenn Sie unsere Räume an mehreren aufeinanderfolgenden Tagen während des Tages buchen, könnte dazwischen eine Abendveranstaltung stattfinden. Ihr Aufbausetting wird für den nächsten Tag von uns wiederhergestellt. Es besteht die Möglichkeit, Materialien in anderen Nebenräumen zwischenzulagern oder gegen Aufpreis eine Über-Nacht-Buchung vorzunehmen.
           </div>
           <div class="form-row">
             <div class="form-group col-md-4">
@@ -259,10 +260,11 @@
         <p><b>6. Ausstattung buchen:</b></p>
         <div style="padding: 10px" class="bg-light">
           <h4>Ausstattung</h4>
-          <p>Im Grundpreis sind W-LAN, 1 Beamer, 1 Flipchart, 1 Pinnwand, 1 Whiteboard, 1 Funkmikrofon, Sound-System, Möblierung sowie das Saalherrichten inbegriffen.</p>
+          <p>Im Grundpreis sind W-LAN, Soundsystem (nur basic), Möblierung sowie das Saalherrichten inbegriffen.</p>
           <p>Papier für Flipchart und Pinnwand wird von Gleis 21 bereit gestellt. Moderationsmaterial (inkl. Stifte) bringen Sie bitte selber mit. Vielen Dank!</p>
-          <p>Änderungen Ihrer Ausstattungswünsche sind bei Bedarf auch nach Vertragsabschluß möglich.</p>
-          <p><b>Alle Angaben sind Netto-Preise (exkl. USt).</b></p>
+          <p>Änderungen Ihrer Ausstattungswünsche sind auch nach Vertragsabschluss möglich.Bitte teilen Sie uns jedoch Ihre <b>technischen Anforderungen so früh wie möglich</b> mit! Bestimmte Änderungen - z.B. Tonpult-Anschlüsse oder Tonwiedergabe über große Lautsprecher - <b>erfordern Techniker</b> und können bei kurzfristiger Mitteilung ggf. nicht umgesetzt werden.</p>
+          <p><b>Extern beauftragte Tontechniker</b> müssen vorab ein Gespräch mit unserem Haustechniker vor Ort führen, um sich mit unserem System vertraut zu machen und die <b>Anschlussmöglichkeiten externer Geräte</b> abzuklären (behördlich vorgeschriebener Vorgang).</p>
+          <p>Alle Angaben sind <b>Netto-Preise (exkl. USt).</b></p>
           <div class=" form-group row" v-for="e in booking.equipment">
             <label class="col-sm-4 col-form-label" for="equipment">{{e.name}}</label>
             <div class="col-sm-3">
