@@ -197,7 +197,7 @@
           </div>
 
           <div class="form-row">
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-6">
               <label for="beginn">Beginn der Raumnutzung (inkl. Ihrer eigenen Vorbereitung):</label>
               <select id="hour" class="form-control" v-model="ts.beginnH">
                 <option v-for="h in hours" :value="h">{{h}} Uhr</option>
@@ -212,7 +212,7 @@
           </div>
 
           <div class="form-row">
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-6">
               <label for="end">Ende der Raumnutzung (inkl. Abbau):</label>
               <select id="hour" class="form-control" v-model="ts.endH">
                 <option v-for="h in hours" :value="h">{{ h }} Uhr</option>
