@@ -88,7 +88,10 @@ class InvoiceService {
   }
 
   calculatePrices(articlePrices: Array<any>, durationsInHours: Array<any>, isNGO: boolean) {
-    const tariff = isNGO ? "NGO Tarif": "Regulärer Tarif";
+    var tariff = isNGO ? "NGO Tarif": "Regulärer Tarif";
+    if (articlePrices[0].get('ArtikelTyp') != 'Raum') {
+      tariff = "Für alle Tarife";
+    }
 
     const variant1h = articlePrices.find(p => p.get('Variante') === "1 Stunde" && (!p.get('Typ') || p.get('Typ') == tariff));
     const variant2h = articlePrices.find(p => p.get('Variante') === "2 Stunden" && (!p.get('Typ') || p.get('Typ') == tariff));
