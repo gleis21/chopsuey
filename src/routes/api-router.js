@@ -50,7 +50,9 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
             notes: b.get('Notes'),
             participantsCount: b.get('TeilnehmerInnenanzahl'),
             person: person,
-            isNGO: b.get('NGO')
+            isNGO: b.get('NGO'),
+            workTypeFloor: b.get('ArbeitTyp_Boden'),
+            workTypePaint: b.get('ArbeitTyp_Farben')
           },
           err: null
         });
@@ -103,7 +105,9 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
         person: req.body.person,
         timeSlots: req.body.timeSlots,
         isNGO: req.body.isNGO,
-        hau: req.body.hau
+        hau: req.body.hau,
+        workTypeFloor: req.body.workTypeFloor,
+        workTypePaint: req.body.workTypePaint
       };
       const r = await bookingSrv.update(booking);
 

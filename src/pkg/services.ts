@@ -224,7 +224,9 @@ class BookingService {
       Timeslots: createdTimeSlots.map(ts => ts.getId()),
       Rechnungen: [invoice.getId()],
       NGO: b.isNGO,
-      WoherKennstDuUns: b.hau
+      WoherKennstDuUns: b.hau,
+      ArbeitTyp_Boden: b.workTypeFloor,
+      ArbeitTyp_Farben: b.workTypePaint
     };
     return await this.table.update(b.id, bk);
   }

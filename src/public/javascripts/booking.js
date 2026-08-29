@@ -14,7 +14,9 @@ Vue.component('booking-form', {
         notes: '',
         timeSlots: [],
         isNGO: false,
-        hau: ''
+        hau: '',
+        workTypeFloor: false,
+        workTypePaint: false
       },
       moeblierungen: ['Ohne Möblierung', 'Block', 'Cafe', 'Carre', 'Geschwungene-Reihen', 'Kreis', 'U-Form', 'Kino Bestuhlung', 'Andere'],
       hauOptions: [
