@@ -91,15 +91,36 @@ npm install puppeteer@^25.9.0
 ```
 Used only in `src/routes/router.js:44` for PDF generation (`puppeteer.launch`, `page.pdf`).
 - **Security**: `puppeteer@25.9.0` is the version that fixes the `extract-zip` high advisory (see §0). No version below 25 fixes it, so this upgrade is required.
-- Massive multi-major jump. `executablePath`, `--no-sandbox`, and `page.pdf` API all still exist, but launch defaults and the bundled Chromium changed.
+- Massive multi-major jump. `executablePath`, `--no-sandbox`, and `page.pdf` API all still exist, but launch defaults changed: since puppeteer ≥~19 the Chromium binary is **no longer bundled in `node_modules`** — it's downloaded to a cache dir at install time.
+- **Blocker to fix**: `npm ci` in the `Dockerfile` does not download Chromium, and `node:26-alpine` has no browser, so the print route (`src/routes/router.js:44`, which relies on `process.env.CHROMIUM_PATH`) is broken in the container. Fix by installing Chromium in the image:
+  - Alpine: `RUN apk add --no-cache chromium` + `ENV CHROMIUM_PATH=/usr/bin/chromium-browser` (matches the code's env-var lookup). May need `--no-sandbox` (already present).
+  - Or `RUN npm ci && npx puppeteer browsers install chrome` with `PUPPETEER_CACHE_DIR`.
+  - Fallback: switch base to `node:26-slim` (glibc) + `apt-get install chromium` — least fragile for puppeteer.
 - `puppeteer@25` downloads its own Chromium on install — confirm the Docker image has the required OS libs, or set `CHROMIUM_PATH` explicitly (the code already reads `process.env.CHROMIUM_PATH`).
 - Pay special attention: newer Chrome versions may refuse `--no-sandbox` without explicit flag handling. Test the `/bookings/:id/contract/print` endpoint end-to-end.
 
-### 3.6 `crypto` (none) / `airtable` 0.11 -> 0.12
+### 3.6 `airtable` 0.11 -> 0.12
 ```
 npm install airtable@^0.12.2
 ```
-Axonistic warn: major-version-zero, "anything may change". Project imports `* as airtable` and `Base` in `src/services.ts`/`src/app.ts` and uses the low-level `base('Table').select().firstPage()` API. The `airtable` package is unmaintained/deprecated — 0.12 is the last published release. If it breaks, pin at `^0.11.6`. (Consider ejecting to `@airtable/airtable` or REST as a future project.)
+Major-version-zero warning: "anything may change". Project imports `* as airtable` and `Base` in `src/services.ts`/`src/app.ts` and uses the low-level `base('Table').select().firstPage()` API. If it breaks, pin at `^0.11.6`.
+
+> **Note on "ejecting to `@airtable/airtable`":** that package does **not** exist — `npm view @airtable/airtable` returns 404. The official scoped package is **`airtable`** (unscoped), on GitHub at `git://github.com/airtable/airtable.js`. It is effectively abandoned: last publish `0.12.2`, last modified **2025-06-02**, no major releases beyond 0.x, still bundles a built-in `node-fetch@2`, `lodash`, and the `abort-controller` polyfill (pre-Node-15 cruft). Since this codebase runs Node 26 with a global `fetch`, the SDK is largely obsolete.
+
+### 3.7 (optional) Eject the Airtable dependency entirely
+If you want to stop depending on the abandoned SDK, replace it with direct calls to the Airtable **REST API** (which the SDK wraps anyway). No extra package needed:
+
+- REST base: `https://api.airtable.com/v0/{baseId}/{tableOrViewName}`
+- Auth: `Authorization: Bearer <AIRTABLE_API_KEY>`
+- Endpoints used here map 1:1:
+  - `base('Table').create(fields)` → `POST` with `{ records: [{ fields }] }` (max 10/request — the code already chunks at 10)
+  - `table.update(id, fields)` → `PATCH /v0/{base}/{Table}` with `{ records: [{ id, fields }] }`
+  - `table.select({ filterByFormula, view, pageSize, maxRecords }).firstPage()` → `GET` with `filterByFormula`, `view`, `pageSize`, `maxRecords` query params
+  - `table.find(id)` → `GET /v0/{base}/{Table}/{id}`
+- Use Node 26's native `fetch` + a small typed wrapper in `src/pkg/airtable.ts`; no runtime dependency, no abandoned SDK, no bundled polyfills.
+- Rewrite surface is bounded to `src/pkg/services.ts` and one use in `src/app.ts:28,31-38`.
+
+Recommendation: attempt §3.6 first (low effort). If the API surface or typing causes friction, §3.7 is essentially a mechanical REST port for ~6 methods and removes the project's only abandoned dependency.
 
 ---
 
