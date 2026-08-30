@@ -63,3 +63,8 @@ typings/
 dist/
 caddy_data/
 caddy_config/
+
+# Vite build output (src/public is the frontend output dir)
+src/public/assets/
+src/public/booking-update.html
+src/public/booking-create.html

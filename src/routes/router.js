@@ -6,6 +6,7 @@ const router = express.Router();
 const asyncMiddleware = require('../pkg/middleware').asyncMiddleware;
 const bookingCredsMiddleware = require('../pkg/middleware').bookingCredsMiddleware;
 const authMiddleware = require('../pkg/middleware').authMiddleware;
+const path = require('path');
 
 const gleisUser = process.env.CS_USER;
 const gleisPassword = process.env.CS_PASSWORD;
@@ -18,9 +19,9 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
   router.get(
     '/new',
     authMiddleware(gleisUser, gleisPassword),
-    asyncMiddleware(async (req, res, next) => {
-      res.render('booking_create');
-    })
+    (req, res, next) => {
+      res.sendFile(path.join(__dirname, '..', 'public', 'booking-create.html'));
+    }
   );
 
   router.get(
@@ -29,10 +30,10 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     (req, res, next) => {
       return authMiddleware(res.locals.customerUserName, res.locals.pin)(req, res, next);
     },
-    asyncMiddleware(async (req, res, next) => {
+    (req, res, next) => {
       res.cookie('cs-creds', Buffer.from(res.locals.customerUserName + ':' + res.locals.pin).toString('base64'), { maxAge: 7200000, httpOnly: true, encode: String, overwrite: true });
-      res.render('booking_update');
-    })
+      res.sendFile(path.join(__dirname, '..', 'public', 'booking-update.html'));
+    }
   );
 
   // router.get(
@@ -186,17 +187,6 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
 
     return contract;
   }
-
-  // router.get(
-  //   '/:id/contract',
-  //   authMiddleware(gleisUser, gleisPassword),
-  //   asyncMiddleware(async (req, res, next) => {
-  //     const bookingId = req.params.id;
-  //     const b = await bookingSrv.get(bookingId);
-  //     const contract = await generateContract(bookingId, b, true);
-  //     res.render('contract', contract);
-  //   })
-  // );
 
   router.get(
     '/:id/checkout/preview',

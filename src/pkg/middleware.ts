@@ -22,7 +22,8 @@ function authMiddleware(validUser: string, validPass: string, tryCookie: boolean
         const c = basicAuthCreds.split(':');
         credentials = { name: c[0], pass: c[1] };
       } else {
-        credentials = parseBasicAuth(req.headers.authorization as string);
+        const header = req.headers.authorization;
+        credentials = header ? parseBasicAuth(header) : null;
       }
   
       if (!credentials || !check(credentials.name, credentials.pass, validUser, validPass)) {

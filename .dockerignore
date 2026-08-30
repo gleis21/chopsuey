@@ -1,8 +1,11 @@
 node_modules
+**/node_modules
 sessions
 logs
 config/.env
 config/service_account_key.json
 dist
+src/public/assets
+src/public/.vite
 .github
 .vscode
