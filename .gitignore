@@ -61,3 +61,5 @@ typings/
 .next
 
 dist/
+caddy_data/
+caddy_config/

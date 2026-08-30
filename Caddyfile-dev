@@ -1,0 +1,7 @@
+:8080 {
+	route /buchungssystem/* {
+		uri strip_prefix /buchungssystem
+		reverse_proxy http://localhost:3000 {
+			header_up Host {http.reverse_proxy.upstream.host}
+		}
+	}
