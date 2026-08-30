@@ -2,8 +2,6 @@ const express = require('express');
 const moment = require('moment');
 
 const router = express.Router();
-const puppeteer = require('puppeteer');
-const fs = require('fs');
 
 const asyncMiddleware = require('../pkg/middleware').asyncMiddleware;
 const bookingCredsMiddleware = require('../pkg/middleware').bookingCredsMiddleware;
@@ -34,39 +32,6 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     asyncMiddleware(async (req, res, next) => {
       res.cookie('cs-creds', Buffer.from(res.locals.customerUserName + ':' + res.locals.pin).toString('base64'), { maxAge: 7200000, httpOnly: true, encode: String, overwrite: true });
       res.render('booking_update');
-    })
-  );
-
-  router.get(
-    '/:id/contract/print',
-    authMiddleware(gleisUser, gleisPassword),
-    asyncMiddleware(async (req, res, next) => {
-      const browser = await puppeteer.launch({
-        executablePath: process.env.CHROMIUM_PATH,
-        args: ['--no-sandbox'], // This was important. Can't remember why
-      });
-      const page = await browser.newPage();
-      const contractUrl = `http://${gleisUser}:${gleisPassword}@localhost:3000/bookings/${req.params.id}/contract`;
-      await page.goto(contractUrl, {
-        waitUntil: 'networkidle2'
-      });
-      // /tmp/chopsuey dir must exist!!
-      const tmpDir = '/tmp/chopsuey';
-      if (!fs.existsSync(tmpDir)) {
-        fs.mkdirSync(tmpDir);
-      }
-      const fileName = 'gleis21_' + new Date().valueOf().toString() + '.pdf';
-      const filePath = tmpDir + '/' + fileName;
-      await page.pdf({ path: filePath, format: 'A4' });
-
-      await browser.close();
-
-      const rs = fs.createReadStream(filePath, { autoClose: true });
-      var stat = fs.statSync(filePath);
-      res.setHeader('Content-Length', stat.size);
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 'attachment; filename=' + fileName);
-      rs.pipe(res);
     })
   );
 
@@ -222,16 +187,16 @@ module.exports = (bookingSrv, invoiceSrv, timeSlotsSrv, personSrv) => {
     return contract;
   }
 
-  router.get(
-    '/:id/contract',
-    authMiddleware(gleisUser, gleisPassword),
-    asyncMiddleware(async (req, res, next) => {
-      const bookingId = req.params.id;
-      const b = await bookingSrv.get(bookingId);
-      const contract = await generateContract(bookingId, b, true);
-      res.render('contract', contract);
-    })
-  );
+  // router.get(
+  //   '/:id/contract',
+  //   authMiddleware(gleisUser, gleisPassword),
+  //   asyncMiddleware(async (req, res, next) => {
+  //     const bookingId = req.params.id;
+  //     const b = await bookingSrv.get(bookingId);
+  //     const contract = await generateContract(bookingId, b, true);
+  //     res.render('contract', contract);
+  //   })
+  // );
 
   router.get(
     '/:id/checkout/preview',

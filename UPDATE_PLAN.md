@@ -3,15 +3,13 @@
 Generated: 2026-08-30
 Environment: Node v26.3.1 / npm 11.16.0. `Dockerfile` uses `node:26-alpine`.
 
-## 0. Security baseline (`npm audit`)
+## 0. Security baseline (`npm audit`) — RESOLVED
 
-`npm audit` reports **2 high-severity** vulns:
+Original `npm audit` reported **2 high-severity** vulns from `puppeteer`:
 - `extract-zip` unvalidated symlink path traversal (GHSA-jmr9-qjv8-65gv), introduced solely by `puppeteer` (any `0.9.0 – 18.1.0`).
-- `npm audit fix --force` jumps straight to `puppeteer@25.9.0` (a breaking change — no lower 18/19/20/24.x version bundles a fixed `extract-zip`).
 
-This is **exactly** the breaking upgrade planned in §3.5. So upgrading puppeteer to `^25.9.0` is not optional for a clean audit — it is the required fix. There is no conflicting workaround: the vulnerable chain cannot be avoided while staying below 25.
+**Status: resolved** — puppeteer is no longer needed (PDF generation dropped, see §3.5). Uninstalling it removed the only source of the advisory, and `npm audit` now reports **0 vulnerabilities** without any version-constraint workarounds.
 
-No other advisories, so completing §3.5 (plus the §1 cleanup, which drops `debug`/`http-errors`/etc.) clears the audit report entirely.
 
 ---
 
@@ -85,19 +83,12 @@ npm install ejs@^6.0.1
 ```
 Used in `src/app.ts:18` via `ejs.renderFile` as the html view engine. API largely stable but major-bumped; run the UI views to confirm rendering.
 
-### 3.5 `puppeteer` 2.x -> 25.x  (★ resolves the audit)
-```
-npm install puppeteer@^25.9.0
-```
-Used only in `src/routes/router.js:44` for PDF generation (`puppeteer.launch`, `page.pdf`).
-- **Security**: `puppeteer@25.9.0` is the version that fixes the `extract-zip` high advisory (see §0). No version below 25 fixes it, so this upgrade is required.
-- Massive multi-major jump. `executablePath`, `--no-sandbox`, and `page.pdf` API all still exist, but launch defaults changed: since puppeteer ≥~19 the Chromium binary is **no longer bundled in `node_modules`** — it's downloaded to a cache dir at install time.
-- **Blocker to fix**: `npm ci` in the `Dockerfile` does not download Chromium, and `node:26-alpine` has no browser, so the print route (`src/routes/router.js:44`, which relies on `process.env.CHROMIUM_PATH`) is broken in the container. Fix by installing Chromium in the image:
-  - Alpine: `RUN apk add --no-cache chromium` + `ENV CHROMIUM_PATH=/usr/bin/chromium-browser` (matches the code's env-var lookup). May need `--no-sandbox` (already present).
-  - Or `RUN npm ci && npx puppeteer browsers install chrome` with `PUPPETEER_CACHE_DIR`.
-  - Fallback: switch base to `node:26-slim` (glibc) + `apt-get install chromium` — least fragile for puppeteer.
-- `puppeteer@25` downloads its own Chromium on install — confirm the Docker image has the required OS libs, or set `CHROMIUM_PATH` explicitly (the code already reads `process.env.CHROMIUM_PATH`).
-- Pay special attention: newer Chrome versions may refuse `--no-sandbox` without explicit flag handling. Test the `/bookings/:id/contract/print` endpoint end-to-end.
+### 3.5 `puppeteer` — REMOVED (completed: PDF generation no longer needed)
+PDF generation and the puppeteer print route are no longer required. Completed work:
+- Uninstalled `puppeteer` (was `^25.9.0`) — `npm uninstall puppeteer`.
+- Removed the commented-out `/bookings/:id/contract/print` route and the dead `puppeteer`/`fs` requires from `src/routes/router.js`.
+- No Chromium needed: kept the lightweight `node:26-alpine` base in the `Dockerfile` (the temporary `node:26-slim` + apt chromium revert was dropped).
+- **Side benefit**: puppeteer was the only source of the `extract-zip` high-severity advisory (§0). Removing it brings `npm audit` to **0 vulnerabilities** with no version constraint workarounds needed.
 
 ### 3.6 `airtable` 0.11 -> 0.12
 ```
@@ -134,15 +125,14 @@ npm start   # boot smoke test
 Manually exercise:
 - [ ] HTML views render (ejs)
 - [ ] A booking flow (create/update) hits Airtable (airtable, moment)
-- [ ] Basic-auth-protected route (`/bookings/:id/contract/print`) (basic-auth 3)
-- [ ] PDF download (puppeteer)
+- [ ] Basic-auth-protected route (basic-auth 3)
 - [ ] Dev path via `start-dev.sh` (ts-node, ts live compile)
 
 ## 5. Docker build
 ```
 docker build .   # npm ci, tsc, node:26-alpine
 ```
-Confirm the global TS in the Dockerfile matches the project's TypeScript major to avoid runtime mismatches. Add `node_modules`/`dist` exclusions if the image (+ Chromium) grows too large.
+Confirm the global TS in the Dockerfile matches the project's TypeScript major to avoid runtime mismatches. Base stays `node:26-alpine` (no Chromium needed since puppeteer was removed).
 
 ---
 
@@ -151,7 +141,7 @@ Confirm the global TS in the Dockerfile matches the project's TypeScript major t
 # prod
 moment ^2.30.1        winston ^3.19.0       morgan ~1.12.0
 express-winston ^4.2.0 cookie-parser ^1.4.7  ejs ^6.0.1
-basic-auth ^3.0.0     express ^5.2.1        puppeteer ^25.9.0
+basic-auth ^3.0.0     express ^5.2.1
 airtable ^0.12.2      tsscmp ^1.0.6
 
 # dev
