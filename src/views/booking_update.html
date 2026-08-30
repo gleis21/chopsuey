@@ -284,20 +284,21 @@
             </div>
           </div>
         </div>
-
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" v-model="booking.workTypeFloor" id="workTypeFloor">
-          <label class="form-check-label" for="workTypeFloor"> .</label>
-        </div>
-
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" v-model="booking.workTypePaint" id="workTypePaint">
-          <label class="form-check-label" for="workTypePaint"> .</label>
-        </div>
         
+        <br/>
         <div class="form-group">
           <label for="decription">Anmerkungen</label>
           <textarea class="form-control" id="decription" rows="5" v-model="booking.notes"></textarea>
+          <br/>
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" v-model="booking.workTypeFloor" id="workTypeFloor">
+            <label class="form-check-label" for="workTypeFloor"> Wird am Boden gearbeitet? (z.B. Yoga, Meditation, Körperübungen)</label>
+          </div>
+
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" v-model="booking.workTypePaint" id="workTypePaint">
+            <label class="form-check-label" for="workTypePaint"> Wird mit Farben gearbeitet?</label>
+          </div>
         </div>
 
         
