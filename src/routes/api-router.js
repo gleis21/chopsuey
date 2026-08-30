@@ -1,7 +1,6 @@
 const express = require('express');
 const { InvoiceService } = require('../pkg/services');
 const router = express.Router();
-var auth = require('basic-auth');
 var compare = require('tsscmp');
 const moment = require('moment');
 

@@ -1,4 +1,4 @@
-import auth from 'basic-auth';
+import { parse as parseBasicAuth } from 'basic-auth';
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 import compare from 'tsscmp';
 
@@ -22,11 +22,11 @@ function authMiddleware(validUser: string, validPass: string, tryCookie: boolean
         const c = basicAuthCreds.split(':');
         credentials = { name: c[0], pass: c[1] };
       } else {
-        credentials = auth(req);
+        credentials = parseBasicAuth(req.headers.authorization as string);
       }
   
       if (!credentials || !check(credentials.name, credentials.pass, validUser, validPass)) {
-        res.statusCode = 401;
+        res.status(401)
         res.setHeader('WWW-Authenticate', 'Basic realm="Glesi21"');
         res.end('Access denied');
       } else {
