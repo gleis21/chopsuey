@@ -11,6 +11,14 @@ const authMiddleware = require('../pkg/middleware').authMiddleware;
 const gleisUser = process.env.CS_USER;
 const gleisPassword = process.env.CS_PASSWORD;
 
+const BOOKING_LANGS = ['de', 'en', 'es'];
+
+// Nur de | en | es übernehmen, alles andere ignorieren (Feld "Sprache" bleibt dann leer)
+function normalizeLang(lang) {
+  const code = String(lang || '').trim().toLowerCase();
+  return BOOKING_LANGS.includes(code) ? code : undefined;
+}
+
 module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => {
   /* GET home page. */
   router.get(
@@ -74,11 +82,15 @@ module.exports = (bookingSrv, itemsSrv, personSrv, invoiceSrv, timeslotsSrv) => 
         name: b.name,
         customerEmail: b.customerEmail,
         pin: pin,
-        sendAutoMail: b.sendAutoMail
+        sendAutoMail: b.sendAutoMail,
+        // Sprache der Kund:in (de | en | es) → Airtable-Feld "Sprache"; die Automation
+        // "Email nach angelegter neuer Buchung" wählt danach die deutsche oder englische Mail
+        lang: normalizeLang(b.lang)
       };
       // Create a new entry in the booking table
       const r = await bookingSrv.create(booking);
-      const editUrl = process.env.CS_BOOKING_EDIT_URL + '/' + r.getId();
+      // Formular öffnet sich in der gewählten Sprache (booking.js liest ?lang=)
+      const editUrl = process.env.CS_BOOKING_EDIT_URL + '/' + r.getId() + (booking.lang && booking.lang !== 'de' ? '?lang=' + booking.lang : '');
 
       res.status(200).json({
         res: { editUrl: editUrl, email: b.customerEmail, pin: pin },

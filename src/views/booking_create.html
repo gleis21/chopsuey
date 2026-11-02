@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
   <link rel="stylesheet" href="/buchungssystem/stylesheets/fontawesome/css/all.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"
     integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous"></script>
 
@@ -53,6 +53,14 @@
         <div class="form-group">
           <label for="email">E-Mail-Adresse des Kunden</label>
           <input type="email" required class="form-control" v-model="booking.customerEmail">
+        </div>
+        <div class="form-group">
+          <label for="lang">Sprache</label>
+          <select id="lang" class="form-control" v-model="booking.lang">
+            <option value="de">de – Deutsch</option>
+            <option value="en">en – Englisch</option>
+            <option value="es">es – Spanisch</option>
+          </select>
         </div>
         <div class="form-check">
           <input type="checkbox" class="form-check-input" v-model="booking.sendAutoMail" id="sendAutoMail">

@@ -7,7 +7,8 @@ Vue.component('booking-form', {
       booking: {
         name: '',
         customerEmail: '',
-        sendAutoMail: false
+        sendAutoMail: false,
+        lang: 'de'
       }
     };
   },

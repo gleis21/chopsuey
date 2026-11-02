@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "TZ='Europe/Vienna' node ./dist/chopsuey.js",
-    "test": "echo no_tests_for_now"
+    "test": "echo no_tests_for_now",
+    "test:sprache": "tsc && node test/sprache-anlegen.test.js"
   },
   "dependencies": {
     "airtable": "^0.12.2",
