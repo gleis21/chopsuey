@@ -161,6 +161,12 @@ var I18N = {
     'room.Saal groß': 'Saal groß (large hall)',
     'room.Saal klein': 'Saal klein (small hall)',
     'room.Salon': 'Salon',
+    // Raum-Namen wie in Airtable (Tabelle Artikel, Ansicht Raeume)
+    'room.Saal große Variante': 'Saal groß (large hall)',
+    'room.Saal kleine Variante': 'Saal klein (small hall)',
+    'room.Station': 'Station (media room / backstage)',
+    'room.Chamäleon': 'Chameleon',
+    'room.Gutschein': 'Voucher',
 
     'moebl.Ohne Möblierung': 'No furniture',
     'moebl.Block': 'Block',
@@ -273,6 +279,12 @@ var I18N = {
     'room.Saal groß': 'Saal groß (sala grande)',
     'room.Saal klein': 'Saal klein (sala pequeña)',
     'room.Salon': 'Salon (salón)',
+    // Nombres de sala como en Airtable (tabla Artikel, vista Raeume)
+    'room.Saal große Variante': 'Saal groß (sala grande)',
+    'room.Saal kleine Variante': 'Saal klein (sala pequeña)',
+    'room.Station': 'Station (sala de medios / backstage)',
+    'room.Chamäleon': 'Camaleón',
+    'room.Gutschein': 'Vale',
 
     'moebl.Ohne Möblierung': 'Sin mobiliario',
     'moebl.Block': 'Bloque',
@@ -344,6 +356,161 @@ var I18N = {
   }
 };
 
+// ---------------------------------------------------------------------------
+// Ausstattung (Airtable-Tabelle Artikel, Ansicht Ausstattung)
+//
+// Name, Beschreibung und TitelAnmerkung kommen aus Airtable und sind deutsch.
+// Hier stehen die Übersetzungen, gesucht nach dem deutschen Key (getrimmt).
+// Gespeichert wird weiter über die id. Die Übersetzung von Beschreibung bzw.
+// TitelAnmerkung wird nur gezeigt, wenn der deutsche Text in Airtable noch
+// genau so lautet wie unten unter "de" – ändert sich z. B. ein Preis in
+// Airtable, erscheint der neue deutsche Text statt einer veralteten
+// Übersetzung. Dann hier "de", "en" und "es" nachziehen.
+// ---------------------------------------------------------------------------
+var EQUIPMENT_I18N = [
+  {
+    de: { name: 'Flipchart', description: 'Jedes zusätzliches Flipchart EUR 10,- pro Stück' },
+    en: { name: 'Flipchart', description: 'Each additional flipchart EUR 10,- per piece' },
+    es: { name: 'Rotafolio (flipchart)', description: 'Cada rotafolio adicional EUR 10,- por unidad' }
+  },
+  {
+    de: { name: 'Getränkewagen (Kaffee, Tee, Milch, Wasser)', description: 'Ganztag: 4€/Person, Halbtag/Abend: 3€/Person' },
+    en: { name: 'Drinks trolley (coffee, tea, milk, water)', description: 'Full day: 4€/person, half day/evening: 3€/person' },
+    es: { name: 'Carrito de bebidas (café, té, leche, agua)', description: 'Día completo: 4€/persona, medio día/noche: 3€/persona' }
+  },
+  {
+    de: { name: 'Stühle' },
+    en: { name: 'Chairs' },
+    es: { name: 'Sillas' }
+  },
+  {
+    de: { name: 'Beamer (Bitte stellen Sie sicher, dass Ihr Laptop über einen HDMI-Anschluss verfügt)', description: 'Zusätzlicher Beamer: EUR 30,-' },
+    en: { name: 'Projector (please make sure your laptop has an HDMI port)', description: 'Additional projector: EUR 30,-' },
+    es: { name: 'Proyector (asegúrese de que su portátil tenga una conexión HDMI)', description: 'Proyector adicional: EUR 30,-' }
+  },
+  {
+    de: { name: 'Tische' },
+    en: { name: 'Tables' },
+    es: { name: 'Mesas' }
+  },
+  {
+    de: { name: 'Pinnwand', description: 'Jede zusätzliche Pinnwand EUR 10,- pro Stück' },
+    en: { name: 'Pinboard', description: 'Each additional pinboard EUR 10,- per piece' },
+    es: { name: 'Tablero de corcho', description: 'Cada tablero adicional EUR 10,- por unidad' }
+  },
+  {
+    de: {
+      name: 'Gesangsmikrofone Shure Beta 58 (max 4)  / Schwanenhalsmikrofone (max 4)',
+      description: 'Zusätzliche  Mikrofone (inkl. Mischpult) Pauschale: 50€',
+      notesTitle: 'Bitte geben Sie ein wie viele und welche Mikrofonart benötigt wird.'
+    },
+    en: {
+      name: 'Vocal microphones Shure Beta 58 (max 4) / gooseneck microphones (max 4)',
+      description: 'Additional microphones (incl. mixing desk) flat rate: 50€',
+      notesTitle: 'Please tell us how many microphones you need and of which type.'
+    },
+    es: {
+      name: 'Micrófonos vocales Shure Beta 58 (máx. 4) / micrófonos de cuello de cisne (máx. 4)',
+      description: 'Micrófonos adicionales (incl. mesa de mezclas) tarifa plana: 50€',
+      notesTitle: 'Indique cuántos micrófonos necesita y de qué tipo.'
+    }
+  },
+  {
+    de: { name: 'Bühnenelemente', description: '100 x 200cm, max. 9 Stk. Kosten: EUR 50,-', notesTitle: 'Bitte geben Sie ein wie viele Bühnenelemente werden benötigt.' },
+    en: { name: 'Stage platforms', description: '100 x 200cm, max. 9 pieces. Cost: EUR 50,-', notesTitle: 'Please tell us how many stage platforms you need.' },
+    es: { name: 'Módulos de escenario', description: '100 x 200cm, máx. 9 unidades. Coste: EUR 50,-', notesTitle: 'Indique cuántos módulos de escenario necesita.' }
+  },
+  {
+    de: { name: 'Spesenersatz für Werbepaket kultur', description: 'Kosten: EUR 50,-' },
+    en: { name: 'Expense reimbursement for the culture promotion package', description: 'Cost: EUR 50,-' },
+    es: { name: 'Reembolso de gastos del paquete de promoción cultural', description: 'Coste: EUR 50,-' }
+  },
+  {
+    de: { name: 'Ich benötige eine technische Betreuung der Ton- und Lichtanlage/Tontechniker. Preis auf Anfrage.' },
+    en: { name: 'I need technical support for the sound and lighting system / a sound engineer. Price on request.' },
+    es: { name: 'Necesito asistencia técnica para el equipo de sonido e iluminación / un técnico de sonido. Precio a consultar.' }
+  },
+  {
+    de: { name: 'Funkmikrofon(2x)', description: 'Ein Mikrofon ist im Preis inkludiert. Zweites Funkmikrofon EUR 10,- pro Stück' },
+    en: { name: 'Wireless microphone (2x)', description: 'One microphone is included in the price. Second wireless microphone EUR 10,- per piece' },
+    es: { name: 'Micrófono inalámbrico (2x)', description: 'Un micrófono está incluido en el precio. Segundo micrófono inalámbrico EUR 10,- por unidad' }
+  },
+  {
+    de: { name: 'Tischtücher', description: 'Kosten: EUR 10,- / Stück' },
+    en: { name: 'Tablecloths', description: 'Cost: EUR 10,- / piece' },
+    es: { name: 'Manteles', description: 'Coste: EUR 10,- / unidad' }
+  },
+  {
+    de: { name: 'Tischhussen', description: 'Kosten: EUR 10,- / Stück' },
+    en: { name: 'Table covers (stretch)', description: 'Cost: EUR 10,- / piece' },
+    es: { name: 'Fundas para mesa', description: 'Coste: EUR 10,- / unidad' }
+  },
+  {
+    de: { name: 'White Board' },
+    en: { name: 'Whiteboard' },
+    es: { name: 'Pizarra blanca' }
+  },
+  {
+    de: { name: 'Stehtische' },
+    en: { name: 'Standing tables' },
+    es: { name: 'Mesas altas' }
+  },
+  {
+    de: { name: 'Gläser', description: 'Wasser Gläser' },
+    en: { name: 'Glasses', description: 'Water glasses' },
+    es: { name: 'Vasos', description: 'Vasos de agua' }
+  },
+  {
+    de: { name: 'Heurigengarnituren', description: '1 Set = 1 Tisch + 2 Bänke (max. 4 Sets)' },
+    en: { name: 'Beer tent sets (table + benches)', description: '1 set = 1 table + 2 benches (max. 4 sets)' },
+    es: { name: 'Conjuntos de mesa y bancos', description: '1 conjunto = 1 mesa + 2 bancos (máx. 4 conjuntos)' }
+  },
+  {
+    de: {
+      name: 'Wein- und/oder Sektgläser',
+      description: 'Max. 50 Stück je Glasart. Bitte genaue Anzahl der gewünschten Wein- und Sektgläser in den Anmerkungen angeben. Kosten: EUR 40,- pauschal.',
+      notesTitle: 'max. 50 Stück je Glasart. Bitte genaue Anzahl der gewünschten Wein- und Sektgläser in den Anmerkungen angeben. Kosten: EUR 40,- pauschal.'
+    },
+    en: {
+      name: 'Wine and/or sparkling wine glasses',
+      description: 'Max. 50 per type of glass. Please state the exact number of wine and sparkling wine glasses you need in the notes. Cost: EUR 40,- flat rate.',
+      notesTitle: 'max. 50 per type of glass. Please state the exact number of wine and sparkling wine glasses you need in the notes. Cost: EUR 40,- flat rate.'
+    },
+    es: {
+      name: 'Copas de vino y/o de espumoso',
+      description: 'Máx. 50 unidades por tipo de copa. Indique en las observaciones el número exacto de copas de vino y de espumoso que necesita. Coste: EUR 40,- tarifa plana.',
+      notesTitle: 'máx. 50 unidades por tipo de copa. Indique en las observaciones el número exacto de copas de vino y de espumoso que necesita. Coste: EUR 40,- tarifa plana.'
+    }
+  }
+];
+
+// Leerzeichen (auch doppelte, am Ende, geschützte) für den Vergleich vereinheitlichen
+function normText(text) {
+  return String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
+}
+
+var EQUIPMENT_BY_NAME = {};
+EQUIPMENT_I18N.forEach(function (entry) {
+  EQUIPMENT_BY_NAME[normText(entry.de.name)] = entry;
+});
+
+// Anzeige eines Ausstattungs-Felds (name | description | notesTitle) in der
+// gewählten Sprache; ohne passende Übersetzung der Originaltext aus Airtable.
+function translateEquipment(lang, item, field) {
+  var original = item[field];
+  if (lang === 'de' || !original) {
+    return original;
+  }
+  var entry = EQUIPMENT_BY_NAME[normText(item.name)];
+  if (!entry || !entry[lang] || !entry[lang][field]) {
+    return original;
+  }
+  if (field !== 'name' && normText(entry.de[field]) !== normText(original)) {
+    return original;
+  }
+  return entry[lang][field];
+}
+
 var LANGUAGES = [
   { code: 'de', label: 'Deutsch' },
   { code: 'en', label: 'English' },
@@ -401,9 +568,13 @@ Vue.mixin({
     },
     // tOpt('moebl', 'Kreis') – Anzeige für einen gespeicherten Wert; unbekannte Werte unverändert
     tOpt: function (group, value) {
-      var key = group + '.' + value;
+      var key = group + '.' + String(value).trim();
       var text = translate(this.$root.lang, key);
       return text === key ? value : text;
+    },
+    // tEquip(e, 'name' | 'description' | 'notesTitle') – Ausstattung aus Airtable
+    tEquip: function (item, field) {
+      return translateEquipment(this.$root.lang, item, field);
     }
   }
 });

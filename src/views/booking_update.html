@@ -287,7 +287,7 @@
           <p v-html="t('s6.p4')"></p>
           <p v-html="t('s6.p5')"></p>
           <div class=" form-group row" v-for="e in booking.equipment">
-            <label class="col-sm-4 col-form-label" for="equipment">{{e.name}}</label>
+            <label class="col-sm-4 col-form-label" for="equipment">{{tEquip(e, 'name')}}</label>
             <div class="col-sm-3">
               <select v-if="e.quantity == 1" class="form-control c-select" v-model="e.count">
                 <option :value="1">{{t('common.yes')}}</option>
@@ -296,12 +296,12 @@
               <input v-else class="form-control" required type="number" :min='0' :max='e.quantity' v-model="e.count"></input>
               <template v-if="e.notesTitle && e.count > 0">
                 <br />
-                <b>{{e.notesTitle}}</b>
+                <b>{{tEquip(e, 'notesTitle')}}</b>
                 <textarea class="form-control" id="decription" rows="2" v-model="e.notes"></textarea>
               </template>
             </div>
             <div class="col-sm-4">
-              {{e.description}}
+              {{tEquip(e, 'description')}}
             </div>
           </div>
         </div>

@@ -232,29 +232,40 @@ class BookingService {
   }
 }
 
+// Räume und Ausstattung aus Airtable höchstens 10 Minuten zwischenspeichern.
+// Vorher wurden sie nur einmal beim Serverstart geladen – Änderungen in
+// Airtable (z. B. Artikel auf "Deleted") kamen erst nach einem Neustart an.
+const ITEMS_CACHE_MS = 10 * 60 * 1000;
+
 class BookableItemsService {
   rooms: Records<FieldSet>;
   equipment: Records<FieldSet>;
+  roomsLoadedAt: number;
+  equipmentLoadedAt: number;
   table: Table<FieldSet>;
   constructor(base: Base) {
     this.table = base('Artikel');
     this.rooms = [];
     this.equipment = [];
+    this.roomsLoadedAt = 0;
+    this.equipmentLoadedAt = 0;
   }
   async getRooms() {
-    if (this.rooms.length === 0) {
+    if (this.rooms.length === 0 || Date.now() - this.roomsLoadedAt > ITEMS_CACHE_MS) {
       this.rooms = await this.table
         .select({ view: 'Raeume' })
         .firstPage();
+      this.roomsLoadedAt = Date.now();
     }
     return this.rooms;
   }
 
   async getEquipment() {
-    if (this.equipment.length === 0) {
+    if (this.equipment.length === 0 || Date.now() - this.equipmentLoadedAt > ITEMS_CACHE_MS) {
       this.equipment = await this.table
         .select({ view: 'Ausstattung', pageSize: 100 })
         .firstPage();
+      this.equipmentLoadedAt = Date.now();
     }
     return this.equipment;
   }
