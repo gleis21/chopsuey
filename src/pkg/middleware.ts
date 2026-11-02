@@ -22,7 +22,10 @@ function authMiddleware(validUser: string, validPass: string, tryCookie: boolean
         const c = basicAuthCreds.split(':');
         credentials = { name: c[0], pass: c[1] };
       } else {
-        credentials = parseBasicAuth(req.headers.authorization as string);
+        // basic-auth 3 wirft einen Fehler, wenn noch keine Anmeldung mitgeschickt wurde
+        // (erster Aufruf des Links) – dann soll das Anmeldefenster kommen, nicht Fehler 500.
+        const authHeader = req.headers.authorization;
+        credentials = authHeader ? parseBasicAuth(authHeader) : undefined;
       }
   
       if (!credentials || !check(credentials.name, credentials.pass, validUser, validPass)) {
