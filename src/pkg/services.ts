@@ -185,7 +185,28 @@ class BookingService {
     if (!customer) {
       customer = await this.personSrv.createOrUpdate({ email: b.customerEmail })
     }
-    return await this.table.create({ Name: b.name, Mieter: [customer.getId()], PIN: b.pin, SendAutoMail: b.sendAutoMail, Status: 'Neu' });
+    // "Sprache" im selben create wie "SendAutoMail" – die Automation sieht beim Auslösen schon die Sprache
+    const fields: FieldSet = { Name: b.name, Mieter: [customer.getId()], PIN: b.pin, SendAutoMail: b.sendAutoMail, Status: 'Neu' };
+    if (b.lang) {
+      fields.Sprache = b.lang;
+    }
+    return await this.withOptionalLanguage(fields, f => this.table.create(f));
+  }
+
+  // Gibt es das Feld "Sprache" (z. B. in einer Base ohne das Feld) nicht oder lehnt
+  // Airtable den Wert ab, wird dasselbe Anlegen ohne "Sprache" wiederholt – das
+  // Anlegen scheitert nie an der Sprache. Im Fehlerfall wurde noch nichts angelegt.
+  async withOptionalLanguage<T>(fields: FieldSet, write: (f: FieldSet) => Promise<T>): Promise<T> {
+    try {
+      return await write(fields);
+    } catch (err: any) {
+      if (fields.Sprache === undefined || !isLanguageFieldError(err)) {
+        throw err;
+      }
+      console.warn('Airtable: Feld "Sprache" nicht gespeichert (' + (err && (err.error || err.message)) + ') – Buchung ohne Sprache angelegt');
+      const { Sprache, ...withoutLanguage } = fields;
+      return await write(withoutLanguage);
+    }
   }
 
   private async updateStatus(bookingId: string, newStatus:string) {
@@ -230,6 +251,18 @@ class BookingService {
     };
     return await this.table.update(b.id, bk);
   }
+}
+
+// Fehler, die nur am Feld "Sprache" liegen können: unbekanntes Feld, fehlende
+// Auswahl-Option (de/en/es) im Single select oder ungültiger Wert.
+const LANGUAGE_FIELD_ERRORS = ['UNKNOWN_FIELD_NAME', 'INVALID_MULTIPLE_CHOICE_OPTIONS', 'INVALID_VALUE_FOR_COLUMN'];
+function isLanguageFieldError(err: any): boolean {
+  if (!err) {
+    return false;
+  }
+  const code = String(err.error || '');
+  const message = String(err.message || '');
+  return LANGUAGE_FIELD_ERRORS.includes(code) || err.statusCode === 422 || message.includes('Sprache');
 }
 
 // Räume und Ausstattung aus Airtable höchstens 10 Minuten zwischenspeichern.
