@@ -116,6 +116,14 @@ var I18N = {
     'err.city': 'Ansprechperson/Stadt fehlt!',
     'err.slotOrder': 'Zeitraum Nr. {n} ist ungültig. Bitte überprüfen Sie, ob das Ende nicht vor dem Beginn liegt.',
     'err.slotMaxEnd': 'Zeitraum Nr. {n} ist ungültig. Das Ende darf maximal 00:30 sein.',
+    'stage.count': 'Wie viele Bühnenelemente brauchen Sie?',
+    'stage.choose': 'Bitte auswählen',
+    'stage.unclear': 'noch unklar',
+    'stage.size': 'Bühnenfläche: {m2} m² (je Element 1 × 2 m)',
+    'stage.height': 'Wie hoch soll die Bühne sein?',
+    'stage.extra': 'Weitere Wünsche zur Bühne (optional)',
+    'err.stageCount': 'Bitte geben Sie an, wie viele Bühnenelemente Sie brauchen (1 bis 9 oder „noch unklar“).',
+    'err.stageHeight': 'Bitte geben Sie an, wie hoch die Bühne sein soll (25 cm, 40 cm oder „noch unklar“).',
     'ok.saved': 'Ihre Buchung wurde erfolgreich gespeichert! Bitte beachten Sie, dass die Reservierung erst durch Bestätigung des Vertrages fixiert wird. Ein Link zum Vertrag wird Ihnen per E-Mail übermittelt.'
   },
 
@@ -234,6 +242,14 @@ var I18N = {
     'err.city': 'Please enter the city of the billing address.',
     'err.slotOrder': 'Date no. {n} is invalid. Please check that the end is not before the start.',
     'err.slotMaxEnd': 'Date no. {n} is invalid. The end can be no later than 00:30.',
+    'stage.count': 'How many stage platforms do you need?',
+    'stage.choose': 'Please choose',
+    'stage.unclear': 'not sure yet',
+    'stage.size': 'Stage area: {m2} m² (each platform 1 × 2 m)',
+    'stage.height': 'How high should the stage be?',
+    'stage.extra': 'Other requests for the stage (optional)',
+    'err.stageCount': 'Please tell us how many stage platforms you need (1 to 9 or “not sure yet”).',
+    'err.stageHeight': 'Please tell us how high the stage should be (25 cm, 40 cm or “not sure yet”).',
     'ok.saved': 'Your booking has been saved successfully! Please note that the reservation only becomes binding once you have confirmed the contract. We will send you a link to the contract by email.'
   },
 
@@ -352,6 +368,14 @@ var I18N = {
     'err.city': 'Por favor, indique la ciudad de la dirección de facturación.',
     'err.slotOrder': 'La fecha n.º {n} no es válida. Compruebe que el fin no sea anterior al inicio.',
     'err.slotMaxEnd': 'La fecha n.º {n} no es válida. El fin puede ser como máximo a las 00:30.',
+    'stage.count': '¿Cuántos módulos de escenario necesita?',
+    'stage.choose': 'Seleccione',
+    'stage.unclear': 'aún no lo sé',
+    'stage.size': 'Superficie del escenario: {m2} m² (cada módulo 1 × 2 m)',
+    'stage.height': '¿Qué altura debe tener el escenario?',
+    'stage.extra': 'Otros deseos para el escenario (opcional)',
+    'err.stageCount': 'Indique cuántos módulos de escenario necesita (de 1 a 9 o «aún no lo sé»).',
+    'err.stageHeight': 'Indique qué altura debe tener el escenario (25 cm, 40 cm o «aún no lo sé»).',
     'ok.saved': '¡Su reserva se ha guardado correctamente! Tenga en cuenta que la reserva solo será definitiva una vez que usted haya confirmado el contrato. Le enviaremos un enlace al contrato por correo electrónico.'
   }
 };
@@ -511,6 +535,42 @@ function translateEquipment(lang, item, field) {
   return entry[lang][field];
 }
 
+// ---------------------------------------------------------------------------
+// Bühnenelemente (Phil, 09.11.2026): Wer die Bühne bucht, muss Anzahl (1–9)
+// und Höhe (25 oder 40 cm) angeben – oder jeweils „noch unklar“. Gespeichert wird beides – immer deutsch –
+// in der Anmerkung des Postens (steht so im Vertrag), z. B.
+// "6 Elemente (12 m²), Höhe 40 cm – Treppe links" (bei 1: "1 Element (2 m²) …").
+// ---------------------------------------------------------------------------
+var STAGE_MAX = 9;
+var STAGE_HEIGHTS = [25, 40];
+var STAGE_M2_PER_ELEMENT = 2; // 1 × 2 m
+
+function isStageItem(item) {
+  return /b(ü|ue)hnenelement/i.test(normText(item && item.name));
+}
+
+var STAGE_UNCLEAR = 'unklar';
+
+function stageNotes(count, height, extra) {
+  var text = (count === STAGE_UNCLEAR
+    ? 'Anzahl Elemente noch unklar'
+    : count + (+count === 1 ? ' Element (' : ' Elemente (') + count * STAGE_M2_PER_ELEMENT + ' m²)') +
+    (height === STAGE_UNCLEAR ? ', Höhe noch unklar' : ', Höhe ' + height + ' cm');
+  extra = normText(extra);
+  return extra ? text + ' – ' + extra : text;
+}
+
+// Liest eine gespeicherte Anmerkung wieder ein (Formular erneut geöffnet).
+// Alte freie Anmerkungen ("6 Stück") landen unter "Weitere Wünsche".
+function parseStageNotes(notes) {
+  var text = normText(notes);
+  var m = text.match(/^(?:(\d+) Elemente? \([^)]*\)|(Anzahl Elemente noch unklar)), Höhe (?:(\d+) cm|(noch unklar))(?: – (.*))?$/);
+  if (m && (m[2] || (+m[1] >= 1 && +m[1] <= STAGE_MAX)) && (m[4] || STAGE_HEIGHTS.indexOf(+m[3]) > -1)) {
+    return { count: m[2] ? STAGE_UNCLEAR : +m[1], height: m[4] ? STAGE_UNCLEAR : +m[3], extra: m[5] || '' };
+  }
+  return { count: '', height: '', extra: text };
+}
+
 var LANGUAGES = [
   { code: 'de', label: 'Deutsch' },
   { code: 'en', label: 'English' },
@@ -630,7 +690,9 @@ Vue.component('booking-form', {
         22,
         23
       ],
-      mins: [0, 30]
+      mins: [0, 30],
+      stageMax: STAGE_MAX,
+      stageHeights: STAGE_HEIGHTS
     };
   },
   async mounted() {
@@ -672,6 +734,14 @@ Vue.component('booking-form', {
           notesTitle: e.notesTitle,
           notes: bookedEqp ? bookedEqp.notes : null
         };
+      }).map(e => {
+        if (isStageItem(e)) {
+          const st = parseStageNotes(e.notes);
+          e.stageCount = st.count;
+          e.stageHeight = st.height;
+          e.stageExtra = st.extra;
+        }
+        return e;
       }).sort((a, b) => a.position - b.position);
       if (timeslotsRes.res && timeslotsRes.res.length > 0) {
         this.booking.timeSlots = timeslotsRes.res
@@ -707,6 +777,12 @@ Vue.component('booking-form', {
         this.booking.timeSlots.length - 1
       ];
       this.booking.timeSlots = [...this.booking.timeSlots, { ...lastRange }];
+    },
+    isStage: function (e) {
+      return isStageItem(e);
+    },
+    stageSize: function (count) {
+      return { n: count, m2: count * STAGE_M2_PER_ELEMENT };
     },
     deleteTimeSlot: function (index) {
       this.booking.timeSlots.splice(index, 1);
@@ -829,9 +905,25 @@ Vue.component('booking-form', {
         };
         return;
       }
+      const stage = this.booking.equipment.find(eq => isStageItem(eq) && eq.count > 0);
+      if (stage && !stage.stageCount) {
+        this.submitResult = { success: false, key: 'err.stageCount' };
+        return;
+      }
+      if (stage && !stage.stageHeight) {
+        this.submitResult = { success: false, key: 'err.stageHeight' };
+        return;
+      }
+
       this.loading = true;
       const b = { ...this.booking };
-      b.equipment = b.equipment.filter(eq => eq.count > 0);
+      b.equipment = b.equipment.filter(eq => eq.count > 0).map(eq => {
+        if (!isStageItem(eq)) {
+          return eq;
+        }
+        const { stageCount, stageHeight, stageExtra, ...rest } = eq;
+        return { ...rest, notes: stageNotes(stageCount, stageHeight, stageExtra) };
+      });
       const res = await fetch('/buchungssystem/api/bookings/' + this.booking.id, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
