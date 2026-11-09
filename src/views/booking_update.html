@@ -294,7 +294,27 @@
                 <option :value="0">{{t('common.no')}}</option>
               </select>
               <input v-else class="form-control" required type="number" :min='0' :max='e.quantity' v-model="e.count"></input>
-              <template v-if="e.notesTitle && e.count > 0">
+              <template v-if="isStage(e) && e.count > 0">
+                <br />
+                <b>{{t('stage.count')}} *</b>
+                <select class="form-control c-select" required v-model="e.stageCount">
+                  <option disabled value="">{{t('stage.choose')}}</option>
+                  <option v-for="n in stageMax" :value="n">{{n}}</option>
+                  <option value="unklar">{{t('stage.unclear')}}</option>
+                </select>
+                <small class="form-text text-muted" v-if="e.stageCount && e.stageCount !== 'unklar'">{{t('stage.size', stageSize(e.stageCount))}}</small>
+                <br />
+                <b>{{t('stage.height')}} *</b>
+                <select class="form-control c-select" required v-model="e.stageHeight">
+                  <option disabled value="">{{t('stage.choose')}}</option>
+                  <option v-for="h in stageHeights" :value="h">{{h}} cm</option>
+                  <option value="unklar">{{t('stage.unclear')}}</option>
+                </select>
+                <br />
+                <b>{{t('stage.extra')}}</b>
+                <textarea class="form-control" rows="2" v-model="e.stageExtra"></textarea>
+              </template>
+              <template v-else-if="e.notesTitle && e.count > 0">
                 <br />
                 <b>{{tEquip(e, 'notesTitle')}}</b>
                 <textarea class="form-control" id="decription" rows="2" v-model="e.notes"></textarea>
